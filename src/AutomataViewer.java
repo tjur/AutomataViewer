@@ -192,10 +192,7 @@ public class AutomataViewer implements ActionListener, MouseListener
                                 chooseColorButton.setVisible(true);
                             
                             if(automatonPanel.getOperation() != AutomatonPanel.Operation.ADD_TRANS.getValue())
-                            {
                                 transitions.setVisible(false);
-                                automatonPanel.setFirstState(-1);
-                            }
                             else
                                 transitions.setVisible(true);
                             

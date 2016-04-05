@@ -113,11 +113,6 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
         this.selectedColor = color;
     }
     
-    public void setFirstState(int state)
-    {
-        addTransFirstState = state;
-    }
-    
     public void setSelectedTransition(int trans)
     {
         selectedTransition = trans;
@@ -198,15 +193,19 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
     @Override
     public void mouseDragged(MouseEvent ev)
     {
-        if (automaton == null || grabbed == -1)
-        {
-            return;
-        }
         grabX = ev.getX();
         grabY = ev.getY();
-        vertices[grabbed].x = grabX + grabShiftX;
-        vertices[grabbed].y = grabY + grabShiftY;
-        repaint();
+        mouseMoved(ev);
+        
+        if (automaton == null || grabbed == -1)
+            return;
+        
+        if (operation == Operation.NONE)
+        {
+            vertices[grabbed].x = grabX + grabShiftX;
+            vertices[grabbed].y = grabY + grabShiftY;
+            repaint();
+        }
     }
 
     @Override
@@ -270,19 +269,9 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
                 highlighted = -1;
                 this.firePropertyChange("update", false, true);
             }
-            else if(operation == Operation.ADD_TRANS)
+            else if(highlighted >= 0 && operation == Operation.ADD_TRANS)
             {
-                if (highlighted >= 0 && addTransFirstState == -1)
-                    addTransFirstState = highlighted;
-                else if (highlighted == -1 && addTransFirstState != -1)
-                    addTransFirstState = -1;
-                else if (addTransFirstState != -1)
-                {
-                    automaton.addTransition(addTransFirstState, highlighted, selectedTransition);
-                    addTransFirstState = -1;
-                    updateAutomatonData();
-                    this.firePropertyChange("update", false, true);
-                }
+                addTransFirstState = highlighted;
             }
             else if(highlighted >= 0 && operation == Operation.CHANGE_COLOR)
             {
@@ -309,8 +298,22 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
     @Override
     public void mouseReleased(MouseEvent ev)
     {
-        grabbed = -1;
-        mouseMoved(ev);
+        if (operation == Operation.ADD_TRANS)
+        {
+            if (addTransFirstState >= 0 && highlighted >= 0)
+            {
+                automaton.addTransition(addTransFirstState, highlighted, selectedTransition);
+                updateAutomatonData();
+                this.firePropertyChange("update", false, true);
+            }   
+            addTransFirstState = -1;
+        }
+        else
+        {
+            grabbed = -1;
+            mouseMoved(ev);
+        }
+        
         repaint();
     }
 
@@ -401,7 +404,7 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
         }
         
         // draw new transition when you are in ADD_TRANS mode
-        if (addTransFirstState != -1 && operation == Operation.ADD_TRANS)
+        if (addTransFirstState >= 0 && operation == Operation.ADD_TRANS)
         {
             g.setColor(TRANSITIONS_COLORS[selectedTransition]);
             drawEdge(g, vertices[addTransFirstState].x, vertices[addTransFirstState].y,
