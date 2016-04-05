@@ -1,0 +1,115 @@
+
+public class Automaton
+{
+
+    private int K, N; // max number of out edges for one state / number of states
+    private int[][] matrix;
+
+    public Automaton(String code) throws IllegalArgumentException
+    {
+        // Parse code
+        String[] tokens = code.trim().replace('\n', ' ').split("\\s+");
+        if (tokens.length < 2)
+        {
+            throw new IllegalArgumentException("Invalid automaton code (expected K N).");
+        }
+        K = Integer.parseInt(tokens[0]);
+        N = Integer.parseInt(tokens[1]);
+        if (tokens.length != 2 + K * N)
+        {
+            throw new IllegalArgumentException("Invalid automaton code (expected " + (2 + K * N) + " numbers but read " + tokens.length + ").");
+        }
+        matrix = new int[N][K];
+        for (int n = 0; n < N; n++)
+        {
+            for (int k = 0; k < K; k++)
+            {
+                matrix[n][k] = Integer.parseInt(tokens[2 + n * K + k]);
+                if (matrix[n][k] < 0 || matrix[n][k] >= N)
+                {
+                    throw new IllegalArgumentException("Invalid automaton code (number "
+                            + tokens[2 + n * K + k] + " at position " + (2 + n * K + k) + " is outside the range [0," + (N - 1) + "])");
+                }
+            }
+        }
+    }
+    
+    @Override
+    public String toString()
+    {
+        String str = Integer.toString(K) + " " + Integer.toString(N) + " ";
+        for (int n = 0; n < N; n++)
+        {
+            for (int k = 0; k < K; k++)
+                str += Integer.toString(matrix[n][k]) + " ";
+        }
+        
+        return str.trim();
+    }
+    
+    public int getK()
+    {
+        return K;
+    }
+    
+    public int getN()
+    {
+        return N;
+    }
+    
+    public int[][] getMatrix()
+    {
+        return matrix;
+    }
+    
+    public void addState()
+    {
+        int[][] temp = new int[N+1][K];
+        for (int n = 0; n < N; n++)
+            System.arraycopy(matrix[n], 0, temp[n], 0, K);
+        
+        for (int k = 0; k < K; k++)
+            temp[N][k] = N;
+        
+        matrix = temp;
+        N++;
+    }
+    
+    public void removeState(int state)
+    {
+        int[][] temp = new int[N-1][K];
+        for (int n = 0; n < N - 1; n++)
+        {
+            int z = (n < state) ? n : n + 1;
+            temp[n] = matrix[z];
+            for(int k = 0; k < K; k++)
+            {
+                if (temp[n][k] == state)
+                    temp[n][k] = n;
+                else if (temp[n][k] > state)
+                    temp[n][k]--;
+            }
+        }
+        
+        matrix = temp;
+        N--;
+    }
+    
+    public void addTransition(int out, int in, int k)
+    {
+        if (k < K) // edit transition
+            matrix[out][k] = in;
+        else if (k == K)// add new transition
+        {
+            int[][] temp = new int[N][K+1];
+            for (int n = 0; n < N; n++)
+            {
+                System.arraycopy(matrix[n], 0, temp[n], 0, K);
+                temp[n][k] = n;
+            }
+            temp[out][k] = in;
+            matrix = temp;
+            K++;
+        }
+    }
+}
