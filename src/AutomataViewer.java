@@ -13,7 +13,7 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.FileOutputStream;
+import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.Box;
@@ -21,6 +21,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -30,9 +31,10 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 
-public class AutomataViewer implements ActionListener, MouseListener 
+public class AutomataViewer implements MouseListener 
 {
 
     public static void main(String[] args) 
@@ -53,6 +55,7 @@ public class AutomataViewer implements ActionListener, MouseListener
     private JMenuBar menuBar;
     private JMenu fileMenu;
     private JMenuItem saveMenuItem;
+    private JFileChooser fileChooser;
     
     private JToolBar toolBar;
     private final String[] iconFiles = { "add_state.png", "remove_state.png", "add_transition.png", "change_color.png" };
@@ -105,16 +108,46 @@ public class AutomataViewer implements ActionListener, MouseListener
         panelControls.add(textAreaMatrix);
         
         buttonSetGraph = new JButton("OK");
-        buttonSetGraph.addActionListener(this);
+        buttonSetGraph.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                String matrix = textAreaMatrix.getText();
+                try {
+                    Automaton graph = new Automaton(matrix);
+                    automatonPanel.setGraph(graph);
+
+                    transitions.removeAllItems();
+                    int K = automatonPanel.getAutomatonK();
+                    for (int i = 0; i < K; i++)
+                        transitions.addItem(Integer.toString(i));
+                    transitions.addItem("Create new transition");
+                } 
+                catch (IllegalArgumentException e) {
+                    JOptionPane.showMessageDialog(frameMain, e.toString());
+                }
+            }       
+        });
         panelControls.add(buttonSetGraph);
         
         // create popup menu for text area
         menuItemCut = new JMenuItem("Cut");
-        menuItemCut.addActionListener(this);
         menuItemCopy = new JMenuItem("Copy");
-        menuItemCopy.addActionListener(this);
         menuItemPaste = new JMenuItem("Paste");
-        menuItemPaste.addActionListener(this);
+        menuItemCut.addActionListener((ActionEvent ev) ->
+        {
+            textAreaMatrix.cut();       
+        });
+        menuItemCopy.addActionListener((ActionEvent ev) ->
+        {
+            textAreaMatrix.copy();       
+        });
+        menuItemPaste.addActionListener((ActionEvent ev) ->
+        {
+            textAreaMatrix.paste();       
+        });
+        
         popupMenuMatrix = new JPopupMenu();
         popupMenuMatrix.add(menuItemCut);
         popupMenuMatrix.add(menuItemCopy);
@@ -135,10 +168,45 @@ public class AutomataViewer implements ActionListener, MouseListener
         menuBar = new JMenuBar();
         fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
+        
+        fileChooser = new JFileChooser();
 
-        saveMenuItem = new JMenuItem("Save");
+        saveMenuItem = new JMenuItem("Save Image... ");
         fileMenu.add(saveMenuItem);
-        saveMenuItem.addActionListener(this);
+        saveMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                int option = fileChooser.showSaveDialog(fileMenu);
+                if (option == JFileChooser.APPROVE_OPTION)
+                {
+                    File file = fileChooser.getSelectedFile();
+                    String path = file.getPath();
+                    String name = file.getName();
+                    
+                    BufferedImage img = new BufferedImage(automatonPanel.getWidth(),automatonPanel.getHeight(),BufferedImage.TYPE_INT_RGB);
+                    Graphics g = img.getGraphics();
+                    automatonPanel.paint(g);
+                    g.dispose();
+                    try {
+                        if (name.lastIndexOf(".") != -1 && name.lastIndexOf(".") != 0)
+                        {
+                            String ext = name.substring(name.lastIndexOf(".") + 1);
+                            if (!ext.equals("png"))
+                                JOptionPane.showMessageDialog(frameMain, "Invalid file extension (.png expected)");
+                            else
+                                ImageIO.write(img, ext, fileChooser.getSelectedFile());
+                        }
+                        else
+                            ImageIO.write(img, "png", new File(path + ".png"));
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }   
+        });
 
         frameMain.setJMenuBar(menuBar);
     }
@@ -245,47 +313,6 @@ public class AutomataViewer implements ActionListener, MouseListener
         image.flush();
         ImageIcon icon = new ImageIcon(image);
         return icon;
-    }
-
-    @Override 
-    public void actionPerformed(ActionEvent ev) 
-    {   
-        if (ev.getSource() == buttonSetGraph) 
-        {
-            String matrix = textAreaMatrix.getText();
-            try {
-                Automaton graph = new Automaton(matrix);
-                automatonPanel.setGraph(graph);
-                
-                transitions.removeAllItems();
-                int K = automatonPanel.getAutomatonK();
-                for (int i = 0; i < K; i++)
-                    transitions.addItem(Integer.toString(i));
-                transitions.addItem("Create new transition");
-            } 
-            catch (IllegalArgumentException e) {
-                JOptionPane.showMessageDialog(frameMain,e.toString());
-            }
-        } 
-        else if (ev.getSource() == saveMenuItem) 
-        {
-            BufferedImage img = new BufferedImage(automatonPanel.getWidth(),automatonPanel.getHeight(),BufferedImage.TYPE_INT_RGB);
-            Graphics g = img.getGraphics();
-            automatonPanel.paint(g);
-            g.dispose();
-            try {
-                ImageIO.write(img, "png", new FileOutputStream("automaton.png"));
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-          }
-        }
-        else if (ev.getSource() == menuItemCut) 
-            textAreaMatrix.cut();
-        else if (ev.getSource() == menuItemCopy) 
-            textAreaMatrix.copy();
-        else if (ev.getSource() == menuItemPaste) 
-            textAreaMatrix.paste();  
     }
 
     @Override 
