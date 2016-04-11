@@ -73,8 +73,16 @@ public class AutomataViewer implements MouseListener
     public AutomataViewer(JFrame frameMain) 
     {
         this.frameMain = frameMain;
-        
         automatonPanel = new AutomatonPanel();
+        
+        frameMain.addComponentListener(new ComponentAdapter() {
+            
+            @Override
+            public void componentResized(ComponentEvent e) {
+                automatonPanel.repaintGraph();
+            }
+        });
+        
         automatonPanel.addPropertyChangeListener("update", new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent ev)
@@ -116,16 +124,21 @@ public class AutomataViewer implements MouseListener
             @Override
             public void actionPerformed(ActionEvent ev)
             {
-                String matrix = textAreaMatrix.getText();
+                String matrix = textAreaMatrix.getText().trim();
                 try {
-                    Automaton graph = new Automaton(matrix);
-                    automatonPanel.setGraph(graph);
+                    if (!automatonPanel.automatonIsNull() && automatonPanel.getAutomatonString().equals(matrix))
+                        automatonPanel.repaintGraph();
+                    else
+                    {
+                        Automaton automaton = new Automaton(matrix);
+                        automatonPanel.setGraph(automaton);
 
-                    transitions.removeAllItems();
-                    int K = automatonPanel.getAutomatonK();
-                    for (int i = 0; i < K; i++)
-                        transitions.addItem(Integer.toString(i));
-                    transitions.addItem("Create new transition");
+                        transitions.removeAllItems();
+                        int K = automatonPanel.getAutomatonK();
+                        for (int i = 0; i < K; i++)
+                            transitions.addItem(Integer.toString(i));
+                        transitions.addItem("Create new transition");
+                    }
                 } 
                 catch (IllegalArgumentException e) {
                     JOptionPane.showMessageDialog(frameMain, e.toString());

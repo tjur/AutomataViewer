@@ -133,6 +133,11 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
         K = automaton.getK();
         N = automaton.getN();
     }
+    
+    public boolean automatonIsNull()
+    {
+        return automaton == null;
+    }
 
     public void setGraph(Automaton automaton)
     {
@@ -149,6 +154,24 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
             orders[n] = n;
             color[n] = Color.WHITE;
         }
+        int width = this.getWidth();
+        int height = this.getHeight();
+        int r = ((width < height ? width : height) - VERTEX_RADIUS * 3) / 2;
+        int cx = width / 2;
+        int cy = height / 2;
+        double angle = 0.0;
+        for (int n = 0; n < N; n++)
+        {
+            vertices[n] = new Point(
+                    (int) (Math.sin(angle) * r + cx),
+                    (int) (-Math.cos(angle) * r + cy));
+            angle += 2 * Math.PI / N;
+        }
+        repaint();
+    }
+    
+    public void repaintGraph()
+    {
         int width = this.getWidth();
         int height = this.getHeight();
         int r = ((width < height ? width : height) - VERTEX_RADIUS * 3) / 2;
