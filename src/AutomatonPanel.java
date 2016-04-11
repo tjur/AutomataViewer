@@ -171,11 +171,10 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
     public void mouseMoved(MouseEvent ev)
     {
         if (automaton == null)
-        {
             return;
-        }
-        grabX = ev.getX();
-        grabY = ev.getY();
+        
+        grabX = (ev.getX() >= 0 && ev.getX() <= this.getSize().width) ? ev.getX() : grabX;
+        grabY = (ev.getY() >= 0 && ev.getY() <= this.getSize().height) ? ev.getY() : grabY;
         highlighted = -1;
         for (int i = N - 1; i >= 0; i--)
         {
@@ -193,8 +192,8 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
     @Override
     public void mouseDragged(MouseEvent ev)
     {
-        grabX = ev.getX();
-        grabY = ev.getY();
+        grabX = (ev.getX() >= 0 && ev.getX() <= this.getSize().width) ? ev.getX() : grabX;
+        grabY = (ev.getY() >= 0 && ev.getY() <= this.getSize().height) ? ev.getY() : grabY;
         mouseMoved(ev);
         
         if (automaton == null || grabbed == -1)
@@ -202,8 +201,10 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
         
         if (operation == Operation.NONE)
         {
-            vertices[grabbed].x = grabX + grabShiftX;
-            vertices[grabbed].y = grabY + grabShiftY;
+            if (grabX + grabShiftX >= VERTEX_RADIUS && grabX + grabShiftX <= this.getSize().width - VERTEX_RADIUS)
+                vertices[grabbed].x = grabX + grabShiftX;
+            if (grabY + grabShiftY >= VERTEX_RADIUS && grabY + grabShiftY <= this.getSize().height - VERTEX_RADIUS)
+                vertices[grabbed].y = grabY + grabShiftY;
             repaint();
         }
     }

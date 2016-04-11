@@ -8,6 +8,8 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -31,7 +33,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 
 public class AutomataViewer implements MouseListener 
@@ -42,7 +43,8 @@ public class AutomataViewer implements MouseListener
         JFrame frameMain = new JFrame("Automata viewer");
         new AutomataViewer(frameMain);
         frameMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frameMain.setSize(1000,750);
+        frameMain.setSize(900,675);
+        frameMain.setMinimumSize(new Dimension(600, 450));
         frameMain.setVisible(true);
     }
 
@@ -71,6 +73,7 @@ public class AutomataViewer implements MouseListener
     public AutomataViewer(JFrame frameMain) 
     {
         this.frameMain = frameMain;
+        
         automatonPanel = new AutomatonPanel();
         automatonPanel.addPropertyChangeListener("update", new PropertyChangeListener() {
             @Override
