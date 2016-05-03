@@ -52,19 +52,20 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
         }
     }
 
-    private static final Color[] TRANSITIONS_COLORS =
+    public static final Color[] TRANSITIONS_COLORS =
     {
         Color.RED, Color.GREEN, Color.BLUE, Color.ORANGE,
         Color.PINK, Color.GRAY, Color.CYAN, Color.BLACK,
         Color.YELLOW, Color.MAGENTA
     };
 
-    /*private static final Color[] VERTICES_COLORS =
+    public static final Color[] STATES_COLORS =
     {
         Color.WHITE,
         new Color(96, 128, 255), new Color(255, 128, 96), new Color(96, 255, 96),
-        new Color(255, 255, 96), new Color(96, 255, 255), new Color(255, 96, 255)
-    };*/
+        new Color(255, 255, 96), new Color(96, 255, 255), new Color(255, 96, 255),
+        Color.ORANGE, Color.lightGray, new Color(219, 112, 147)
+    };
 
     private Automaton automaton;
     private Color [] color;

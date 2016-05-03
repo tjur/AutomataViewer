@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -64,7 +65,7 @@ public class AutomataViewer implements MouseListener
     private final String [] buttonLabels = { "Add state", "Remove state", "Add transition", "Change color" };
     private final JButton [] toolBarButtons = new JButton[buttonLabels.length];
     
-    private JButton chooseColorButton;
+    private JPanel colorChoosersPanel;
     private JComboBox<String> transitions;
 
     private JPopupMenu popupMenuMatrix;
@@ -232,24 +233,14 @@ public class AutomataViewer implements MouseListener
         toolBar = new JToolBar("Tool Bar");
         toolBar.setFloatable(false);
         toolBar.setBackground(Color.GRAY);
-        ActionListener actionListener = new ActionListener() 
+        ActionListener actionListener = new ActionListener()
         {
             @Override
             public void actionPerformed(ActionEvent ev)
             {
                 Color noBackground = new JButton().getBackground();
-                if(ev.getSource() == chooseColorButton)
-                {
-                    Color selectedColor = JColorChooser.showDialog(null, "Choose color", automatonPanel.getSelectedColor());
-                    selectedColor = (selectedColor == null) ? automatonPanel.getSelectedColor() : selectedColor;
-                    automatonPanel.setSelectedColor(selectedColor);
-                    chooseColorButton.setIcon(createIcon(automatonPanel.getSelectedColor(), 25, 25));
-                }
-                else if (ev.getSource() == transitions)
-                {
+                if (ev.getSource() == transitions)
                     automatonPanel.setSelectedTransition(transitions.getSelectedIndex());
-                    
-                }
                 else
                 {
                     for (int i = 0; i < AutomatonPanel.Operation.NONE.getValue(); i++)
@@ -271,9 +262,9 @@ public class AutomataViewer implements MouseListener
                             }
                             
                             if(automatonPanel.getOperation() != AutomatonPanel.Operation.CHANGE_COLOR.getValue())
-                                chooseColorButton.setVisible(false);
+                                colorChoosersPanel.setVisible(false);
                             else
-                                chooseColorButton.setVisible(true);
+                                colorChoosersPanel.setVisible(true);
                             
                             if(automatonPanel.getOperation() != AutomatonPanel.Operation.ADD_TRANS.getValue())
                                 transitions.setVisible(false);
@@ -303,11 +294,35 @@ public class AutomataViewer implements MouseListener
         }
         
         toolBar.add(Box.createHorizontalGlue());
-        chooseColorButton = new JButton(createIcon(automatonPanel.getSelectedColor(), 25, 25));
-        chooseColorButton.setToolTipText("Choose color");
-        chooseColorButton.addActionListener(actionListener);
-        chooseColorButton.setVisible(false);
-        toolBar.add(chooseColorButton);
+        
+        int cols = 5;
+        int rows = AutomatonPanel.STATES_COLORS.length / cols;
+        if (AutomatonPanel.STATES_COLORS.length % cols != 0)
+            rows++;
+        
+        colorChoosersPanel = new JPanel();
+        GridLayout gridLayout = new GridLayout(rows, cols);
+        colorChoosersPanel.setLayout(gridLayout);
+        colorChoosersPanel.setVisible(false);
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                if (i*cols + j < AutomatonPanel.STATES_COLORS.length)
+                {
+                    Color stateColor = AutomatonPanel.STATES_COLORS[i*cols + j];
+                    JButton chooseColorButton = new JButton(createIcon(stateColor, 20, 20));
+                    chooseColorButton.addActionListener((ActionEvent ev) -> 
+                    {    
+                        automatonPanel.setSelectedColor(stateColor);
+                    });
+                    colorChoosersPanel.add(chooseColorButton);
+                }
+            }
+        }
+        toolBar.add(colorChoosersPanel);
+        Dimension dim = new Dimension(toolBar.getPreferredSize().width / 3, toolBar.getPreferredSize().height);
+        colorChoosersPanel.setMaximumSize(dim);
         
         transitions = new JComboBox<>();
         transitions.setMaximumSize(new Dimension(100,30));
