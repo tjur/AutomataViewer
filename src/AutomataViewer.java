@@ -114,7 +114,7 @@ public class AutomataViewer implements MouseListener
         // create text area
         textAreaMatrix = new JTextArea();
         textAreaMatrix.addMouseListener(this);
-        textAreaMatrix.setMinimumSize(new Dimension(500,50));
+        textAreaMatrix.setMinimumSize(new Dimension(500, 50));
         textAreaMatrix.setPreferredSize(textAreaMatrix.getMinimumSize());
         textAreaMatrix.setText("2 4 1 0 3 0 0 1 1 2");
         panelControls.add(textAreaMatrix);
@@ -283,7 +283,7 @@ public class AutomataViewer implements MouseListener
         {
             ImageIcon icon = new ImageIcon("icons/" + iconFiles[i]);
             Image image = icon.getImage();  
-            Image newimage = image.getScaledInstance(30, 30, java.awt.Image.SCALE_SMOOTH);  
+            Image newimage = image.getScaledInstance(35, 35, java.awt.Image.SCALE_SMOOTH);  
             icon = new ImageIcon(newimage);
             toolBarButtons[i] = new JButton(icon);
             toolBarButtons[i].setToolTipText(buttonLabels[i]);
@@ -311,7 +311,7 @@ public class AutomataViewer implements MouseListener
                 if (i*cols + j < AutomatonPanel.STATES_COLORS.length)
                 {
                     Color stateColor = AutomatonPanel.STATES_COLORS[i*cols + j];
-                    JButton chooseColorButton = new JButton(createIcon(stateColor, 20, 20));
+                    JButton chooseColorButton = new JButton(createIcon(stateColor, 15, 15));
                     chooseColorButton.addActionListener((ActionEvent ev) -> 
                     {    
                         automatonPanel.setSelectedColor(stateColor);
@@ -325,7 +325,7 @@ public class AutomataViewer implements MouseListener
         colorChoosersPanel.setMaximumSize(dim);
         
         transitions = new JComboBox<>();
-        transitions.setMaximumSize(new Dimension(100,30));
+        transitions.setMaximumSize(new Dimension(100, 30));
         transitions.addActionListener(actionListener);
         transitions.setPrototypeDisplayValue("Create new transition");
         transitions.setVisible(false);
