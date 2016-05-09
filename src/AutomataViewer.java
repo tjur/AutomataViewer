@@ -2,17 +2,12 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -22,7 +17,6 @@ import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -31,29 +25,26 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
 
-public class AutomataViewer implements MouseListener 
+public class AutomataViewer
 {
 
     public static void main(String[] args) 
     {
-        JFrame frameMain = new JFrame("Automata viewer");
-        new AutomataViewer(frameMain);
-        frameMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frameMain.setSize(900,675);
-        frameMain.setMinimumSize(new Dimension(600, 450));
-        frameMain.setVisible(true);
+        JFrame frame = new JFrame("Automata viewer");
+        new AutomataViewer(frame);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(1000,750);
+        frame.setMinimumSize(new Dimension(700, 525));
+        frame.setVisible(true);
     }
 
-    private JFrame frameMain;
-    private AutomatonPanel automatonPanel;
-    private JPanel panelControls;
-    private JTextArea textAreaMatrix;
-    private JButton buttonSetGraph;
+    private JFrame frame;
+    
+    private Desktop desktop;
+    private PaintPanel paintPanel;
 
     private JMenuBar menuBar;
     private JMenu fileMenu;
@@ -68,35 +59,22 @@ public class AutomataViewer implements MouseListener
     private JPanel colorChoosersPanel;
     private JComboBox<String> transitions;
 
-    private JPopupMenu popupMenuMatrix;
-    private JMenuItem menuItemCut, menuItemCopy, menuItemPaste;
-
-    public AutomataViewer(JFrame frameMain) 
+    public AutomataViewer(JFrame frame) 
     {
-        this.frameMain = frameMain;
-        automatonPanel = new AutomatonPanel();
+        this.frame = frame;
+        desktop = new Desktop();
+        paintPanel = desktop.getPaintPanel();
         
-        frameMain.addComponentListener(new ComponentAdapter() {
+        paintPanel.addPropertyChangeListener("updateAutomaton", new PropertyChangeListener() {
             
-            @Override
-            public void componentResized(ComponentEvent e) {
-                automatonPanel.repaintGraph();
-            }
-        });
-        
-        automatonPanel.addPropertyChangeListener("update", new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent ev)
             {
-                if(automatonPanel.getOperation() == AutomatonPanel.Operation.ADD_STATE.getValue() ||
-                   automatonPanel.getOperation() == AutomatonPanel.Operation.REMOVE_STATE.getValue())
+                desktop.getTextPanel().getTextArea().setText(desktop.getAutomatonString());
+                
+                if (paintPanel.getOperation() == PaintPanel.Operation.ADD_TRANS.getValue())
                 {
-                    textAreaMatrix.setText(automatonPanel.getAutomatonString());
-                }
-                else if (automatonPanel.getOperation() == AutomatonPanel.Operation.ADD_TRANS.getValue())
-                {
-                    textAreaMatrix.setText(automatonPanel.getAutomatonString());
-                    int K = automatonPanel.getAutomatonK();
+                    int K = desktop.getAutomatonK();
                     if(transitions.getItemCount() == K && transitions.getSelectedIndex() == K - 1)
                     {
                         transitions.removeItemAt(K - 1);
@@ -107,77 +85,27 @@ public class AutomataViewer implements MouseListener
                 }    
             }
         });
-
-        panelControls = new JPanel();
-        panelControls.setLayout(new FlowLayout());
         
-        // create text area
-        textAreaMatrix = new JTextArea();
-        textAreaMatrix.addMouseListener(this);
-        textAreaMatrix.setMinimumSize(new Dimension(500, 50));
-        textAreaMatrix.setPreferredSize(textAreaMatrix.getMinimumSize());
-        textAreaMatrix.setText("2 4 1 0 3 0 0 1 1 2");
-        panelControls.add(textAreaMatrix);
-        
-        buttonSetGraph = new JButton("OK");
-        buttonSetGraph.addActionListener(new ActionListener() {
-
+        desktop.getTextPanel().addPropertyChangeListener("updateTransitions", new PropertyChangeListener() {
+            
             @Override
-            public void actionPerformed(ActionEvent ev)
+            public void propertyChange(PropertyChangeEvent ev)
             {
-                String matrix = textAreaMatrix.getText().trim();
-                try {
-                    if (!automatonPanel.automatonIsNull() && automatonPanel.getAutomatonString().equals(matrix))
-                        automatonPanel.repaintGraph();
-                    else
-                    {
-                        Automaton automaton = new Automaton(matrix);
-                        automatonPanel.setGraph(automaton);
-
-                        transitions.removeAllItems();
-                        int K = automatonPanel.getAutomatonK();
-                        for (int i = 0; i < K; i++)
-                            transitions.addItem(Integer.toString(i));
-                        transitions.addItem("Create new transition");
-                    }
-                } 
-                catch (IllegalArgumentException e) {
-                    JOptionPane.showMessageDialog(frameMain, e.toString());
-                }
-            }       
-        });
-        panelControls.add(buttonSetGraph);
-        
-        // create popup menu for text area
-        menuItemCut = new JMenuItem("Cut");
-        menuItemCopy = new JMenuItem("Copy");
-        menuItemPaste = new JMenuItem("Paste");
-        menuItemCut.addActionListener((ActionEvent ev) ->
-        {
-            textAreaMatrix.cut();       
-        });
-        menuItemCopy.addActionListener((ActionEvent ev) ->
-        {
-            textAreaMatrix.copy();       
-        });
-        menuItemPaste.addActionListener((ActionEvent ev) ->
-        {
-            textAreaMatrix.paste();       
+                transitions.removeAllItems();
+                int K = desktop.getAutomatonK();
+                for (int i = 0; i < K; i++)
+                    transitions.addItem(Integer.toString(i));
+                transitions.addItem("Create new transition");
+            }
         });
         
-        popupMenuMatrix = new JPopupMenu();
-        popupMenuMatrix.add(menuItemCut);
-        popupMenuMatrix.add(menuItemCopy);
-        popupMenuMatrix.add(menuItemPaste);
-
         createMenuBar();
         createToolBar();
 
-        Container container = frameMain.getContentPane();
+        Container container = frame.getContentPane();
         container.setLayout(new BorderLayout());
         container.add(toolBar, BorderLayout.NORTH);
-        container.add(automatonPanel, BorderLayout.CENTER);
-        container.add(panelControls, BorderLayout.SOUTH);
+        container.add(desktop, BorderLayout.CENTER);
     }
 
     private void createMenuBar()
@@ -202,16 +130,16 @@ public class AutomataViewer implements MouseListener
                     String path = file.getPath();
                     String name = file.getName();
                     
-                    BufferedImage img = new BufferedImage(automatonPanel.getWidth(),automatonPanel.getHeight(),BufferedImage.TYPE_INT_RGB);
+                    BufferedImage img = new BufferedImage(paintPanel.getWidth(),paintPanel.getHeight(),BufferedImage.TYPE_INT_RGB);
                     Graphics g = img.getGraphics();
-                    automatonPanel.paint(g);
+                    paintPanel.paint(g);
                     g.dispose();
                     try {
                         if (name.lastIndexOf(".") != -1 && name.lastIndexOf(".") != 0)
                         {
                             String ext = name.substring(name.lastIndexOf(".") + 1);
                             if (!ext.equals("png"))
-                                JOptionPane.showMessageDialog(frameMain, "Invalid file extension (.png expected)");
+                                JOptionPane.showMessageDialog(frame, "Invalid file extension (.png expected)");
                             else
                                 ImageIO.write(img, ext, fileChooser.getSelectedFile());
                         }
@@ -225,7 +153,7 @@ public class AutomataViewer implements MouseListener
             }   
         });
 
-        frameMain.setJMenuBar(menuBar);
+        frame.setJMenuBar(menuBar);
     }
     
     private void createToolBar()
@@ -240,33 +168,33 @@ public class AutomataViewer implements MouseListener
             {
                 Color noBackground = new JButton().getBackground();
                 if (ev.getSource() == transitions)
-                    automatonPanel.setSelectedTransition(transitions.getSelectedIndex());
+                    paintPanel.setSelectedTransition(transitions.getSelectedIndex());
                 else
                 {
-                    for (int i = 0; i < AutomatonPanel.Operation.NONE.getValue(); i++)
+                    for (int i = 0; i < PaintPanel.Operation.NONE.getValue(); i++)
                     {
                         if (ev.getSource() == toolBarButtons[i])
                         {
-                            if(automatonPanel.getOperation() == i)
+                            if(paintPanel.getOperation() == i)
                             {   
-                                automatonPanel.setOperation(AutomatonPanel.Operation.NONE);
+                                paintPanel.setOperation(PaintPanel.Operation.NONE);
                                 toolBarButtons[i].setBackground(noBackground);
                             }
                             else
                             {
-                                if(automatonPanel.getOperation() != AutomatonPanel.Operation.NONE.getValue())
-                                    toolBarButtons[automatonPanel.getOperation()].setBackground(noBackground);
+                                if(paintPanel.getOperation() != PaintPanel.Operation.NONE.getValue())
+                                    toolBarButtons[paintPanel.getOperation()].setBackground(noBackground);
                                 
-                                automatonPanel.setOperation(AutomatonPanel.Operation.values()[i]);
+                                paintPanel.setOperation(PaintPanel.Operation.values()[i]);
                                 toolBarButtons[i].setBackground(Color.CYAN);
                             }
                             
-                            if(automatonPanel.getOperation() != AutomatonPanel.Operation.CHANGE_COLOR.getValue())
+                            if(paintPanel.getOperation() != PaintPanel.Operation.CHANGE_COLOR.getValue())
                                 colorChoosersPanel.setVisible(false);
                             else
                                 colorChoosersPanel.setVisible(true);
                             
-                            if(automatonPanel.getOperation() != AutomatonPanel.Operation.ADD_TRANS.getValue())
+                            if(paintPanel.getOperation() != PaintPanel.Operation.ADD_TRANS.getValue())
                                 transitions.setVisible(false);
                             else
                                 transitions.setVisible(true);
@@ -296,8 +224,8 @@ public class AutomataViewer implements MouseListener
         toolBar.add(Box.createHorizontalGlue());
         
         int cols = 5;
-        int rows = AutomatonPanel.STATES_COLORS.length / cols;
-        if (AutomatonPanel.STATES_COLORS.length % cols != 0)
+        int rows = PaintPanel.STATES_COLORS.length / cols;
+        if (PaintPanel.STATES_COLORS.length % cols != 0)
             rows++;
         
         colorChoosersPanel = new JPanel();
@@ -308,13 +236,13 @@ public class AutomataViewer implements MouseListener
         {
             for (int j = 0; j < cols; j++)
             {
-                if (i*cols + j < AutomatonPanel.STATES_COLORS.length)
+                if (i*cols + j < PaintPanel.STATES_COLORS.length)
                 {
-                    Color stateColor = AutomatonPanel.STATES_COLORS[i*cols + j];
+                    Color stateColor = PaintPanel.STATES_COLORS[i*cols + j];
                     JButton chooseColorButton = new JButton(createIcon(stateColor, 15, 15));
                     chooseColorButton.addActionListener((ActionEvent ev) -> 
                     {    
-                        automatonPanel.setSelectedColor(stateColor);
+                        paintPanel.setSelectedColor(stateColor);
                     });
                     colorChoosersPanel.add(chooseColorButton);
                 }
@@ -325,6 +253,9 @@ public class AutomataViewer implements MouseListener
         colorChoosersPanel.setMaximumSize(dim);
         
         transitions = new JComboBox<>();
+        for (int i = 0; i < desktop.getAutomatonK(); i++)
+            transitions.addItem(Integer.toString(i));
+        transitions.addItem("Create new transition");
         transitions.setMaximumSize(new Dimension(100, 30));
         transitions.addActionListener(actionListener);
         transitions.setPrototypeDisplayValue("Create new transition");
@@ -345,27 +276,4 @@ public class AutomataViewer implements MouseListener
         ImageIcon icon = new ImageIcon(image);
         return icon;
     }
-
-    @Override 
-    public void mousePressed(MouseEvent ev) 
-    {
-        if (ev.isPopupTrigger()) 
-            popupMenuMatrix.show(ev.getComponent(), ev.getX(), ev.getY());
-    }
-
-    @Override 
-    public void mouseReleased(MouseEvent ev) 
-    {
-        if (ev.isPopupTrigger()) 
-            popupMenuMatrix.show(ev.getComponent(), ev.getX(), ev.getY());
-    }
-
-    @Override 
-    public void mouseClicked(MouseEvent ev) {}
-    
-    @Override 
-    public void mouseEntered(MouseEvent e) {}
-    
-    @Override 
-    public void mouseExited(MouseEvent e) {}
 }

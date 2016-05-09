@@ -1,17 +1,20 @@
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
-import javax.swing.JPanel;
+import javax.swing.JInternalFrame;
 
-public class AutomatonPanel extends JPanel implements MouseListener, MouseMotionListener
+public class PaintPanel extends JInternalFrame implements MouseListener, MouseMotionListener
 {
 
     private static final long serialVersionUID = 1L;
@@ -84,8 +87,21 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
 
   // ************************************************************************
     // Initialization
-    public AutomatonPanel()
+    public PaintPanel()
     {
+        super("Paint Panel", true, false, false, false);
+        setSize(new Dimension(550, 400));
+        setMinimumSize(new Dimension(550, 400));
+        setVisible(true);
+        
+        addComponentListener(new ComponentAdapter()
+        {
+            @Override
+            public void componentResized(ComponentEvent ev) {
+                repaintGraph();
+            }
+        });
+        
         this.grabbed = -1;
         this.highlighted = -1;
         this.addMouseListener(this);
@@ -119,32 +135,16 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
         selectedTransition = trans;
     }
     
-    public int getAutomatonK()
-    {
-        return automaton.getK();
-    }
-    
-    public String getAutomatonString()
-    {
-        return automaton.toString();
-    }
-    
-    public void updateAutomatonData()
+    private void updateAutomatonData()
     {
         K = automaton.getK();
         N = automaton.getN();
     }
-    
-    public boolean automatonIsNull()
-    {
-        return automaton == null;
-    }
 
-    public void setGraph(Automaton automaton)
+    public void setAutomaton(Automaton automaton)
     {
         this.automaton = automaton;
-        this.K = automaton.getK();
-        this.N = automaton.getN();
+        updateAutomatonData();
         this.vertices = new Point[N];
         this.orders = new int[N];
         this.color = new Color[N];
@@ -193,10 +193,7 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
     // Interface
     @Override
     public void mouseMoved(MouseEvent ev)
-    {
-        if (automaton == null)
-            return;
-        
+    {   
         grabX = (ev.getX() >= 0 && ev.getX() <= this.getSize().width) ? ev.getX() : grabX;
         grabY = (ev.getY() >= 0 && ev.getY() <= this.getSize().height) ? ev.getY() : grabY;
         highlighted = -1;
@@ -220,7 +217,7 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
         grabY = (ev.getY() >= 0 && ev.getY() <= this.getSize().height) ? ev.getY() : grabY;
         mouseMoved(ev);
         
-        if (automaton == null || grabbed == -1)
+        if (grabbed == -1)
             return;
         
         if (operation == Operation.NONE)
@@ -236,8 +233,8 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
     @Override
     @SuppressWarnings("empty-statement")
     public void mousePressed(MouseEvent ev)
-    {
-        if (automaton == null || grabbed != -1)
+    { 
+        if (grabbed != -1)
             return;
         
         mouseMoved(ev);
@@ -262,7 +259,7 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
                 temp2[N-1] = ev.getPoint();
                 this.vertices = temp2;    
 
-                this.firePropertyChange("update", false, true);
+                firePropertyChange("updateAutomaton", false, true);
             }
             else if(highlighted >= 0 && operation == Operation.REMOVE_STATE)
             {
@@ -292,7 +289,7 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
                 this.vertices = temp2;
 
                 highlighted = -1;
-                this.firePropertyChange("update", false, true);
+                this.firePropertyChange("updateAutomaton", false, true);
             }
             else if(highlighted >= 0 && operation == Operation.ADD_TRANS)
             {
@@ -329,7 +326,7 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
             {
                 automaton.addTransition(addTransFirstState, highlighted, selectedTransition);
                 updateAutomatonData();
-                this.firePropertyChange("update", false, true);
+                this.firePropertyChange("updateAutomaton", false, true);
             }   
             addTransFirstState = -1;
         }
@@ -383,14 +380,6 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
         g.fillRect(0, 0, width, height);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-
-        if (automaton == null)
-        {
-            final String NO_AUTOMATON_TEXT = "Empty.";
-            g.setColor(Color.BLACK);
-            g.drawString(NO_AUTOMATON_TEXT, width / 2 - g.getFontMetrics().stringWidth(NO_AUTOMATON_TEXT) / 2, height / 2);
-            return;
-        }
 
         // draw transitions
         g.setColor(Color.BLACK);
@@ -467,8 +456,8 @@ public class AutomatonPanel extends JPanel implements MouseListener, MouseMotion
     public void mouseClicked(MouseEvent ev) {}
 
     @Override
-    public void mouseEntered(MouseEvent e) {}
+    public void mouseEntered(MouseEvent ev) {}
 
     @Override
-    public void mouseExited(MouseEvent e) {}
+    public void mouseExited(MouseEvent ev) {}
 }

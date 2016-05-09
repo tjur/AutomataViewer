@@ -3,22 +3,21 @@ public class Automaton
 {
 
     private int K, N; // max number of out edges for one state / number of states
-    private int[][] matrix;
+    private int [][] matrix;
 
     public Automaton(String code) throws IllegalArgumentException
     {
         // Parse code
         String[] tokens = code.trim().replace('\n', ' ').split("\\s+");
         if (tokens.length < 2)
-        {
             throw new IllegalArgumentException("Invalid automaton code (expected K N).");
-        }
+        
         K = Integer.parseInt(tokens[0]);
         N = Integer.parseInt(tokens[1]);
+        
         if (tokens.length != 2 + K * N)
-        {
             throw new IllegalArgumentException("Invalid automaton code (expected " + (2 + K * N) + " numbers but read " + tokens.length + ").");
-        }
+        
         matrix = new int[N][K];
         for (int n = 0; n < N; n++)
         {
@@ -60,6 +59,13 @@ public class Automaton
     public int[][] getMatrix()
     {
         return matrix;
+    }
+    
+    public void update(Automaton automaton)
+    {
+        this.K = automaton.K;
+        this.N = automaton.N;
+        this.matrix = automaton.matrix;
     }
     
     public void addState()
