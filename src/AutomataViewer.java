@@ -14,6 +14,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -41,7 +42,7 @@ public class AutomataViewer
         frame.setVisible(true);
     }
 
-    private JFrame frame;
+    private final JFrame frame;
     
     private Desktop desktop;
     private PaintPanel paintPanel;
@@ -56,6 +57,7 @@ public class AutomataViewer
     private final String [] buttonLabels = { "Add state", "Remove state", "Add transition", "Change color" };
     private final JButton [] toolBarButtons = new JButton[buttonLabels.length];
     
+    private JPanel selectedColorPanel;
     private JPanel colorChoosersPanel;
     private JComboBox<String> transitions;
 
@@ -190,9 +192,15 @@ public class AutomataViewer
                             }
                             
                             if(paintPanel.getOperation() != PaintPanel.Operation.CHANGE_COLOR.getValue())
+                            {
+                                selectedColorPanel.setVisible(false);
                                 colorChoosersPanel.setVisible(false);
+                            }
                             else
+                            {
+                                selectedColorPanel.setVisible(true);
                                 colorChoosersPanel.setVisible(true);
+                            }
                             
                             if(paintPanel.getOperation() != PaintPanel.Operation.ADD_TRANS.getValue())
                                 transitions.setVisible(false);
@@ -227,10 +235,22 @@ public class AutomataViewer
         int rows = PaintPanel.STATES_COLORS.length / cols;
         if (PaintPanel.STATES_COLORS.length % cols != 0)
             rows++;
+          
+        selectedColorPanel = new JPanel(new BorderLayout());
+        selectedColorPanel.setBorder(BorderFactory.createLineBorder(new Color(219, 219, 219), 10));
+        selectedColorPanel.setVisible(false);
+        toolBar.add(selectedColorPanel);
+        Dimension dim = new Dimension(toolBar.getPreferredSize().height, toolBar.getPreferredSize().height);
+        selectedColorPanel.setPreferredSize(dim);
+        selectedColorPanel.setMinimumSize(dim);
+        selectedColorPanel.setMaximumSize(dim);
+        JPanel innerPanel = new JPanel();
+        innerPanel.setBackground(paintPanel.getSelectedColor());
+        innerPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.BLACK));
+        selectedColorPanel.add(innerPanel, BorderLayout.CENTER);
+        toolBar.addSeparator(new Dimension(toolBar.getPreferredSize().height / 2, toolBar.getPreferredSize().height));
         
-        colorChoosersPanel = new JPanel();
-        GridLayout gridLayout = new GridLayout(rows, cols);
-        colorChoosersPanel.setLayout(gridLayout);
+        colorChoosersPanel = new JPanel(new GridLayout(rows, cols));
         colorChoosersPanel.setVisible(false);
         for (int i = 0; i < rows; i++)
         {
@@ -242,6 +262,7 @@ public class AutomataViewer
                     JButton chooseColorButton = new JButton(createIcon(stateColor, 15, 15));
                     chooseColorButton.addActionListener((ActionEvent ev) -> 
                     {    
+                        innerPanel.setBackground(stateColor);
                         paintPanel.setSelectedColor(stateColor);
                     });
                     colorChoosersPanel.add(chooseColorButton);
@@ -249,7 +270,7 @@ public class AutomataViewer
             }
         }
         toolBar.add(colorChoosersPanel);
-        Dimension dim = new Dimension(toolBar.getPreferredSize().width / 3, toolBar.getPreferredSize().height);
+        dim = new Dimension(toolBar.getPreferredSize().width / 3, toolBar.getPreferredSize().height);
         colorChoosersPanel.setMaximumSize(dim);
         
         transitions = new JComboBox<>();
