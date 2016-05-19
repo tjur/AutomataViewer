@@ -1,36 +1,28 @@
-import java.awt.Dimension;
-import java.awt.FlowLayout;
+
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JInternalFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
 
-/***
- * Panel zawierający pole tekstowe opisujące automat
- * @author Tomasz Jurkiewicz
- */
-public class TextPanel extends JInternalFrame
+
+public class TextToolbar extends DockToolbar
 {
     private Automaton automaton;
     private JTextArea textArea;
     private JPopupMenu popupMenu;
     
-    public TextPanel(int width)
+    public TextToolbar(String name)
     {
-        super("Text Panel", true, true, false, true);
-        setSize(new Dimension(300, 100));
-        setMinimumSize(new Dimension(300, 100));
-        setBounds(width + 10, 0, 300, 100);
-        setVisible(true);
+        super(name);
         
-        JPanel panel = new JPanel(new FlowLayout());
         textArea = new JTextArea();
         popupMenu = new JPopupMenu();
         
@@ -39,17 +31,32 @@ public class TextPanel extends JInternalFrame
         menuItemCut = new JMenuItem("Cut");
         menuItemCopy = new JMenuItem("Copy");
         menuItemPaste = new JMenuItem("Paste");
-        menuItemCut.addActionListener((ActionEvent ev) ->
+        menuItemCut.addActionListener(new ActionListener()
         {
-            textArea.cut();       
+       
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                textArea.cut();
+            }
         });
-        menuItemCopy.addActionListener((ActionEvent ev) ->
+        menuItemCopy.addActionListener(new ActionListener()
         {
-            textArea.copy();       
+       
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                textArea.copy();
+            }
         });
-        menuItemPaste.addActionListener((ActionEvent ev) ->
+        menuItemPaste.addActionListener(new ActionListener()
         {
-            textArea.paste();       
+       
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                textArea.paste();
+            }
         });
 
         popupMenu.add(menuItemCut);
@@ -73,9 +80,8 @@ public class TextPanel extends JInternalFrame
             }
         });
         
-        textArea.setMinimumSize(new Dimension(200, 50));
-        textArea.setPreferredSize(textArea.getMinimumSize());
-        panel.add(textArea);
+        panel.add(textArea, BorderLayout.CENTER);
+        
         
         JButton buttonSetGraph = new JButton("OK");
         buttonSetGraph.addActionListener(new ActionListener() {
@@ -100,8 +106,10 @@ public class TextPanel extends JInternalFrame
                 }
             }       
         });
-        panel.add(buttonSetGraph);
-        add(panel);
+        JPanel borderPanel = new JPanel();
+        borderPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        borderPanel.add(buttonSetGraph);
+        panel.add(borderPanel, BorderLayout.EAST);
     }
     
     public JTextArea getTextArea()

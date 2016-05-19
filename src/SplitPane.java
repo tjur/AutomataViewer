@@ -1,52 +1,47 @@
+
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyVetoException;
-import javax.swing.DefaultDesktopManager;
-import javax.swing.JComponent;
-import javax.swing.JDesktopPane;
-import javax.swing.JInternalFrame;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 
-/**
- * Główny pulpit, który zarządza wszystkimi panelami dla automatu
- * @author Tomasz Jurkiewicz
- */
-public class Desktop extends JDesktopPane
+
+public class SplitPane extends JSplitPane
 {
     private Automaton automaton;
     private int K, N;
     
-    private PaintPanel paintPanel;
-    private TextPanel textPanel;
+    public PaintPanel paintPanel;
+    public TextToolbar textPanel;
     
-    public Desktop()
+    public SplitPane()
     {
-        this.setDesktopManager(new ImmovableDesktopManager());
+        super(JSplitPane.HORIZONTAL_SPLIT);
+        
         setBackground(new Color(224, 224, 224));
         
         paintPanel = new PaintPanel();
-        add(paintPanel);
+        setTopComponent(paintPanel);
         
-        int width = paintPanel.getSize().width;
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        JPanel innerPanel = new JPanel();
+        innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
+        rightPanel.add(new JScrollPane(innerPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+        rightPanel.setMinimumSize(new Dimension(300, 0));
+        setBottomComponent(rightPanel);
+        setResizeWeight(1.0);
         
-        textPanel = new TextPanel(width);
-        add(textPanel);
+        textPanel = new TextToolbar("Text Toolbar");
+        innerPanel.add(textPanel);
+        innerPanel.add(new TestToolbar("Toolbar 2"));
+        innerPanel.add(new TestToolbar("Toolbar 3"));
         
         setAutomaton(new Automaton("1 0"));
         textPanel.getTextArea().setText("2 4 1 0 3 0 0 1 1 2");
-        
-        for (JInternalFrame frame : getAllFrames())
-        {
-            try
-            {
-                if (!(frame instanceof PaintPanel))
-                    frame.setIcon(true);
-            } 
-            catch (PropertyVetoException ex)
-            {
-                System.err.println(ex.getMessage());
-            }
-        }
         
         textPanel.addPropertyChangeListener("repaintGraph", new PropertyChangeListener() {
             
@@ -89,18 +84,8 @@ public class Desktop extends JDesktopPane
         return paintPanel;
     }
     
-    public TextPanel getTextPanel()
+    public TextToolbar getTextPanel()
     {
         return textPanel;
-    }
-    
-    private class ImmovableDesktopManager extends DefaultDesktopManager 
-    {       
-        @Override
-        public void dragFrame(JComponent f, int x, int y) 
-        {
-            if (!(f instanceof PaintPanel))
-                super.dragFrame( f, x, y );
-        }
     }
 }

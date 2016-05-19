@@ -1,3 +1,4 @@
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -12,9 +13,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
-import javax.swing.JInternalFrame;
+import javax.swing.JPanel;
 
-public class PaintPanel extends JInternalFrame implements MouseListener, MouseMotionListener
+public class PaintPanel extends JPanel implements MouseListener, MouseMotionListener
 {
 
     private static final long serialVersionUID = 1L;
@@ -89,10 +90,7 @@ public class PaintPanel extends JInternalFrame implements MouseListener, MouseMo
     // Initialization
     public PaintPanel()
     {
-        super("Paint Panel", true, false, false, false);
-        setSize(new Dimension(550, 400));
         setMinimumSize(new Dimension(550, 400));
-        setVisible(true);
         
         addComponentListener(new ComponentAdapter()
         {

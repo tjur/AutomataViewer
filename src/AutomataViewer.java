@@ -1,3 +1,4 @@
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -35,22 +36,17 @@ public class AutomataViewer
     public static void main(String[] args) 
     {
         JFrame frame = new JFrame("Automata viewer");
-        new AutomataViewer(frame);
+        AutomataViewer automataViewer = new AutomataViewer(frame);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000,750);
+        frame.setSize(1300,750);
         frame.setMinimumSize(new Dimension(700, 525));
         frame.setVisible(true);
     }
 
     private final JFrame frame;
     
-    private Desktop desktop;
+    private SplitPane desktop;
     private PaintPanel paintPanel;
-
-    private JMenuBar menuBar;
-    private JMenu fileMenu;
-    private JMenuItem saveMenuItem;
-    private JFileChooser fileChooser;
     
     private JToolBar toolBar;
     private final String[] iconFiles = { "add_state.png", "remove_state.png", "add_transition.png", "change_color.png" };
@@ -64,7 +60,7 @@ public class AutomataViewer
     public AutomataViewer(JFrame frame) 
     {
         this.frame = frame;
-        desktop = new Desktop();
+        desktop = new SplitPane();
         paintPanel = desktop.getPaintPanel();
         
         paintPanel.addPropertyChangeListener("updateAutomaton", new PropertyChangeListener() {
@@ -112,9 +108,17 @@ public class AutomataViewer
 
     private void createMenuBar()
     {
+        JMenuBar menuBar;
+        JMenu fileMenu;
+        JMenu toolbarsMenu;
+        JMenuItem saveMenuItem;
+        JFileChooser fileChooser;
+        
         menuBar = new JMenuBar();
         fileMenu = new JMenu("File");
+        toolbarsMenu = new JMenu("Toolbars");
         menuBar.add(fileMenu);
+        menuBar.add(toolbarsMenu);
         
         fileChooser = new JFileChooser();
 
@@ -260,10 +264,15 @@ public class AutomataViewer
                 {
                     Color stateColor = PaintPanel.STATES_COLORS[i*cols + j];
                     JButton chooseColorButton = new JButton(createIcon(stateColor, 15, 15));
-                    chooseColorButton.addActionListener((ActionEvent ev) -> 
-                    {    
-                        innerPanel.setBackground(stateColor);
-                        paintPanel.setSelectedColor(stateColor);
+                    chooseColorButton.addActionListener(new ActionListener()
+                    {
+
+                        @Override
+                        public void actionPerformed(ActionEvent ev)
+                        {
+                            innerPanel.setBackground(stateColor);
+                            paintPanel.setSelectedColor(stateColor);
+                        }
                     });
                     colorChoosersPanel.add(chooseColorButton);
                 }
