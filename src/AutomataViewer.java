@@ -49,8 +49,11 @@ public class AutomataViewer
     private PaintPanel paintPanel;
     
     private JToolBar toolBar;
-    private final String[] iconFiles = { "icons/add_state.png", "icons/remove_state.png", "icons/add_transition.png", "icons/change_color.png" };
-    private final String [] buttonLabels = { "Add state", "Remove state", "Add transition", "Change color" };
+    private final String[] iconFiles = { 
+        "icons/add_state.png", "icons/remove_state.png", "icons/add_transition.png", 
+        "icons/change_color.png", "icons/move_state.png" 
+    };
+    private final String [] buttonLabels = { "Add state", "Remove state", "Add transition", "Change color", "Move state" };
     private final JButton [] toolBarButtons = new JButton[buttonLabels.length];
     
     private JPanel selectedColorPanel;
@@ -167,35 +170,31 @@ public class AutomataViewer
         toolBar = new JToolBar("Tool Bar");
         toolBar.setFloatable(false);
         toolBar.setBackground(Color.GRAY);
+        
+        Color noBackground = (new JButton()).getBackground();
+        Color selectedButtonColor = Color.CYAN;
         ActionListener actionListener = new ActionListener()
         {
             @Override
             public void actionPerformed(ActionEvent ev)
             {
-                Color noBackground = new JButton().getBackground();
                 if (ev.getSource() == transitions)
                     paintPanel.setSelectedTransition(transitions.getSelectedIndex());
                 else
                 {
-                    for (int i = 0; i < PaintPanel.Operation.NONE.getValue(); i++)
+                    for (PaintPanel.Operation op : PaintPanel.Operation.values())
                     {
+                        int i = op.getValue();
                         if (ev.getSource() == toolBarButtons[i])
                         {
-                            if(paintPanel.getOperation() == i)
-                            {   
-                                paintPanel.setOperation(PaintPanel.Operation.NONE);
-                                toolBarButtons[i].setBackground(noBackground);
-                            }
-                            else
+                            if (paintPanel.getOperation() != i)
                             {
-                                if(paintPanel.getOperation() != PaintPanel.Operation.NONE.getValue())
-                                    toolBarButtons[paintPanel.getOperation()].setBackground(noBackground);
-                                
-                                paintPanel.setOperation(PaintPanel.Operation.values()[i]);
-                                toolBarButtons[i].setBackground(Color.CYAN);
+                                toolBarButtons[paintPanel.getOperation()].setBackground(noBackground);
+                                paintPanel.setOperation(op);
+                                toolBarButtons[i].setBackground(selectedButtonColor);
                             }
                             
-                            if(paintPanel.getOperation() != PaintPanel.Operation.CHANGE_COLOR.getValue())
+                            if (paintPanel.getOperation() != PaintPanel.Operation.CHANGE_COLOR.getValue())
                             {
                                 selectedColorPanel.setVisible(false);
                                 colorChoosersPanel.setVisible(false);
@@ -206,7 +205,7 @@ public class AutomataViewer
                                 colorChoosersPanel.setVisible(true);
                             }
                             
-                            if(paintPanel.getOperation() != PaintPanel.Operation.ADD_TRANS.getValue())
+                            if (paintPanel.getOperation() != PaintPanel.Operation.ADD_TRANS.getValue())
                                 transitions.setVisible(false);
                             else
                                 transitions.setVisible(true);
@@ -232,6 +231,8 @@ public class AutomataViewer
                 toolBar.addSeparator();
             toolBar.add(toolBarButtons[i]);
         }
+        
+        toolBarButtons[paintPanel.getOperation()].setBackground(selectedButtonColor);
         
         toolBar.add(Box.createHorizontalGlue());
         
