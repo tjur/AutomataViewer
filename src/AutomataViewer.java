@@ -49,7 +49,7 @@ public class AutomataViewer
     private PaintPanel paintPanel;
     
     private JToolBar toolBar;
-    private final String[] iconFiles = { "add_state.png", "remove_state.png", "add_transition.png", "change_color.png" };
+    private final String[] iconFiles = { "icons/add_state.png", "icons/remove_state.png", "icons/add_transition.png", "icons/change_color.png" };
     private final String [] buttonLabels = { "Add state", "Remove state", "Add transition", "Change color" };
     private final JButton [] toolBarButtons = new JButton[buttonLabels.length];
     
@@ -221,7 +221,7 @@ public class AutomataViewer
         toolBar.addSeparator(new Dimension(0, 50));
         for (int i = 0; i < buttonLabels.length; i++) 
         {
-            ImageIcon icon = new ImageIcon("icons/" + iconFiles[i]);
+            ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(iconFiles[i]));
             Image image = icon.getImage();  
             Image newimage = image.getScaledInstance(35, 35, java.awt.Image.SCALE_SMOOTH);  
             icon = new ImageIcon(newimage);
