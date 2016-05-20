@@ -23,6 +23,7 @@ public class TextToolbar extends DockToolbar
     {
         super(name);
         
+        JPanel panel = getPanel();
         textArea = new JTextArea();
         popupMenu = new JPopupMenu();
         

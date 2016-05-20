@@ -18,16 +18,18 @@ import javax.swing.event.AncestorListener;
 
 public class DockToolbar extends JToolBar
 {
-    protected JPanel panel; // content panel
-    protected String name;
+    private JPanel panel; // content panel
+    private final String name;
     
-    protected Dimension dockSize;
-    protected Dimension floatSize;
+    private boolean floating;
+    private Dimension dockSize;
+    private Dimension floatSize;
     
     DockToolbar(String name)
     {
         super(name);
         this.name = name;
+        floating = false;
         setLayout(new FlowLayout());
         setOrientation(javax.swing.SwingConstants.HORIZONTAL);
         
@@ -42,6 +44,7 @@ public class DockToolbar extends JToolBar
             {
                 if (SwingUtilities.getWindowAncestor(DockToolbar.this) instanceof JDialog) 
                 {
+                    floating = true;
                     JDialog toolBarDialog = (JDialog) SwingUtilities.getWindowAncestor(DockToolbar.this);
                     toolBarDialog.setResizable(true);
                     if (dockSize == null)
@@ -53,14 +56,17 @@ public class DockToolbar extends JToolBar
                     toolBarDialog.addComponentListener(new ComponentAdapter()
                     {
                         @Override
-                        public void componentResized(ComponentEvent ev) {
+                        public void componentResized(ComponentEvent ev) 
+                        {
                             toolBarDialog.setPreferredSize(toolBarDialog.getSize());
                         }
                     });
                     toolBarDialog.addWindowListener(new WindowAdapter() {
 
                         @Override
-                        public void windowClosing(WindowEvent e) {
+                        public void windowClosing(WindowEvent e) 
+                        {
+                            floating = false;
                             toolBarDialog.remove(panel);
                             DockToolbar.this.setVisible(true);
                             DockToolbar.this.add(panel);
@@ -91,5 +97,33 @@ public class DockToolbar extends JToolBar
                 revalidate();
             }
         });
+    }
+    
+    protected JPanel getPanel()
+    {
+        return panel;
+    }
+    
+    @Override
+    public String getName()
+    {
+        return name;
+    }
+    
+    @Override
+    public void setVisible(boolean b)
+    {
+        boolean oldValue = isVisible();
+        super.setVisible(b);
+        firePropertyChange("setVisible", oldValue, b);
+    }
+    
+    public void Dock()
+    {
+        if (floating)
+        {
+            JDialog toolBarDialog = (JDialog) SwingUtilities.getWindowAncestor(this);
+            toolBarDialog.dispatchEvent(new WindowEvent(toolBarDialog, WindowEvent.WINDOW_CLOSING));
+        }
     }
 }

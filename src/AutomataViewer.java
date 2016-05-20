@@ -20,6 +20,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -108,12 +109,9 @@ public class AutomataViewer
         
         menuBar = new JMenuBar();
         fileMenu = new JMenu("File");
-        toolbarsMenu = new JMenu("Toolbars");
         menuBar.add(fileMenu);
-        menuBar.add(toolbarsMenu);
         
         fileChooser = new JFileChooser();
-
         saveMenuItem = new JMenuItem("Save Image... ");
         fileMenu.add(saveMenuItem);
         saveMenuItem.addActionListener(new ActionListener() {
@@ -150,7 +148,24 @@ public class AutomataViewer
                 }
             }   
         });
+        
+        toolbarsMenu = new JMenu("Toolbars");
+        for (DockToolbar dockToolbar : splitPane.getDockToolbars())
+        {
+            JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(dockToolbar.getName());
+            menuItem.setSelected(true);
+            toolbarsMenu.add(menuItem);
+            menuItem.addActionListener(new ActionListener() {
 
+                @Override
+                public void actionPerformed(ActionEvent ev)
+                {
+                    dockToolbar.Dock();
+                    dockToolbar.setVisible(menuItem.isSelected());
+                }
+            });
+        }
+        menuBar.add(toolbarsMenu);
         frame.setJMenuBar(menuBar);
     }
     
