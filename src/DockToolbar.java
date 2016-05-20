@@ -19,6 +19,7 @@ import javax.swing.event.AncestorListener;
 public class DockToolbar extends JToolBar
 {
     protected JPanel panel; // content panel
+    protected String name;
     
     protected Dimension dockSize;
     protected Dimension floatSize;
@@ -26,6 +27,7 @@ public class DockToolbar extends JToolBar
     DockToolbar(String name)
     {
         super(name);
+        this.name = name;
         setLayout(new FlowLayout());
         setOrientation(javax.swing.SwingConstants.HORIZONTAL);
         
