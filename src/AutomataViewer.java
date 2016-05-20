@@ -1,6 +1,7 @@
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -22,12 +23,15 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+import javax.swing.ListCellRenderer;
 
 
 public class AutomataViewer
@@ -45,7 +49,7 @@ public class AutomataViewer
 
     private final JFrame frame;
     
-    private SplitPane desktop;
+    private SplitPane splitPane;
     private PaintPanel paintPanel;
     
     private JToolBar toolBar;
@@ -58,45 +62,30 @@ public class AutomataViewer
     
     private JPanel selectedColorPanel;
     private JPanel colorChoosersPanel;
-    private JComboBox<String> transitions;
+    private JComboBox<String> transitions = new JComboBox<>();
 
     public AutomataViewer(JFrame frame) 
     {
         this.frame = frame;
-        desktop = new SplitPane();
-        paintPanel = desktop.getPaintPanel();
+        splitPane = new SplitPane();
+        paintPanel = splitPane.getPaintPanel();
         
         paintPanel.addPropertyChangeListener("updateAutomaton", new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
             {
-                desktop.getTextPanel().getTextArea().setText(desktop.getAutomatonString());
-                
-                if (paintPanel.getOperation() == PaintPanel.Operation.ADD_TRANS.getValue())
-                {
-                    int K = desktop.getAutomatonK();
-                    if(transitions.getItemCount() == K && transitions.getSelectedIndex() == K - 1)
-                    {
-                        transitions.removeItemAt(K - 1);
-                        transitions.addItem(Integer.toString(K - 1));
-                        transitions.addItem("Create new transition");
-                        transitions.setSelectedIndex(K - 1);
-                    }
-                }    
+                splitPane.getTextPanel().getTextArea().setText(splitPane.getAutomatonString());       
+                updateTransitionsComboBox(); 
             }
         });
         
-        desktop.getTextPanel().addPropertyChangeListener("updateTransitions", new PropertyChangeListener() {
+        splitPane.getTextPanel().addPropertyChangeListener("updateTransitions", new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
             {
-                transitions.removeAllItems();
-                int K = desktop.getAutomatonK();
-                for (int i = 0; i < K; i++)
-                    transitions.addItem(Integer.toString(i));
-                transitions.addItem("Create new transition");
+                updateTransitionsComboBox();
             }
         });
         
@@ -106,7 +95,7 @@ public class AutomataViewer
         Container container = frame.getContentPane();
         container.setLayout(new BorderLayout());
         container.add(toolBar, BorderLayout.NORTH);
-        container.add(desktop, BorderLayout.CENTER);
+        container.add(splitPane, BorderLayout.CENTER);
     }
 
     private void createMenuBar()
@@ -178,40 +167,35 @@ public class AutomataViewer
             @Override
             public void actionPerformed(ActionEvent ev)
             {
-                if (ev.getSource() == transitions)
-                    paintPanel.setSelectedTransition(transitions.getSelectedIndex());
-                else
+                for (PaintPanel.Operation op : PaintPanel.Operation.values())
                 {
-                    for (PaintPanel.Operation op : PaintPanel.Operation.values())
+                    int i = op.getValue();
+                    if (ev.getSource() == toolBarButtons[i])
                     {
-                        int i = op.getValue();
-                        if (ev.getSource() == toolBarButtons[i])
+                        if (paintPanel.getOperation() != i)
                         {
-                            if (paintPanel.getOperation() != i)
-                            {
-                                toolBarButtons[paintPanel.getOperation()].setBackground(noBackground);
-                                paintPanel.setOperation(op);
-                                toolBarButtons[i].setBackground(selectedButtonColor);
-                            }
-                            
-                            if (paintPanel.getOperation() != PaintPanel.Operation.CHANGE_COLOR.getValue())
-                            {
-                                selectedColorPanel.setVisible(false);
-                                colorChoosersPanel.setVisible(false);
-                            }
-                            else
-                            {
-                                selectedColorPanel.setVisible(true);
-                                colorChoosersPanel.setVisible(true);
-                            }
-                            
-                            if (paintPanel.getOperation() != PaintPanel.Operation.ADD_TRANS.getValue())
-                                transitions.setVisible(false);
-                            else
-                                transitions.setVisible(true);
-                            
-                            break;
+                            toolBarButtons[paintPanel.getOperation()].setBackground(noBackground);
+                            paintPanel.setOperation(op);
+                            toolBarButtons[i].setBackground(selectedButtonColor);
                         }
+
+                        if (paintPanel.getOperation() != PaintPanel.Operation.CHANGE_COLOR.getValue())
+                        {
+                            selectedColorPanel.setVisible(false);
+                            colorChoosersPanel.setVisible(false);
+                        }
+                        else
+                        {
+                            selectedColorPanel.setVisible(true);
+                            colorChoosersPanel.setVisible(true);
+                        }
+
+                        if (paintPanel.getOperation() != PaintPanel.Operation.ADD_TRANS.getValue())
+                            transitions.setVisible(false);
+                        else
+                            transitions.setVisible(true);
+
+                        break;
                     }
                 }
             }
@@ -283,14 +267,7 @@ public class AutomataViewer
         dim = new Dimension(toolBar.getPreferredSize().width / 3, toolBar.getPreferredSize().height);
         colorChoosersPanel.setMaximumSize(dim);
         
-        transitions = new JComboBox<>();
-        for (int i = 0; i < desktop.getAutomatonK(); i++)
-            transitions.addItem(Integer.toString(i));
-        transitions.addItem("Create new transition");
-        transitions.setMaximumSize(new Dimension(100, 30));
-        transitions.addActionListener(actionListener);
-        transitions.setPrototypeDisplayValue("Create new transition");
-        transitions.setVisible(false);
+        updateTransitionsComboBox();
         toolBar.add(transitions);
         toolBar.addSeparator();
     }
@@ -306,5 +283,77 @@ public class AutomataViewer
         image.flush();
         ImageIcon icon = new ImageIcon(image);
         return icon;
+    }
+    
+    private void updateTransitionsComboBox()
+    {
+        if (transitions.getItemCount() == 0) // init
+        {
+            for (int i = 0; i < splitPane.getAutomatonK(); i++)
+                transitions.addItem(PaintPanel.TRANSITIONS_LETTERS[i % PaintPanel.TRANSITIONS_LETTERS.length]);
+            transitions.addItem("Create new transition");
+            transitions.setMaximumSize(new Dimension(100, 30));
+            transitions.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    paintPanel.setSelectedTransition(transitions.getSelectedIndex());
+                }
+            });
+            transitions.setPrototypeDisplayValue("Create new transition   ");
+            transitions.setVisible(false);
+            ComboBoxRenderer renderer = new ComboBoxRenderer(transitions);
+            transitions.setRenderer(renderer);
+        }
+        else
+        {
+            int K = splitPane.getAutomatonK();
+            if(transitions.getItemCount() == K && transitions.getSelectedIndex() == K - 1)
+            {
+                transitions.removeItemAt(K - 1);
+                transitions.addItem(PaintPanel.TRANSITIONS_LETTERS[(K - 1) % PaintPanel.TRANSITIONS_LETTERS.length]);
+                transitions.addItem("Create new transition");
+                transitions.setSelectedIndex(K - 1);
+            }
+            else if (transitions.getItemCount() != K + 1)
+            {
+                transitions.removeAllItems();
+                for (int i = 0; i < K; i++)
+                    transitions.addItem(PaintPanel.TRANSITIONS_LETTERS[i % PaintPanel.TRANSITIONS_LETTERS.length]);
+                transitions.addItem("Create new transition");
+            }
+        }
+    }
+    
+    private class ComboBoxRenderer extends JPanel implements ListCellRenderer
+    {
+        JPanel textPanel;
+        JLabel text;
+
+        public ComboBoxRenderer(JComboBox combo) 
+        {
+            textPanel = new JPanel();
+            text = new JLabel();
+            text.setOpaque(true);
+            textPanel.add(text);
+        }
+
+        @Override
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) 
+        {
+            if (isSelected)
+                setBackground(list.getSelectionBackground());
+            else
+                setBackground(Color.WHITE);
+
+            text.setBackground(getBackground());
+
+            text.setText(value.toString());
+            if (index > -1)
+                text.setForeground(PaintPanel.TRANSITIONS_COLORS[index]);
+            
+            return text;
+        }
     }
 }

@@ -62,6 +62,11 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         Color.PINK, Color.GRAY, Color.CYAN, Color.BLACK,
         Color.YELLOW, Color.MAGENTA
     };
+    
+    public static final String[] TRANSITIONS_LETTERS =
+    {
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o"
+    };
 
     public static final Color[] STATES_COLORS =
     {
