@@ -100,8 +100,24 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         addComponentListener(new ComponentAdapter()
         {
             @Override
-            public void componentResized(ComponentEvent ev) {
-                repaintGraph();
+            public void componentResized(ComponentEvent ev) 
+            {
+                int width = PaintPanel.this.getSize().width;
+                int height = PaintPanel.this.getSize().height;
+                
+                for (Point vertice : vertices)
+                {
+                    if (vertice.x + VERTEX_RADIUS > width)
+                    {
+                        vertice.x = width - VERTEX_RADIUS;
+                    }
+                    if (vertice.y + VERTEX_RADIUS > height)
+                    {
+                        vertice.y = height - VERTEX_RADIUS;
+                    }
+                }
+                
+                repaint();
             }
         });
         
