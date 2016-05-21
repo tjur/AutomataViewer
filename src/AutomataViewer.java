@@ -55,10 +55,10 @@ public class AutomataViewer
     
     private JToolBar toolBar;
     private final String[] iconFiles = { 
-        "icons/add_state.png", "icons/remove_state.png", "icons/add_transition.png", 
-        "icons/change_color.png", "icons/move_state.png" 
+        "icons/add_state.png", "icons/remove_state.png", "icons/replace_states.png",
+        "icons/add_transition.png", "icons/change_color.png", "icons/move_state.png" 
     };
-    private final String [] buttonLabels = { "Add state", "Remove state", "Add transition", "Change color", "Move state" };
+    private final String [] buttonLabels = { "Add state", "Remove state", "Replace states", "Add transition", "Change color", "Move state" };
     private final JButton [] toolBarButtons = new JButton[buttonLabels.length];
     
     private JPanel selectedColorPanel;

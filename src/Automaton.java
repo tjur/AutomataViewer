@@ -101,6 +101,24 @@ public class Automaton
         N--;
     }
     
+    public void replaceStates(int state1, int state2)
+    {
+        for (int i = 0; i < N; i++)
+        {
+            for (int j = 0; j < K; j++)
+            {
+                if (matrix[i][j] == state1)
+                    matrix[i][j] = state2;
+                else if (matrix[i][j] == state2)
+                    matrix[i][j] = state1;
+            }
+        }
+        
+        int[] temp = matrix[state1];
+        matrix[state1] = matrix[state2];
+        matrix[state2] = temp;
+    }
+    
     public void addTransition(int out, int in, int k)
     {
         if (k < K) // edit transition

@@ -43,7 +43,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     
     public static enum Operation
     {
-        ADD_STATE(0), REMOVE_STATE(1), ADD_TRANS(2), CHANGE_COLOR(3), NONE(4);
+        ADD_STATE(0), REMOVE_STATE(1), REPLACE_STATES(2), ADD_TRANS(3), CHANGE_COLOR(4), NONE(5);
         
         private final int value;
         
@@ -77,7 +77,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     };
 
     private Automaton automaton;
-    private Color [] color;
+    private Color[] color;
     private Point[] vertices;
     private int[] orders;
     private int highlighted;
@@ -87,6 +87,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     private Color selectedColor;
     private int selectedTransition;
     private int addTransFirstState;
+    private int replaceStatesFirstState;
 
     private int grabbed;
     private int grabX, grabY, grabShiftX, grabShiftY;
@@ -165,6 +166,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         this.color = new Color[N];
         this.highlighted = -1;
         this.addTransFirstState = -1;
+        this.replaceStatesFirstState = -1;
         for (int n = 0; n < N; n++)
         {
             orders[n] = n;
@@ -255,7 +257,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         mouseMoved(ev);
         if (ev.getButton() == MouseEvent.BUTTON1)
         {
-            if(operation == Operation.ADD_STATE)
+            if (operation == Operation.ADD_STATE)
             {
                 automaton.addState();
                 updateAutomatonData();
@@ -276,7 +278,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
 
                 firePropertyChange("updateAutomaton", false, true);
             }
-            else if(highlighted >= 0 && operation == Operation.REMOVE_STATE)
+            else if (highlighted >= 0 && operation == Operation.REMOVE_STATE)
             {
                 automaton.removeState(highlighted);
                 updateAutomatonData();
@@ -304,17 +306,36 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                 this.vertices = temp2;
 
                 highlighted = -1;
-                this.firePropertyChange("updateAutomaton", false, true);
+                firePropertyChange("updateAutomaton", false, true);
             }
-            else if(highlighted >= 0 && operation == Operation.ADD_TRANS)
+            else if (operation == Operation.REPLACE_STATES)
             {
+                if (highlighted >= 0 && replaceStatesFirstState != highlighted)
+                {
+                    if (replaceStatesFirstState == -1)
+                        replaceStatesFirstState = highlighted;
+                    else 
+                    {
+                        automaton.replaceStates(replaceStatesFirstState, highlighted);
+                        Point temp = vertices[highlighted];
+                        vertices[highlighted] = vertices[replaceStatesFirstState];
+                        vertices[replaceStatesFirstState] = temp;
+                        int temp2 = orders[highlighted];
+                        orders[highlighted] = orders[replaceStatesFirstState];
+                        orders[replaceStatesFirstState] = temp2;
+                        replaceStatesFirstState = -1;
+                        firePropertyChange("updateAutomaton", false, true);
+                    }
+                }
+                else
+                    replaceStatesFirstState = -1;
+                
+            }
+            else if (highlighted >= 0 && operation == Operation.ADD_TRANS)
                 addTransFirstState = highlighted;
-            }
-            else if(highlighted >= 0 && operation == Operation.CHANGE_COLOR)
-            {
+            else if (highlighted >= 0 && operation == Operation.CHANGE_COLOR)
                 color[highlighted] = selectedColor;
-            }
-            else if(highlighted >= 0)
+            else if (highlighted >= 0)
             {         
                 grabShiftX = (vertices[highlighted].x - grabX);
                 grabShiftY = (vertices[highlighted].y - grabY);
@@ -341,7 +362,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             {
                 automaton.addTransition(addTransFirstState, highlighted, selectedTransition);
                 updateAutomatonData();
-                this.firePropertyChange("updateAutomaton", false, true);
+                firePropertyChange("updateAutomaton", false, true);
             }   
             addTransFirstState = -1;
         }
@@ -446,20 +467,19 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         {
             int n = orders[i];
             g.setColor(color[n]);
-            if (highlighted != -1)
+            if (highlighted != -1 && highlighted == n)
+                g.setColor(g.getColor().brighter());
+            
+            if (operation == Operation.REPLACE_STATES)
             {
-                if (highlighted == n)
-                    g.setColor(g.getColor().brighter());
+                if (highlighted == n || replaceStatesFirstState == n)
+                    g.setColor(Color.GREEN.darker());
             }
             g.fillOval(vertices[n].x - VERTEX_RADIUS, vertices[n].y - VERTEX_RADIUS, VERTEX_RADIUS * 2, VERTEX_RADIUS * 2);
             g.setColor(Color.BLACK);
-            if (highlighted != -1)
-            {
-                if (highlighted == n)
-                {
-                    g.setColor(Color.LIGHT_GRAY);
-                }
-            }
+            if (highlighted != -1 && highlighted == n)
+                g.setColor(Color.LIGHT_GRAY);
+ 
             g.drawOval(vertices[n].x - VERTEX_RADIUS, vertices[n].y - VERTEX_RADIUS, VERTEX_RADIUS * 2, VERTEX_RADIUS * 2);
             g.setColor(Color.BLACK);
             String label = Integer.toString(n);
