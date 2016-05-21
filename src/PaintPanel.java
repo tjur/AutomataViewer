@@ -108,13 +108,9 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                 for (Point vertice : vertices)
                 {
                     if (vertice.x + VERTEX_RADIUS > width)
-                    {
                         vertice.x = width - VERTEX_RADIUS;
-                    }
                     if (vertice.y + VERTEX_RADIUS > height)
-                    {
                         vertice.y = height - VERTEX_RADIUS;
-                    }
                 }
                 
                 repaint();
@@ -212,7 +208,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     // Interface
     @Override
     public void mouseMoved(MouseEvent ev)
-    {   
+    {
         grabX = (ev.getX() >= 0 && ev.getX() <= this.getSize().width) ? ev.getX() : grabX;
         grabY = (ev.getY() >= 0 && ev.getY() <= this.getSize().height) ? ev.getY() : grabY;
         highlighted = -1;
