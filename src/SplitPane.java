@@ -31,6 +31,8 @@ public class SplitPane extends JSplitPane
         setBackground(new Color(224, 224, 224));
         
         paintPanel = new PaintPanel();
+        automaton = new Automaton("1 0");
+        paintPanel.setAutomaton(automaton);
         setTopComponent(paintPanel);
         
         JPanel rightPanel = new JPanel(new BorderLayout());
@@ -53,7 +55,9 @@ public class SplitPane extends JSplitPane
         dockToolbars.add(test1);
         dockToolbars.add(test2);
         
-        setAutomaton(new Automaton("1 0"));
+        for (DockToolbar dockToolbar : dockToolbars)
+            dockToolbar.setAutomaton(automaton);
+        
         textToolbar.getTextArea().setText("2 4 1 0 3 0 0 1 1 2");
         
         textToolbar.addPropertyChangeListener("repaintGraph", new PropertyChangeListener() {
@@ -65,12 +69,21 @@ public class SplitPane extends JSplitPane
             }
         });
         
-        textToolbar.addPropertyChangeListener("setAutomaton", new PropertyChangeListener() {
+        textToolbar.addPropertyChangeListener("updateToolbars", new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
             {
-                setAutomaton(automaton);
+                updateToolbars();
+            }
+        });
+        
+        textToolbar.addPropertyChangeListener("paintPanelSetAutomaton", new PropertyChangeListener() {
+            
+            @Override
+            public void propertyChange(PropertyChangeEvent ev)
+            {
+                paintPanel.setAutomaton(automaton);
             }
         });
         
@@ -130,11 +143,10 @@ public class SplitPane extends JSplitPane
         }
     }
     
-    private void setAutomaton(Automaton automaton)
-    {
-        this.automaton = automaton;
-        paintPanel.setAutomaton(automaton);
-        textToolbar.setAutomaton(automaton);
+    private void updateToolbars()
+    { 
+        for (DockToolbar dockToolbar : dockToolbars)
+            dockToolbar.updateToolbar();
     }
     
     public int getAutomatonK()

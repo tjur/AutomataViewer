@@ -16,10 +16,11 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 
-public class DockToolbar extends JToolBar
+public abstract class DockToolbar extends JToolBar
 {
     private JPanel panel; // content panel
     private final String name;
+    private Automaton automaton;
     
     private boolean floating;
     private Dimension dockSize;
@@ -110,11 +111,25 @@ public class DockToolbar extends JToolBar
         return name;
     }
     
+    public Automaton getAutomaton()
+    {
+        return automaton;
+    }
+    
+    public void setAutomaton(Automaton automaton)
+    {
+        this.automaton = automaton;
+    }
+    
     @Override
     public void setVisible(boolean b)
     {
         boolean oldValue = isVisible();
         super.setVisible(b);
+        
+        if (isVisible())
+            update();
+        
         firePropertyChange("setVisible", oldValue, b);
     }
     
@@ -126,4 +141,13 @@ public class DockToolbar extends JToolBar
             toolBarDialog.dispatchEvent(new WindowEvent(toolBarDialog, WindowEvent.WINDOW_CLOSING));
         }
     }
+    
+    // updates toolbar only if it is visible
+    public void updateToolbar()
+    {
+        if (isVisible())
+            update();
+    }
+    
+    protected abstract void update();
 }

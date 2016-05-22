@@ -191,24 +191,28 @@ public class AutomataViewer
                         {
                             toolBarButtons[paintPanel.getOperation()].setBackground(noBackground);
                             paintPanel.setOperation(op);
+                            paintPanel.repaint();
                             toolBarButtons[i].setBackground(selectedButtonColor);
                         }
 
-                        if (paintPanel.getOperation() != PaintPanel.Operation.CHANGE_COLOR.getValue())
-                        {
-                            selectedColorPanel.setVisible(false);
-                            colorChoosersPanel.setVisible(false);
-                        }
-                        else
+                        if (paintPanel.getOperation() == PaintPanel.Operation.CHANGE_COLOR.getValue())
                         {
                             selectedColorPanel.setVisible(true);
                             colorChoosersPanel.setVisible(true);
                         }
-
-                        if (paintPanel.getOperation() != PaintPanel.Operation.ADD_TRANS.getValue())
-                            transitions.setVisible(false);
                         else
+                        {
+                            selectedColorPanel.setVisible(false);
+                            colorChoosersPanel.setVisible(false);
+                        }
+
+                        if (paintPanel.getOperation() == PaintPanel.Operation.ADD_TRANS.getValue())
                             transitions.setVisible(true);
+                        else
+                            transitions.setVisible(false);
+                        
+                        if (paintPanel.getOperation() != PaintPanel.Operation.REPLACE_STATES.getValue())
+                            paintPanel.resetReplaceStatesFirstState();
 
                         break;
                     }

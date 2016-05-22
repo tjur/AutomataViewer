@@ -15,4 +15,7 @@ public class TestToolbar extends DockToolbar
         ta.setMinimumSize(new Dimension(300, 300));
         panel.add(ta);
     }
+
+    @Override
+    protected void update() {}
 }

@@ -15,7 +15,6 @@ import javax.swing.JTextArea;
 
 public class TextToolbar extends DockToolbar
 {
-    private Automaton automaton;
     private JTextArea textArea;
     private JPopupMenu popupMenu;
     
@@ -93,12 +92,13 @@ public class TextToolbar extends DockToolbar
                 String matrix = textArea.getText().trim();
                 try 
                 {
-                    if (automaton.toString().equals(matrix))
+                    if (getAutomaton().toString().equals(matrix))
                         firePropertyChange("repaintGraph", false, true);
                     else
                     {
-                        automaton.update(new Automaton(matrix));
-                        firePropertyChange("setAutomaton", null, automaton);
+                        getAutomaton().update(new Automaton(matrix));
+                        firePropertyChange("updateToolbars", false, true);
+                        firePropertyChange("paintPanelSetAutomaton", false, true);
                         firePropertyChange("updateTransitions", false, true);
                     }
                 } 
@@ -117,15 +117,10 @@ public class TextToolbar extends DockToolbar
     {
         return textArea;
     }
-    
-    public void setAutomaton(Automaton automaton)
+
+    @Override
+    protected void update() 
     {
-        this.automaton = automaton;
-        updateTextArea();
-    }
-    
-    public void updateTextArea()
-    {
-        textArea.setText(automaton.toString());
+        textArea.setText(getAutomaton().toString());
     }
 }

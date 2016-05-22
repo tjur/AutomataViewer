@@ -151,6 +151,11 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         selectedTransition = trans;
     }
     
+    public void resetReplaceStatesFirstState()
+    {
+        replaceStatesFirstState = -1;
+    }
+    
     private void updateAutomatonData()
     {
         K = automaton.getK();
