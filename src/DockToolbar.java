@@ -7,6 +7,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -26,10 +28,11 @@ public abstract class DockToolbar extends JToolBar
     private Dimension dockSize;
     private Dimension floatSize;
     
-    DockToolbar(String name)
+    DockToolbar(String name, Automaton automaton)
     {
         super(name);
         this.name = name;
+        this.automaton = automaton;
         floating = false;
         setLayout(new FlowLayout());
         setOrientation(javax.swing.SwingConstants.HORIZONTAL);
@@ -98,6 +101,15 @@ public abstract class DockToolbar extends JToolBar
                 revalidate();
             }
         });
+        
+        automaton.getPCS().addPropertyChangeListener("automatonChanged", new PropertyChangeListener() {
+            
+            @Override
+            public void propertyChange(PropertyChangeEvent ev)
+            {
+                updateToolbar();
+            }
+        });
     }
     
     protected JPanel getPanel()
@@ -145,7 +157,7 @@ public abstract class DockToolbar extends JToolBar
     // updates toolbar only if it is visible
     public void updateToolbar()
     {
-        if (isVisible())
+        if (panel.isVisible())
             update();
     }
     

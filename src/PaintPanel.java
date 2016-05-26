@@ -43,7 +43,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     
     public static enum Operation
     {
-        ADD_STATE(0), REMOVE_STATE(1), REPLACE_STATES(2), ADD_TRANS(3), CHANGE_COLOR(4), NONE(5);
+        ADD_STATE(0), REMOVE_STATE(1), REPLACE_STATES(2), ADD_TRANS(3), SELECT_STATES(4), NONE(5);
         
         private final int value;
         
@@ -56,18 +56,6 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         }
     }
 
-    public static final Color[] TRANSITIONS_COLORS =
-    {
-        Color.RED, Color.GREEN, Color.BLUE, Color.ORANGE,
-        Color.PINK, Color.GRAY, Color.CYAN, Color.BLACK,
-        Color.YELLOW, Color.MAGENTA
-    };
-    
-    public static final String[] TRANSITIONS_LETTERS =
-    {
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o"
-    };
-
     public static final Color[] STATES_COLORS =
     {
         Color.WHITE,
@@ -77,11 +65,10 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     };
 
     private Automaton automaton;
-    private Color[] color;
+    private Color[] colors;
     private Point[] vertices;
     private int[] orders;
     private int highlighted;
-    private int K, N;
     
     private Operation operation; 
     private Color selectedColor;
@@ -94,9 +81,18 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
 
   // ************************************************************************
     // Initialization
-    public PaintPanel()
+    public PaintPanel(Automaton automaton)
     {
         setMinimumSize(new Dimension(550, 400));
+        
+        this.grabbed = -1;
+        this.highlighted = -1;
+        this.addMouseListener(this);
+        this.addMouseMotionListener(this);
+        this.operation = Operation.NONE;
+        this.selectedColor = Color.WHITE;
+        
+        setAutomaton(automaton);
         
         addComponentListener(new ComponentAdapter()
         {
@@ -117,13 +113,16 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                 repaint();
             }
         });
-        
-        this.grabbed = -1;
-        this.highlighted = -1;
-        this.addMouseListener(this);
-        this.addMouseMotionListener(this);
-        this.operation = Operation.NONE;
-        this.selectedColor = Color.ORANGE;
+    }
+    
+    private int getN()
+    {
+        return automaton.getN();
+    }
+    
+    private int getK()
+    {
+        return automaton.getK();
     }
     
     public int getOperation()
@@ -143,7 +142,17 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     
     public void setSelectedColor(Color color)
     {
-        this.selectedColor = color;
+        if (!color.equals(selectedColor))
+        {
+            ArrayList<Integer> selectedStates = new ArrayList<>();
+            for (int i = 0; i < colors.length; i++)
+            {
+                if (color.equals(colors[i]))
+                    selectedStates.add(i);
+            }
+            automaton.selectStates(selectedStates);
+            this.selectedColor = color;
+        }
     }
     
     public void setSelectedTransition(int trans)
@@ -155,52 +164,54 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     {
         replaceStatesFirstState = -1;
     }
-    
-    private void updateAutomatonData()
-    {
-        K = automaton.getK();
-        N = automaton.getN();
-    }
 
-    public void setAutomaton(Automaton automaton)
+    private void setAutomaton(Automaton automaton)
     {
         this.automaton = automaton;
-        updateAutomatonData();
+        int N = getN();
+        
         this.vertices = new Point[N];
         this.orders = new int[N];
-        this.color = new Color[N];
+        this.colors = new Color[N];
         this.highlighted = -1;
         this.addTransFirstState = -1;
         this.replaceStatesFirstState = -1;
         for (int n = 0; n < N; n++)
         {
             orders[n] = n;
-            color[n] = Color.WHITE;
+            colors[n] = selectedColor;
+            automaton.selectState(n);
         }
-        int width = this.getWidth();
-        int height = this.getHeight();
-        int r = ((width < height ? width : height) - VERTEX_RADIUS * 3) / 2;
-        int cx = width / 2;
-        int cy = height / 2;
-        double angle = 0.0;
-        for (int n = 0; n < N; n++)
-        {
-            vertices[n] = new Point(
-                    (int) (Math.sin(angle) * r + cx),
-                    (int) (-Math.cos(angle) * r + cy));
-            angle += 2 * Math.PI / N;
-        }
-        repaint();
+        
+        repaintAutomaton();
     }
     
-    public void repaintGraph()
+    public void updateAutomatonData()
     {
+        int N = getN();
+        this.vertices = new Point[N];
+        this.orders = new int[N];
+        this.colors = new Color[N];
+        this.highlighted = -1;
+        this.addTransFirstState = -1;
+        this.replaceStatesFirstState = -1;
+        for (int n = 0; n < N; n++)
+        {
+            orders[n] = n;
+            colors[n] = selectedColor;
+            automaton.selectState(n);
+        }
+    }
+    
+    public void repaintAutomaton()
+    {   
         int width = this.getWidth();
         int height = this.getHeight();
         int r = ((width < height ? width : height) - VERTEX_RADIUS * 3) / 2;
         int cx = width / 2;
         int cy = height / 2;
         double angle = 0.0;
+        int N = getN();
         for (int n = 0; n < N; n++)
         {
             vertices[n] = new Point(
@@ -219,7 +230,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         grabX = (ev.getX() >= 0 && ev.getX() <= this.getSize().width) ? ev.getX() : grabX;
         grabY = (ev.getY() >= 0 && ev.getY() <= this.getSize().height) ? ev.getY() : grabY;
         highlighted = -1;
-        for (int i = N - 1; i >= 0; i--)
+        for (int i = getN() - 1; i >= 0; i--)
         {
             int v = orders[i];
             double d = (grabX - vertices[v].x) * (grabX - vertices[v].x) + (grabY - vertices[v].y) * (grabY - vertices[v].y);
@@ -265,28 +276,26 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             if (operation == Operation.ADD_STATE)
             {
                 automaton.addState();
-                updateAutomatonData();
+                int N = getN();
 
                 this.orders = new int[N];
                 for (int n = 0; n < N; n++)
                     this.orders[n] = n;
 
                 Color[] temp = new Color[N];
-                System.arraycopy(this.color, 0, temp, 0, N - 1);
-                temp[N-1] = Color.WHITE;
-                this.color = temp;
+                System.arraycopy(this.colors, 0, temp, 0, N - 1);
+                temp[N-1] = selectedColor;
+                this.colors = temp;
 
                 Point[] temp2 = new Point[N];
                 System.arraycopy(this.vertices, 0, temp2, 0, N - 1);
                 temp2[N-1] = ev.getPoint();
                 this.vertices = temp2;    
-
-                firePropertyChange("updateAutomaton", false, true);
             }
             else if (highlighted >= 0 && operation == Operation.REMOVE_STATE)
             {
                 automaton.removeState(highlighted);
-                updateAutomatonData();
+                int N = getN();
 
                 this.orders = new int[N];
                 for (int n = 0; n < N; n++)
@@ -298,20 +307,19 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                 {
                     if (n < highlighted)
                     {
-                        temp[n] = this.color[n];
+                        temp[n] = this.colors[n];
                         temp2[n] = this.vertices[n];
                     }
                     else
                     {
-                        temp[n] = this.color[n+1];
+                        temp[n] = this.colors[n+1];
                         temp2[n] = this.vertices[n+1];
                     }
                 }
-                this.color = temp;
+                this.colors = temp;
                 this.vertices = temp2;
 
                 highlighted = -1;
-                firePropertyChange("updateAutomaton", false, true);
             }
             else if (operation == Operation.REPLACE_STATES)
             {
@@ -329,7 +337,6 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                         orders[highlighted] = orders[replaceStatesFirstState];
                         orders[replaceStatesFirstState] = temp2;
                         replaceStatesFirstState = -1;
-                        firePropertyChange("updateAutomaton", false, true);
                     }
                 }
                 else
@@ -338,14 +345,21 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             }
             else if (highlighted >= 0 && operation == Operation.ADD_TRANS)
                 addTransFirstState = highlighted;
-            else if (highlighted >= 0 && operation == Operation.CHANGE_COLOR)
-                color[highlighted] = selectedColor;
+            else if (highlighted >= 0 && operation == Operation.SELECT_STATES)
+            {
+                if (!automaton.isSelected(highlighted))
+                {
+                    automaton.selectState(highlighted);
+                    colors[highlighted] = selectedColor;
+                }
+            }
             else if (highlighted >= 0)
             {         
                 grabShiftX = (vertices[highlighted].x - grabX);
                 grabShiftY = (vertices[highlighted].y - grabY);
                 grabbed = highlighted;
                 int i;
+                int N = getN();
                 for (i = N - 1; i >= 0 && (orders[i] != highlighted); i--);
                 
                 for (int j = i; j < N - 1; j++)
@@ -366,8 +380,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             if (addTransFirstState >= 0 && highlighted >= 0)
             {
                 automaton.addTransition(addTransFirstState, highlighted, selectedTransition);
-                updateAutomatonData();
-                firePropertyChange("updateAutomaton", false, true);
+                firePropertyChange("updateTransitions", false, true);
             }   
             addTransFirstState = -1;
         }
@@ -425,6 +438,8 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         // draw transitions
         g.setColor(Color.BLACK);
         int[][] matrix = automaton.getMatrix();
+        int N = getN();
+        int K = getK();
         
         for (int n = 0; n < N; n++)
         {
@@ -449,7 +464,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                     {
                         Transition trans = transitions.get(i);
                         int j = (trans.stateOut == n) ? i : transQuantity - i - 1;
-                        g.setColor(TRANSITIONS_COLORS[trans.k % TRANSITIONS_COLORS.length]);
+                        g.setColor(AutomatonHelper.TRANSITIONS_COLORS[trans.k % AutomatonHelper.TRANSITIONS_COLORS.length]);
                         drawEdge(g, vertices[trans.stateOut].x, vertices[trans.stateOut].y,
                             vertices[trans.stateIn].x,
                             vertices[trans.stateIn].y, j, transQuantity, trans.inverse, false, false);
@@ -461,7 +476,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         // draw new transition when you are in ADD_TRANS mode
         if (addTransFirstState >= 0 && operation == Operation.ADD_TRANS)
         {
-            g.setColor(TRANSITIONS_COLORS[selectedTransition]);
+            g.setColor(AutomatonHelper.TRANSITIONS_COLORS[selectedTransition]);
             drawEdge(g, vertices[addTransFirstState].x, vertices[addTransFirstState].y,
                 grabX,
                 grabY, 0, 1, false, true, true);
@@ -471,7 +486,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         for (int i = 0; i < N; i++)
         {
             int n = orders[i];
-            g.setColor(color[n]);
+            g.setColor(colors[n]);
             if (highlighted != -1 && highlighted == n)
                 g.setColor(g.getColor().brighter());
             

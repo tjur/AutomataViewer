@@ -1,12 +1,22 @@
 
+import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+
 public class Automaton
 {
 
     private int K, N; // max number of out edges for one state / number of states
     private int [][] matrix;
+    private ArrayList<Integer> selectedStates;
+    
+    private final PropertyChangeSupport PCS;
 
-    public Automaton(String code) throws IllegalArgumentException
+    public Automaton(String code) throws IllegalArgumentException 
     {
+        PCS = new PropertyChangeSupport(this);
+        
         // Parse code
         String[] tokens = code.trim().replace('\n', ' ').split("\\s+");
         if (tokens.length < 2)
@@ -31,6 +41,8 @@ public class Automaton
                 }
             }
         }
+        
+        selectedStates = new ArrayList<>();
     }
     
     @Override
@@ -56,6 +68,11 @@ public class Automaton
         return N;
     }
     
+    public PropertyChangeSupport getPCS()
+    {
+        return PCS;
+    }
+    
     public int[][] getMatrix()
     {
         return matrix;
@@ -66,6 +83,7 @@ public class Automaton
         this.K = automaton.K;
         this.N = automaton.N;
         this.matrix = automaton.matrix;
+        this.selectedStates = new ArrayList<>();
     }
     
     public void addState()
@@ -79,6 +97,9 @@ public class Automaton
         
         matrix = temp;
         N++;
+        selectState(N - 1);
+        
+        automatonChanged();
     }
     
     public void removeState(int state)
@@ -99,6 +120,14 @@ public class Automaton
         
         matrix = temp;
         N--;
+        
+        for (int i = 0; i < selectedStates.size(); i++)
+        {
+            if (selectedStates.get(i) > state)
+                selectedStates.set(i, selectedStates.get(i) - 1);
+        }
+            
+        unselectState(state);
     }
     
     public void replaceStates(int state1, int state2)
@@ -117,6 +146,16 @@ public class Automaton
         int[] temp = matrix[state1];
         matrix[state1] = matrix[state2];
         matrix[state2] = temp;
+        
+        int i1 = selectedStates.indexOf(state1);
+        int i2 = selectedStates.indexOf(state2);
+        
+        if (i1 == -1 && i2 != -1)
+            selectedStates.set(i2, state1);
+        else if (i1 != -1 && i2 == -1)
+            selectedStates.set(i1, state2);
+        
+        automatonChanged();
     }
     
     public void addTransition(int out, int in, int k)
@@ -135,5 +174,45 @@ public class Automaton
             matrix = temp;
             K++;
         }
+        
+        automatonChanged();
     }
+    
+    public void selectState(int state)
+    {
+        selectedStates.add(state);
+        automatonChanged();
+    }
+    
+    public void selectStates(ArrayList<Integer> selectedStates)
+    {
+        this.selectedStates = selectedStates;
+        automatonChanged();
+    }
+    
+    public void unselectState(int state)
+    {
+        selectedStates.remove(state);
+        automatonChanged();
+    }
+    
+    public boolean isSelected(int state)
+    {
+        return selectedStates.contains(state);
+    }
+    
+    public int[] getSelectedStates()
+    {
+        int[] subset = new int[N];
+        Arrays.fill(subset, 0);
+        for (int state : selectedStates)
+            subset[N - 1 - state] = 1;
+        
+        return subset;
+    }
+    
+    public void automatonChanged()
+    {
+        PCS.firePropertyChange("automatonChanged", false, true);
+    }  
 }

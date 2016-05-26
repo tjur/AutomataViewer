@@ -55,10 +55,10 @@ public class AutomataViewer
     
     private JToolBar toolBar;
     private final String[] iconFiles = { 
-        "icons/add_state.png", "icons/remove_state.png", "icons/replace_states.png",
-        "icons/add_transition.png", "icons/change_color.png", "icons/move_state.png" 
+        "icons/add_states.png", "icons/remove_states.png", "icons/replace_states.png",
+        "icons/add_transitions.png", "icons/select_states.png", "icons/move_states.png"
     };
-    private final String [] buttonLabels = { "Add state", "Remove state", "Replace states", "Add transition", "Change color", "Move state" };
+    private final String [] buttonLabels = { "Add states", "Remove states", "Replace states", "Add transitions", "Select states", "Move states" };
     private final JButton [] toolBarButtons = new JButton[buttonLabels.length];
     
     private JPanel selectedColorPanel;
@@ -71,24 +71,16 @@ public class AutomataViewer
         splitPane = new SplitPane();
         paintPanel = splitPane.getPaintPanel();
         
-        paintPanel.addPropertyChangeListener("updateAutomaton", new PropertyChangeListener() {
-            
-            @Override
-            public void propertyChange(PropertyChangeEvent ev)
-            {
-                splitPane.getTextPanel().getTextArea().setText(splitPane.getAutomatonString());       
-                updateTransitionsComboBox(); 
-            }
-        });
-        
-        splitPane.getTextPanel().addPropertyChangeListener("updateTransitions", new PropertyChangeListener() {
+        PropertyChangeListener pcl = new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
             {
                 updateTransitionsComboBox();
             }
-        });
+        };
+        splitPane.getTextPanel().addPropertyChangeListener("updateTransitions", pcl);
+        paintPanel.addPropertyChangeListener("updateTransitions", pcl);
         
         createMenuBar();
         createToolBar();
@@ -195,7 +187,7 @@ public class AutomataViewer
                             toolBarButtons[i].setBackground(selectedButtonColor);
                         }
 
-                        if (paintPanel.getOperation() == PaintPanel.Operation.CHANGE_COLOR.getValue())
+                        if (paintPanel.getOperation() == PaintPanel.Operation.SELECT_STATES.getValue())
                         {
                             selectedColorPanel.setVisible(true);
                             colorChoosersPanel.setVisible(true);
@@ -309,7 +301,7 @@ public class AutomataViewer
         if (transitions.getItemCount() == 0) // init
         {
             for (int i = 0; i < splitPane.getAutomatonK(); i++)
-                transitions.addItem(PaintPanel.TRANSITIONS_LETTERS[i % PaintPanel.TRANSITIONS_LETTERS.length]);
+                transitions.addItem(AutomatonHelper.TRANSITIONS_LETTERS[i % AutomatonHelper.TRANSITIONS_LETTERS.length]);
             transitions.addItem("Create new transition");
             transitions.setMaximumSize(new Dimension(100, 30));
             transitions.addActionListener(new ActionListener() {
@@ -331,7 +323,7 @@ public class AutomataViewer
             if(transitions.getItemCount() == K && transitions.getSelectedIndex() == K - 1)
             {
                 transitions.removeItemAt(K - 1);
-                transitions.addItem(PaintPanel.TRANSITIONS_LETTERS[(K - 1) % PaintPanel.TRANSITIONS_LETTERS.length]);
+                transitions.addItem(AutomatonHelper.TRANSITIONS_LETTERS[(K - 1) % AutomatonHelper.TRANSITIONS_LETTERS.length]);
                 transitions.addItem("Create new transition");
                 transitions.setSelectedIndex(K - 1);
             }
@@ -339,7 +331,7 @@ public class AutomataViewer
             {
                 transitions.removeAllItems();
                 for (int i = 0; i < K; i++)
-                    transitions.addItem(PaintPanel.TRANSITIONS_LETTERS[i % PaintPanel.TRANSITIONS_LETTERS.length]);
+                    transitions.addItem(AutomatonHelper.TRANSITIONS_LETTERS[i % AutomatonHelper.TRANSITIONS_LETTERS.length]);
                 transitions.addItem("Create new transition");
             }
         }
@@ -370,7 +362,7 @@ public class AutomataViewer
 
             text.setText(value.toString());
             if (index > -1)
-                text.setForeground(PaintPanel.TRANSITIONS_COLORS[index]);
+                text.setForeground(AutomatonHelper.TRANSITIONS_COLORS[index]);
             
             return text;
         }

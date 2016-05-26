@@ -4,7 +4,6 @@ public class ReversedAutomaton
     
     private int K, N;
     private boolean [][][] matrix; // matrix[state][transition] - array of states
-    //private final int MAX_STATES = 20;
 
     public ReversedAutomaton(Automaton automaton)
     {

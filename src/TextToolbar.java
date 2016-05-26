@@ -18,9 +18,9 @@ public class TextToolbar extends DockToolbar
     private JTextArea textArea;
     private JPopupMenu popupMenu;
     
-    public TextToolbar(String name)
+    public TextToolbar(String name, Automaton automaton)
     {
-        super(name);
+        super(name, automaton);
         
         JPanel panel = getPanel();
         textArea = new JTextArea();
@@ -93,12 +93,12 @@ public class TextToolbar extends DockToolbar
                 try 
                 {
                     if (getAutomaton().toString().equals(matrix))
-                        firePropertyChange("repaintGraph", false, true);
+                        firePropertyChange("repaintAutomaton", false, true);
                     else
                     {
                         getAutomaton().update(new Automaton(matrix));
                         firePropertyChange("updateToolbars", false, true);
-                        firePropertyChange("paintPanelSetAutomaton", false, true);
+                        firePropertyChange("updateAndRepaintAutomaton", false, true);
                         firePropertyChange("updateTransitions", false, true);
                     }
                 } 
@@ -113,9 +113,9 @@ public class TextToolbar extends DockToolbar
         panel.add(borderPanel, BorderLayout.EAST);
     }
     
-    public JTextArea getTextArea()
+    public void setText(String text)
     {
-        return textArea;
+        textArea.setText(text);
     }
 
     @Override

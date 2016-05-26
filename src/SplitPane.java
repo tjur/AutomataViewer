@@ -15,12 +15,12 @@ import javax.swing.JSplitPane;
 
 public class SplitPane extends JSplitPane
 {
-    private Automaton automaton;
+    private final Automaton automaton;
     private int K, N;
     
     private PaintPanel paintPanel;
     
-    private TextToolbar textToolbar;
+    private final TextToolbar textToolbar;
     
     private ArrayList<DockToolbar> dockToolbars = new ArrayList<>();
     
@@ -30,9 +30,8 @@ public class SplitPane extends JSplitPane
         
         setBackground(new Color(224, 224, 224));
         
-        paintPanel = new PaintPanel();
         automaton = new Automaton("1 0");
-        paintPanel.setAutomaton(automaton);
+        paintPanel = new PaintPanel(automaton);
         setTopComponent(paintPanel);
         
         JPanel rightPanel = new JPanel(new BorderLayout());
@@ -44,28 +43,24 @@ public class SplitPane extends JSplitPane
         setBottomComponent(rightPanel);
         setResizeWeight(1.0);
         
-        textToolbar = new TextToolbar("Text Toolbar");
+        textToolbar = new TextToolbar("Text toolbar", automaton);
         innerPanel.add(textToolbar);
-        TestToolbar test1 = new TestToolbar("Toolbar 2");
-        TestToolbar test2 = new TestToolbar("Toolbar 3");
-        innerPanel.add(test1);
-        innerPanel.add(test2);
+        
+        MinSyncWordToolbar minSyncWordToolbar = new MinSyncWordToolbar("Minimal sync word toolbar", automaton);
+        innerPanel.add(minSyncWordToolbar);
         
         dockToolbars.add(textToolbar);
-        dockToolbars.add(test1);
-        dockToolbars.add(test2);
+        dockToolbars.add(minSyncWordToolbar);
         
-        for (DockToolbar dockToolbar : dockToolbars)
-            dockToolbar.setAutomaton(automaton);
+        updateToolbars();
+        textToolbar.setText("2 4 1 0 3 0 0 1 1 2");
         
-        textToolbar.getTextArea().setText("2 4 1 0 3 0 0 1 1 2");
-        
-        textToolbar.addPropertyChangeListener("repaintGraph", new PropertyChangeListener() {
+        textToolbar.addPropertyChangeListener("repaintAutomaton", new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
             {
-                paintPanel.repaintGraph();
+                paintPanel.repaintAutomaton();
             }
         });
         
@@ -78,12 +73,13 @@ public class SplitPane extends JSplitPane
             }
         });
         
-        textToolbar.addPropertyChangeListener("paintPanelSetAutomaton", new PropertyChangeListener() {
+        textToolbar.addPropertyChangeListener("updateAndRepaintAutomaton", new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
             {
-                paintPanel.setAutomaton(automaton);
+                paintPanel.updateAutomatonData();
+                paintPanel.repaintAutomaton();
             }
         });
         
