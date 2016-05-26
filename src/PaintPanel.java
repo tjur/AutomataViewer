@@ -61,7 +61,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         Color.WHITE,
         new Color(96, 128, 255), new Color(255, 128, 96), new Color(96, 255, 96),
         new Color(255, 255, 96), new Color(96, 255, 255), new Color(255, 96, 255),
-        Color.ORANGE, Color.lightGray, new Color(219, 112, 147)
+        Color.ORANGE, new Color(160, 0, 210), new Color(219, 112, 147)
     };
 
     private Automaton automaton;
@@ -295,8 +295,8 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             else if (highlighted >= 0 && operation == Operation.REMOVE_STATE)
             {
                 automaton.removeState(highlighted);
+                
                 int N = getN();
-
                 this.orders = new int[N];
                 for (int n = 0; n < N; n++)
                     this.orders[n] = n;

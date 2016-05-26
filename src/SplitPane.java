@@ -145,6 +145,11 @@ public class SplitPane extends JSplitPane
             dockToolbar.updateToolbar();
     }
     
+    public Automaton getAutomaton()
+    {
+        return automaton;
+    }
+    
     public int getAutomatonK()
     {
         return automaton.getK();
@@ -153,6 +158,11 @@ public class SplitPane extends JSplitPane
     public String getAutomatonString()
     {
         return automaton.toString();
+    }
+    
+    public int getSelectedStatesNumber()
+    {
+        return automaton.getSelectedStatesNumber();
     }
     
     public PaintPanel getPaintPanel()

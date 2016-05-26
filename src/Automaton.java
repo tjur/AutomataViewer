@@ -1,4 +1,5 @@
 
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,11 +69,6 @@ public class Automaton
         return N;
     }
     
-    public PropertyChangeSupport getPCS()
-    {
-        return PCS;
-    }
-    
     public int[][] getMatrix()
     {
         return matrix;
@@ -126,7 +122,7 @@ public class Automaton
             if (selectedStates.get(i) > state)
                 selectedStates.set(i, selectedStates.get(i) - 1);
         }
-            
+
         unselectState(state);
     }
     
@@ -178,7 +174,7 @@ public class Automaton
         automatonChanged();
     }
     
-    public void selectState(int state)
+    public void selectState(Integer state)
     {
         selectedStates.add(state);
         automatonChanged();
@@ -190,15 +186,20 @@ public class Automaton
         automatonChanged();
     }
     
-    public void unselectState(int state)
+    public void unselectState(Integer state)
     {
         selectedStates.remove(state);
         automatonChanged();
     }
     
-    public boolean isSelected(int state)
+    public boolean isSelected(Integer state)
     {
         return selectedStates.contains(state);
+    }
+    
+    public int getSelectedStatesNumber()
+    {
+        return selectedStates.size();
     }
     
     public int[] getSelectedStates()
@@ -215,4 +216,9 @@ public class Automaton
     {
         PCS.firePropertyChange("automatonChanged", false, true);
     }  
+
+    public void addPropertyChangeListener(String propertyName, PropertyChangeListener propertyChangeListener)
+    {
+        PCS.addPropertyChangeListener(propertyName, propertyChangeListener);
+    }
 }

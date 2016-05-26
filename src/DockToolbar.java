@@ -102,7 +102,7 @@ public abstract class DockToolbar extends JToolBar
             }
         });
         
-        automaton.getPCS().addPropertyChangeListener("automatonChanged", new PropertyChangeListener() {
+        automaton.addPropertyChangeListener("automatonChanged", new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)

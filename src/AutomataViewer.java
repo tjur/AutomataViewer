@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
@@ -53,7 +54,7 @@ public class AutomataViewer
     private SplitPane splitPane;
     private PaintPanel paintPanel;
     
-    private JToolBar toolBar;
+    private JToolBar toolbar;
     private final String[] iconFiles = { 
         "icons/add_states.png", "icons/remove_states.png", "icons/replace_states.png",
         "icons/add_transitions.png", "icons/select_states.png", "icons/move_states.png"
@@ -87,7 +88,7 @@ public class AutomataViewer
 
         Container container = frame.getContentPane();
         container.setLayout(new BorderLayout());
-        container.add(toolBar, BorderLayout.NORTH);
+        container.add(toolbar, BorderLayout.NORTH);
         container.add(splitPane, BorderLayout.CENTER);
     }
 
@@ -163,9 +164,9 @@ public class AutomataViewer
     
     private void createToolBar()
     {
-        toolBar = new JToolBar("Tool Bar");
-        toolBar.setFloatable(false);
-        toolBar.setBackground(Color.GRAY);
+        toolbar = new JToolBar("Tool Bar");
+        toolbar.setFloatable(false);
+        toolbar.setBackground(new Color(195, 195, 195));
         
         Color noBackground = (new JButton()).getBackground();
         Color selectedButtonColor = Color.CYAN;
@@ -212,7 +213,7 @@ public class AutomataViewer
             }
         };
         
-        toolBar.addSeparator(new Dimension(0, 50));
+        toolbar.addSeparator(new Dimension(0, 50));
         for (int i = 0; i < buttonLabels.length; i++) 
         {
             ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(iconFiles[i]));
@@ -223,13 +224,31 @@ public class AutomataViewer
             toolBarButtons[i].setToolTipText(buttonLabels[i]);
             toolBarButtons[i].addActionListener(actionListener);
             if (i != 0)
-                toolBar.addSeparator();
-            toolBar.add(toolBarButtons[i]);
-        }
-        
+                toolbar.addSeparator();
+            toolbar.add(toolBarButtons[i]);
+        }     
         toolBarButtons[paintPanel.getOperation()].setBackground(selectedButtonColor);
         
-        toolBar.add(Box.createHorizontalGlue());
+        toolbar.addSeparator(new Dimension(50, 0));
+        Font font = new Font("Times New Roman", Font.PLAIN + Font.BOLD, 20);
+        JLabel label = new JLabel("Selected states:  ");
+        JLabel selectedStatesLabel = new JLabel(Integer.toString(splitPane.getSelectedStatesNumber()));
+        label.setFont(font);
+        selectedStatesLabel.setFont(font);
+        selectedStatesLabel.setForeground(paintPanel.getSelectedColor());
+        splitPane.getAutomaton().addPropertyChangeListener("automatonChanged", new PropertyChangeListener() {
+            
+            @Override
+            public void propertyChange(PropertyChangeEvent ev)
+            {
+                int selectedStatesNumber = splitPane.getSelectedStatesNumber();
+                selectedStatesLabel.setText(Integer.toString(selectedStatesNumber));
+            }
+        });
+        toolbar.add(label);
+        toolbar.add(selectedStatesLabel);
+        
+        toolbar.add(Box.createHorizontalGlue());
         
         int cols = 5;
         int rows = PaintPanel.STATES_COLORS.length / cols;
@@ -239,8 +258,8 @@ public class AutomataViewer
         selectedColorPanel = new JPanel(new BorderLayout());
         selectedColorPanel.setBorder(BorderFactory.createLineBorder(new Color(219, 219, 219), 10));
         selectedColorPanel.setVisible(false);
-        toolBar.add(selectedColorPanel);
-        Dimension dim = new Dimension(toolBar.getPreferredSize().height, toolBar.getPreferredSize().height);
+        toolbar.add(selectedColorPanel);
+        Dimension dim = new Dimension(toolbar.getPreferredSize().height, toolbar.getPreferredSize().height);
         selectedColorPanel.setPreferredSize(dim);
         selectedColorPanel.setMinimumSize(dim);
         selectedColorPanel.setMaximumSize(dim);
@@ -248,7 +267,7 @@ public class AutomataViewer
         innerPanel.setBackground(paintPanel.getSelectedColor());
         innerPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.BLACK));
         selectedColorPanel.add(innerPanel, BorderLayout.CENTER);
-        toolBar.addSeparator(new Dimension(toolBar.getPreferredSize().height / 2, toolBar.getPreferredSize().height));
+        toolbar.addSeparator(new Dimension(toolbar.getPreferredSize().height / 2, toolbar.getPreferredSize().height));
         
         colorChoosersPanel = new JPanel(new GridLayout(rows, cols));
         colorChoosersPanel.setVisible(false);
@@ -267,6 +286,7 @@ public class AutomataViewer
                         public void actionPerformed(ActionEvent ev)
                         {
                             innerPanel.setBackground(stateColor);
+                            selectedStatesLabel.setForeground(stateColor);
                             paintPanel.setSelectedColor(stateColor);
                         }
                     });
@@ -274,13 +294,13 @@ public class AutomataViewer
                 }
             }
         }
-        toolBar.add(colorChoosersPanel);
-        dim = new Dimension(toolBar.getPreferredSize().width / 3, toolBar.getPreferredSize().height);
+        toolbar.add(colorChoosersPanel);
+        dim = new Dimension(toolbar.getPreferredSize().width / 3, toolbar.getPreferredSize().height);
         colorChoosersPanel.setMaximumSize(dim);
         
         updateTransitionsComboBox();
-        toolBar.add(transitions);
-        toolBar.addSeparator();
+        toolbar.add(transitions);
+        toolbar.addSeparator();
     }
     
     private ImageIcon createIcon(Color color, int width, int height) 
