@@ -13,12 +13,12 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
 
 
-public class TextToolbar extends DockToolbar
+public class AutomatonCodeToolbar extends DockToolbar
 {
     private JTextArea textArea;
     private JPopupMenu popupMenu;
     
-    public TextToolbar(String name, Automaton automaton)
+    public AutomatonCodeToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
         
@@ -113,7 +113,7 @@ public class TextToolbar extends DockToolbar
         panel.add(borderPanel, BorderLayout.EAST);
     }
     
-    public void setText(String text)
+    public void setCode(String text)
     {
         textArea.setText(text);
     }

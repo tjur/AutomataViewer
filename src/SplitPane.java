@@ -20,7 +20,7 @@ public class SplitPane extends JSplitPane
     
     private PaintPanel paintPanel;
     
-    private final TextToolbar textToolbar;
+    private final AutomatonCodeToolbar codeToolbar;
     
     private ArrayList<DockToolbar> dockToolbars = new ArrayList<>();
     
@@ -30,7 +30,7 @@ public class SplitPane extends JSplitPane
         
         setBackground(new Color(224, 224, 224));
         
-        automaton = new Automaton("1 0");
+        automaton = new Automaton("0 0");
         paintPanel = new PaintPanel(automaton);
         setTopComponent(paintPanel);
         
@@ -43,19 +43,19 @@ public class SplitPane extends JSplitPane
         setBottomComponent(rightPanel);
         setResizeWeight(1.0);
         
-        textToolbar = new TextToolbar("Text toolbar", automaton);
-        innerPanel.add(textToolbar);
+        codeToolbar = new AutomatonCodeToolbar("Automaton code", automaton);
+        innerPanel.add(codeToolbar);
         
-        MinSyncWordToolbar minSyncWordToolbar = new MinSyncWordToolbar("Minimal sync word toolbar", automaton);
-        innerPanel.add(minSyncWordToolbar);
+        ShortestResetWordToolbar resetWordToolbar = new ShortestResetWordToolbar("Shortest reset word", automaton);
+        innerPanel.add(resetWordToolbar);
         
-        dockToolbars.add(textToolbar);
-        dockToolbars.add(minSyncWordToolbar);
+        dockToolbars.add(codeToolbar);
+        dockToolbars.add(resetWordToolbar);
         
         updateToolbars();
-        textToolbar.setText("2 4 1 0 3 0 0 1 1 2");
+        codeToolbar.setCode("2 4 1 0 3 0 0 1 1 2");
         
-        textToolbar.addPropertyChangeListener("repaintAutomaton", new PropertyChangeListener() {
+        codeToolbar.addPropertyChangeListener("repaintAutomaton", new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
@@ -64,7 +64,7 @@ public class SplitPane extends JSplitPane
             }
         });
         
-        textToolbar.addPropertyChangeListener("updateToolbars", new PropertyChangeListener() {
+        codeToolbar.addPropertyChangeListener("updateToolbars", new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
@@ -73,7 +73,7 @@ public class SplitPane extends JSplitPane
             }
         });
         
-        textToolbar.addPropertyChangeListener("updateAndRepaintAutomaton", new PropertyChangeListener() {
+        codeToolbar.addPropertyChangeListener("updateAndRepaintAutomaton", new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
@@ -170,9 +170,9 @@ public class SplitPane extends JSplitPane
         return paintPanel;
     }
     
-    public TextToolbar getTextPanel()
+    public AutomatonCodeToolbar getTextPanel()
     {
-        return textToolbar;
+        return codeToolbar;
     }
     
     public ArrayList<DockToolbar> getDockToolbars()

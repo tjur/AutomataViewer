@@ -15,12 +15,12 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 
-public class MinSyncWordToolbar extends DockToolbar
+public class ShortestResetWordToolbar extends DockToolbar
 {
     private final int MAX_STATES = 20; // max number of states in automaton
     private final JTextPane textPane;
     
-    public MinSyncWordToolbar(String name, Automaton automaton)
+    public ShortestResetWordToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
         JPanel panel = getPanel();
@@ -30,7 +30,7 @@ public class MinSyncWordToolbar extends DockToolbar
         panel.add(textPane, BorderLayout.CENTER);
     }
     
-    private ArrayList<Integer> findMinSyncWord(int[] subset) throws MinSyncWordNotFoundException
+    private ArrayList<Integer> findShortestResetWord(int[] subset) throws WordNotFoundException
     {
         boolean[] visited = new boolean[(int) Math.pow(2, getAutomaton().getN())];
         Pair[] fromWhere = new Pair[visited.length];
@@ -79,7 +79,7 @@ public class MinSyncWordToolbar extends DockToolbar
             }
         }
         
-        throw new MinSyncWordNotFoundException();
+        throw new WordNotFoundException();
     }
     
     private int subsetToValue(int[] subset)
@@ -118,7 +118,7 @@ public class MinSyncWordToolbar extends DockToolbar
         }
     }
     
-    private class MinSyncWordNotFoundException extends Exception {}
+    private class WordNotFoundException extends Exception {}
     
     private void insertLetterToTextPane(int trans)
     {
@@ -147,12 +147,12 @@ public class MinSyncWordToolbar extends DockToolbar
         
         int[] subset = getAutomaton().getSelectedStates();
         try {
-            ArrayList<Integer> transitions = findMinSyncWord(subset);
+            ArrayList<Integer> transitions = findShortestResetWord(subset);
             textPane.setText("");
             for (int trans : transitions)
                 insertLetterToTextPane(trans);
         }
-        catch(MinSyncWordNotFoundException ex) {
+        catch(WordNotFoundException ex) {
             textPane.setText("");
             try {
                 textPane.getDocument().insertString(0, "Word not found", null);
