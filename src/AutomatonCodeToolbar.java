@@ -16,7 +16,6 @@ import javax.swing.JTextArea;
 public class AutomatonCodeToolbar extends DockToolbar
 {
     private JTextArea textArea;
-    private JPopupMenu popupMenu;
     
     public AutomatonCodeToolbar(String name, Automaton automaton)
     {
@@ -24,9 +23,9 @@ public class AutomatonCodeToolbar extends DockToolbar
         
         JPanel panel = getPanel();
         textArea = new JTextArea();
-        popupMenu = new JPopupMenu();
         
         // create popup menu for text area
+        JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem menuItemCut, menuItemCopy, menuItemPaste;
         menuItemCut = new JMenuItem("Cut");
         menuItemCopy = new JMenuItem("Copy");

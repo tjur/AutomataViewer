@@ -2,12 +2,18 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
@@ -27,6 +33,38 @@ public class ShortestResetWordToolbar extends DockToolbar
         textPane = new JTextPane();
         textPane.setEditable(false);
         textPane.setFont(new Font("Arial", Font.ITALIC + Font.BOLD, 22));
+        
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem menuItemCopy;
+        menuItemCopy = new JMenuItem("Copy");
+        menuItemCopy.addActionListener(new ActionListener()
+        {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                textPane.copy();
+            }
+        });
+        popupMenu.add(menuItemCopy);
+        
+        textPane.addMouseListener(new MouseAdapter() {
+            
+            @Override 
+            public void mousePressed(MouseEvent ev) 
+            {
+                if (ev.isPopupTrigger()) 
+                    popupMenu.show(ev.getComponent(), ev.getX(), ev.getY());
+            }
+
+            @Override 
+            public void mouseReleased(MouseEvent ev) 
+            {
+                if (ev.isPopupTrigger()) 
+                    popupMenu.show(ev.getComponent(), ev.getX(), ev.getY());
+            }
+        });
+        
         panel.add(textPane, BorderLayout.CENTER);
     }
     
