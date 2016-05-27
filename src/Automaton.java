@@ -221,4 +221,10 @@ public class Automaton
     {
         PCS.addPropertyChangeListener(propertyName, propertyChangeListener);
     }
+    
+    public void reset()
+    {
+        update(new Automaton("0 0"));
+        PCS.firePropertyChange("automatonReset", false, true);
+    }
 }

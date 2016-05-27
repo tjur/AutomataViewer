@@ -12,6 +12,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 
@@ -93,6 +95,16 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         this.selectedColor = Color.WHITE;
         
         setAutomaton(automaton);
+        
+        automaton.addPropertyChangeListener("automatonReset", new PropertyChangeListener() {
+            
+            @Override
+            public void propertyChange(PropertyChangeEvent ev)
+            {
+                updateAutomatonData();
+                repaintAutomaton();
+            }
+        });
         
         addComponentListener(new ComponentAdapter()
         {
@@ -195,12 +207,15 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         this.highlighted = -1;
         this.addTransFirstState = -1;
         this.replaceStatesFirstState = -1;
+        ArrayList<Integer> selectedStates = new ArrayList<>();
         for (int n = 0; n < N; n++)
         {
             orders[n] = n;
             colors[n] = selectedColor;
-            automaton.selectState(n);
+            selectedStates.add(n);
         }
+        
+        automaton.selectStates(selectedStates);
     }
     
     public void repaintAutomaton()

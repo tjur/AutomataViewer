@@ -93,19 +93,14 @@ public class AutomataViewer
     }
 
     private void createMenuBar()
-    {
-        JMenuBar menuBar;
-        JMenu fileMenu;
-        JMenu toolbarsMenu;
-        JMenuItem saveMenuItem;
-        JFileChooser fileChooser;
+    {   
+        JMenuBar menuBar = new JMenuBar();
         
-        menuBar = new JMenuBar();
-        fileMenu = new JMenu("File");
+        JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
         
-        fileChooser = new JFileChooser();
-        saveMenuItem = new JMenuItem("Save Image... ");
+        JFileChooser fileChooser = new JFileChooser();
+        JMenuItem saveMenuItem = new JMenuItem("Save Image... ");
         fileMenu.add(saveMenuItem);
         saveMenuItem.addActionListener(new ActionListener() {
 
@@ -142,7 +137,20 @@ public class AutomataViewer
             }   
         });
         
-        toolbarsMenu = new JMenu("Toolbars");
+        JMenu automatonMenu = new JMenu("Automaton");
+        JMenuItem resetMenuItem = new JMenuItem("Reset");
+        automatonMenu.add(resetMenuItem);
+        resetMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                splitPane.getAutomaton().reset();
+            }
+        });
+        menuBar.add(automatonMenu);
+        
+        JMenu toolbarsMenu = new JMenu("Toolbars");
         for (DockToolbar dockToolbar : splitPane.getDockToolbars())
         {
             JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(dockToolbar.getName());
