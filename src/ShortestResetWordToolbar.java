@@ -10,8 +10,6 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Queue;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -24,7 +22,7 @@ import javax.swing.text.StyledDocument;
 
 public class ShortestResetWordToolbar extends DockToolbar
 {
-    private final int MAX_STATES = 20; // max number of states in automaton
+    private final int MAX_STATES = 25; // max number of states in automaton
     private final JTextPane textPane;
     
     public ShortestResetWordToolbar(String name, Automaton automaton)
@@ -73,24 +71,30 @@ public class ShortestResetWordToolbar extends DockToolbar
     private ArrayList<Integer> findShortestResetWord(int[] subset) throws WordNotFoundException
     {
         boolean[] visited = new boolean[(int) Math.pow(2, getAutomaton().getN())];
-        Pair[] fromWhere = new Pair[visited.length];
+        int[] fromWhereSubsetVal = new int[visited.length];
+        int[] fromWhereTransition = new int[visited.length];
         Arrays.fill(visited, false);
-        Arrays.fill(fromWhere, null);
+        Arrays.fill(fromWhereSubsetVal, -1);
+        Arrays.fill(fromWhereTransition, -1);
         
-        Queue<Integer> Q = new LinkedList<>();
-        Q.add(subsetToValue(subset));
-        while (!Q.isEmpty())
+        int[] queue = new int[visited.length];
+        int start = 0;
+        int end = 0;
+        queue[end] = subsetToValue(subset);
+        end++;
+        while (start < end)
         {
-            int subsetValue = Q.poll();    
+            int subsetValue = queue[start];
+            start++;
             visited[subsetValue] = true;
             
             if (Integer.bitCount(subsetValue) == 1) // singleton is a power of two
             {
                 ArrayList<Integer> transitions = new ArrayList<>();
-                while (fromWhere[subsetValue] != null)
+                while (fromWhereSubsetVal[subsetValue] != -1)
                 {
-                    transitions.add(fromWhere[subsetValue].transition);
-                    subsetValue = fromWhere[subsetValue].subsetValue;
+                    transitions.add(fromWhereTransition[subsetValue]);
+                    subsetValue = fromWhereSubsetVal[subsetValue];
                 }
                 
                 Collections.reverse(transitions);
@@ -112,8 +116,10 @@ public class ShortestResetWordToolbar extends DockToolbar
                     int newSubsetValue = subsetToValue(newSubset);
                     if (!visited[newSubsetValue])
                     {
-                        fromWhere[newSubsetValue] = new Pair(subsetValue, trans);
-                        Q.add(newSubsetValue);
+                        fromWhereSubsetVal[newSubsetValue] = subsetValue;
+                        fromWhereTransition[newSubsetValue] = trans;
+                        queue[end] = newSubsetValue;
+                        end++;
                     }
                 }
             }
@@ -144,18 +150,6 @@ public class ShortestResetWordToolbar extends DockToolbar
         }
         
         return subset;
-    }
-    
-    private class Pair
-    {
-        public int subsetValue;
-        public int transition;
-        
-        public Pair(int subsetValue, int transition)
-        {
-            this.subsetValue = subsetValue;
-            this.transition = transition;
-        }
     }
     
     private class WordNotFoundException extends Exception {}
