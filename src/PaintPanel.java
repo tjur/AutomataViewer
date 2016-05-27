@@ -402,13 +402,12 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         double dx = x2 - x1, dy = y2 - y1;
         double angle = Math.atan2(dy, dx);
         int len = (centered) ? (int) Math.sqrt(dx * dx + dy * dy) : (int) Math.sqrt(dx * dx + dy * dy) - VERTEX_RADIUS;
-        AffineTransform at = AffineTransform.getTranslateInstance(x1, y1);
+        AffineTransform at = new AffineTransform(oldTransform);
+        at.translate(x1, y1);
         at.concatenate(AffineTransform.getRotateInstance(angle));
         g.setTransform(at);
 
         int yshift = (int) ((k - transQuantity * 0.5) * K_SHIFT + K_SHIFT / 2);
-        if (inverse)
-            drawEdge(g, x2, y2, x1, y1, transQuantity - k - 1, transQuantity, false, marked, centered);
         if (marked)
         {
             float dash1[] = { 8.0f, 14.0f };
@@ -418,9 +417,16 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         g.drawLine(0, yshift, len, yshift);
         g.setStroke(new BasicStroke());
         g.fillPolygon(
-            new int[] { len, len - ARR_SIZE, len - ARR_SIZE, len },
-            new int[] { yshift, -ARR_SIZE / 2 + yshift, ARR_SIZE / 2 + yshift, yshift }, 
-            4);
+            new int[] { len, len - ARR_SIZE, len - ARR_SIZE },
+            new int[] { yshift, -ARR_SIZE / 2 + yshift, ARR_SIZE / 2 + yshift }, 
+            3);
+        if (inverse)
+        {
+            g.fillPolygon(
+            new int[] { VERTEX_RADIUS, VERTEX_RADIUS + ARR_SIZE, VERTEX_RADIUS + ARR_SIZE },
+            new int[] { yshift, -ARR_SIZE / 2 + yshift, ARR_SIZE / 2 + yshift }, 
+            3);
+        }
         g.setTransform(oldTransform);
     }
 
