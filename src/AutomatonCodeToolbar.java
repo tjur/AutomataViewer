@@ -1,5 +1,6 @@
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -10,19 +11,20 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 
 
 public class AutomatonCodeToolbar extends DockToolbar
 {
-    private JTextArea textArea;
+    private JTextPane textPane;
     
     public AutomatonCodeToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
         
         JPanel panel = getPanel();
-        textArea = new JTextArea();
+        textPane = new JTextPane();
+        textPane.setPreferredSize(new Dimension(0, 55));
         
         // create popup menu for text area
         JPopupMenu popupMenu = new JPopupMenu();
@@ -36,7 +38,7 @@ public class AutomatonCodeToolbar extends DockToolbar
             @Override
             public void actionPerformed(ActionEvent ev)
             {
-                textArea.cut();
+                textPane.cut();
             }
         });
         menuItemCopy.addActionListener(new ActionListener()
@@ -45,7 +47,7 @@ public class AutomatonCodeToolbar extends DockToolbar
             @Override
             public void actionPerformed(ActionEvent ev)
             {
-                textArea.copy();
+                textPane.copy();
             }
         });
         menuItemPaste.addActionListener(new ActionListener()
@@ -54,7 +56,7 @@ public class AutomatonCodeToolbar extends DockToolbar
             @Override
             public void actionPerformed(ActionEvent ev)
             {
-                textArea.paste();
+                textPane.paste();
             }
         });
 
@@ -62,7 +64,7 @@ public class AutomatonCodeToolbar extends DockToolbar
         popupMenu.add(menuItemCopy);
         popupMenu.add(menuItemPaste);
         
-        textArea.addMouseListener(new MouseAdapter() {
+        textPane.addMouseListener(new MouseAdapter() {
             
             @Override 
             public void mousePressed(MouseEvent ev) 
@@ -79,7 +81,7 @@ public class AutomatonCodeToolbar extends DockToolbar
             }
         });
         
-        panel.add(textArea, BorderLayout.CENTER);
+        panel.add(textPane, BorderLayout.CENTER);
         
         
         JButton buttonSetGraph = new JButton("OK");
@@ -88,7 +90,7 @@ public class AutomatonCodeToolbar extends DockToolbar
             @Override
             public void actionPerformed(ActionEvent ev)
             {
-                String matrix = textArea.getText().trim();
+                String matrix = textPane.getText().trim();
                 try 
                 {
                     if (getAutomaton().toString().equals(matrix))
@@ -114,12 +116,12 @@ public class AutomatonCodeToolbar extends DockToolbar
     
     public void setCode(String text)
     {
-        textArea.setText(text);
+        textPane.setText(text);
     }
 
     @Override
     protected void update() 
     {
-        textArea.setText(getAutomaton().toString());
+        textPane.setText(getAutomaton().toString());
     }
 }
