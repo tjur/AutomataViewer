@@ -1,6 +1,7 @@
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,6 +34,7 @@ public class ShortestResetWordToolbar extends DockToolbar
         textPane = new JTextPane();
         textPane.setEditable(false);
         textPane.setFont(new Font("Arial", Font.ITALIC + Font.BOLD, 22));
+        textPane.setPreferredSize(new Dimension(0, 75));
         
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem menuItemCopy;
@@ -158,17 +160,14 @@ public class ShortestResetWordToolbar extends DockToolbar
     
     private class WordNotFoundException extends Exception {}
     
-    private void insertLetterToTextPane(int trans)
+    private void insertStringToTextPane(String text, Color color)
     {
-        String letter = AutomatonHelper.TRANSITIONS_LETTERS[trans];
-        Color color = AutomatonHelper.TRANSITIONS_COLORS[trans];
-        
         StyledDocument doc = textPane.getStyledDocument();
         Style style = textPane.addStyle("Style", null);
         StyleConstants.setForeground(style, color);
 
         try { 
-            doc.insertString(doc.getLength(), letter, style);
+            doc.insertString(doc.getLength(), text, style);
             textPane.removeStyle("Style");
         }
         catch (BadLocationException e) {}
@@ -179,7 +178,8 @@ public class ShortestResetWordToolbar extends DockToolbar
     {
         if (getAutomaton().getN() > MAX_STATES)
         {
-            textPane.setText(String.format("Automaton must have no more than %d states", MAX_STATES));
+            textPane.setText("");
+            insertStringToTextPane(String.format("Automaton must have no more than %d states", MAX_STATES), Color.BLACK);
             return;
         }
         
@@ -188,14 +188,16 @@ public class ShortestResetWordToolbar extends DockToolbar
             ArrayList<Integer> transitions = findShortestResetWord(subset);
             textPane.setText("");
             for (int trans : transitions)
-                insertLetterToTextPane(trans);
+            {
+                String letter = AutomatonHelper.TRANSITIONS_LETTERS[trans];
+                Color color = AutomatonHelper.TRANSITIONS_COLORS[trans];
+                insertStringToTextPane(letter, color);
+            }
+            insertStringToTextPane(String.format("%nLength: %d", transitions.size()), Color.BLACK);
         }
         catch(WordNotFoundException ex) {
             textPane.setText("");
-            try {
-                textPane.getDocument().insertString(0, "Word not found", null);
-            } 
-            catch (BadLocationException ex2) {}
+            insertStringToTextPane("Word not found", Color.BLACK);
         }
     }
 }
