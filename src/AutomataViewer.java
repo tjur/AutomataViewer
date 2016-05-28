@@ -96,7 +96,7 @@ public class AutomataViewer
     }
 
     private void createMenuBar()
-    {   
+    {
         JMenuBar menuBar = new JMenuBar();
         
         JMenu automatonMenu = new JMenu("Automaton");

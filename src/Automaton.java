@@ -143,14 +143,6 @@ public class Automaton
         matrix[state1] = matrix[state2];
         matrix[state2] = temp;
         
-        int i1 = selectedStates.indexOf(state1);
-        int i2 = selectedStates.indexOf(state2);
-        
-        if (i1 == -1 && i2 != -1)
-            selectedStates.set(i2, state1);
-        else if (i1 != -1 && i2 == -1)
-            selectedStates.set(i1, state2);
-        
         automatonChanged();
     }
     

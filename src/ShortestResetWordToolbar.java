@@ -181,7 +181,7 @@ public class ShortestResetWordToolbar extends DockToolbar
             insertStringToTextPane(String.format("Automaton must have no more than %d states", MAX_STATES), Color.BLACK);
             return;
         }
-        
+
         int[] subset = getAutomaton().getSelectedStates();
         try {
             ArrayList<Integer> transitions = findShortestResetWord(subset);
