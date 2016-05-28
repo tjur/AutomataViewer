@@ -99,18 +99,17 @@ public class AutomataViewer
     {   
         JMenuBar menuBar = new JMenuBar();
         
-        JMenu fileMenu = new JMenu("File");
-        menuBar.add(fileMenu);
+        JMenu automatonMenu = new JMenu("Automaton");
+        menuBar.add(automatonMenu);
         
         JFileChooser fileChooser = new JFileChooser();
         JMenuItem saveMenuItem = new JMenuItem("Save Image... ");
-        fileMenu.add(saveMenuItem);
         saveMenuItem.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ev)
             {
-                int option = fileChooser.showSaveDialog(fileMenu);
+                int option = fileChooser.showSaveDialog(automatonMenu);
                 if (option == JFileChooser.APPROVE_OPTION)
                 {
                     File file = fileChooser.getSelectedFile();
@@ -140,9 +139,7 @@ public class AutomataViewer
             }   
         });
         
-        JMenu automatonMenu = new JMenu("Automaton");
         JMenuItem resetMenuItem = new JMenuItem("Reset");
-        automatonMenu.add(resetMenuItem);
         resetMenuItem.addActionListener(new ActionListener() {
 
             @Override
@@ -151,6 +148,10 @@ public class AutomataViewer
                 splitPane.getAutomaton().reset();
             }
         });
+        
+        automatonMenu.add(saveMenuItem);
+        automatonMenu.addSeparator();
+        automatonMenu.add(resetMenuItem);
         menuBar.add(automatonMenu);
         
         JMenu toolbarsMenu = new JMenu("Toolbars");
@@ -175,7 +176,7 @@ public class AutomataViewer
     
     private void createToolBar()
     {
-        toolbar = new JToolBar("Tool Bar");
+        toolbar = new JToolBar("Toolbar");
         toolbar.setFloatable(false);
         toolbar.setBackground(new Color(195, 195, 195));
         
