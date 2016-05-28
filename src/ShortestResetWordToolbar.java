@@ -31,8 +31,8 @@ public class ShortestResetWordToolbar extends DockToolbar
         JPanel panel = getPanel();
         textPane = new JTextPane();
         textPane.setEditable(false);
-        textPane.setFont(new Font("Arial", Font.ITALIC + Font.BOLD, 22));
-        textPane.setPreferredSize(new Dimension(0, 75));
+        textPane.setFont(new Font("Arial", Font.ITALIC + Font.BOLD, 14));
+        textPane.setPreferredSize(new Dimension(0, 55));
         
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem menuItemCopy;
@@ -80,13 +80,17 @@ public class ShortestResetWordToolbar extends DockToolbar
         int[] queue = new int[visited.length];
         int start = 0;
         int end = 0;
+        int subsetValue = subsetToValue(subset);
         queue[end] = subsetToValue(subset);
         end++;
+        visited[subsetValue] = true;
+        
         while (start < end)
         {
-            int subsetValue = queue[start];
+            subsetValue = queue[start];
             start++;
-            visited[subsetValue] = true;
+            if (!visited[subsetValue])
+                System.out.println(subsetValue);
             
             if (Integer.bitCount(subsetValue) == 1) // singleton is a power of two
             {
@@ -120,6 +124,7 @@ public class ShortestResetWordToolbar extends DockToolbar
                         fromWhereTransition[newSubsetValue] = trans;
                         queue[end] = newSubsetValue;
                         end++;
+                        visited[newSubsetValue] = true;
                     }
                 }
             }

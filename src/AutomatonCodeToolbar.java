@@ -94,12 +94,11 @@ public class AutomatonCodeToolbar extends DockToolbar
                 try 
                 {
                     if (getAutomaton().toString().equals(matrix))
-                        firePropertyChange("repaintAutomaton", false, true);
+                        firePropertyChange("repaintCenterAutomaton", false, true);
                     else
                     {
                         getAutomaton().update(new Automaton(matrix));
-                        firePropertyChange("updateToolbars", false, true);
-                        firePropertyChange("updateAndRepaintAutomaton", false, true);
+                        firePropertyChange("updateAndRepaintCenterAutomaton", false, true);
                         firePropertyChange("updateTransitions", false, true);
                     }
                 } 

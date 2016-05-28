@@ -59,12 +59,15 @@ public class AutomataViewer
         "icons/add_states.png", "icons/remove_states.png", "icons/replace_states.png",
         "icons/add_transitions.png", "icons/select_states.png", "icons/move_states.png"
     };
-    private final String [] buttonLabels = { "Add states", "Remove states", "Replace states", "Add transitions", "Select states", "Move states" };
+    private final String [] buttonLabels = { "Add states", "Remove states", "Replace states", "Add/Remove transitions", "Select states", "Move states" };
     private final JButton [] toolBarButtons = new JButton[buttonLabels.length];
     
     private JPanel selectedColorPanel;
     private JPanel colorChoosersPanel;
-    private JComboBox<String> transitions = new JComboBox<>();
+    
+    private JButton addTransButton;
+    private JButton removeTransButton;
+    private JComboBox<String> transitions;
 
     public AutomataViewer(JFrame frame) 
     {
@@ -208,9 +211,17 @@ public class AutomataViewer
                         }
 
                         if (paintPanel.getOperation() == PaintPanel.Operation.ADD_TRANS.getValue())
+                        {
+                            addTransButton.setVisible(true);
+                            removeTransButton.setVisible(true);
                             transitions.setVisible(true);
+                        }
                         else
+                        {
+                            addTransButton.setVisible(false);
+                            removeTransButton.setVisible(false);
                             transitions.setVisible(false);
+                        }
                         
                         if (paintPanel.getOperation() != PaintPanel.Operation.REPLACE_STATES.getValue())
                             paintPanel.resetReplaceStatesFirstState();
@@ -306,8 +317,60 @@ public class AutomataViewer
         dim = new Dimension(toolbar.getPreferredSize().width / 3, toolbar.getPreferredSize().height);
         colorChoosersPanel.setMaximumSize(dim);
         
+        addTransButton = new JButton("Add");
+        removeTransButton = new JButton("Remove");
+        addTransButton.setToolTipText("Create new transition");
+        removeTransButton.setToolTipText("Remove last transition");
+        addTransButton.setVisible(false);
+        removeTransButton.setVisible(false);
+        
+        addTransButton.addActionListener(new ActionListener()
+        {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                if (splitPane.getAutomatonK() < AutomatonHelper.TRANSITIONS_LETTERS.length)
+                {
+                    splitPane.getAutomaton().createNewTransition();
+                    updateTransitionsComboBox();
+                }
+            }
+        });
+        removeTransButton.addActionListener(new ActionListener()
+        {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                if (splitPane.getAutomatonK() > 0)
+                {
+                    splitPane.getAutomaton().removeTransition();
+                    updateTransitionsComboBox();
+                }
+            }
+        });     
+        toolbar.add(addTransButton);
+        toolbar.addSeparator();
+        toolbar.add(removeTransButton);
+        toolbar.addSeparator();
+        
+        transitions = new JComboBox<>();
+        transitions.setMaximumSize(new Dimension(100, 30));
+        transitions.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                paintPanel.setSelectedTransition(transitions.getSelectedIndex());
+            }
+        });
+        transitions.setPrototypeDisplayValue("                  ");
+        transitions.setVisible(false);
+        ComboBoxRenderer renderer = new ComboBoxRenderer(transitions);
+        transitions.setRenderer(renderer);
         updateTransitionsComboBox();
-        toolbar.add(transitions);
+        toolbar.add(transitions);      
         toolbar.addSeparator();
     }
     
@@ -326,42 +389,19 @@ public class AutomataViewer
     
     private void updateTransitionsComboBox()
     {
-        if (transitions.getItemCount() == 0) // init
+        int K = splitPane.getAutomatonK();
+        if (transitions.getItemCount() == K - 1)
         {
-            for (int i = 0; i < splitPane.getAutomatonK(); i++)
-                transitions.addItem(AutomatonHelper.TRANSITIONS_LETTERS[i % AutomatonHelper.TRANSITIONS_LETTERS.length]);
-            transitions.addItem("Create new transition");
-            transitions.setMaximumSize(new Dimension(100, 30));
-            transitions.addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                    paintPanel.setSelectedTransition(transitions.getSelectedIndex());
-                }
-            });
-            transitions.setPrototypeDisplayValue("Create new transition   ");
-            transitions.setVisible(false);
-            ComboBoxRenderer renderer = new ComboBoxRenderer(transitions);
-            transitions.setRenderer(renderer);
+            transitions.addItem(AutomatonHelper.TRANSITIONS_LETTERS[K - 1]);
+            transitions.setSelectedIndex(K - 1);
         }
-        else
+        else if (transitions.getItemCount() == K + 1)
+            transitions.removeItemAt(K);
+        else if (transitions.getItemCount() != K)
         {
-            int K = splitPane.getAutomatonK();
-            if(transitions.getItemCount() == K && transitions.getSelectedIndex() == K - 1)
-            {
-                transitions.removeItemAt(K - 1);
-                transitions.addItem(AutomatonHelper.TRANSITIONS_LETTERS[(K - 1) % AutomatonHelper.TRANSITIONS_LETTERS.length]);
-                transitions.addItem("Create new transition");
-                transitions.setSelectedIndex(K - 1);
-            }
-            else if (transitions.getItemCount() != K + 1)
-            {
-                transitions.removeAllItems();
-                for (int i = 0; i < K; i++)
-                    transitions.addItem(AutomatonHelper.TRANSITIONS_LETTERS[i % AutomatonHelper.TRANSITIONS_LETTERS.length]);
-                transitions.addItem("Create new transition");
-            }
+            transitions.removeAllItems();
+            for (int i = 0; i < K; i++)
+                transitions.addItem(AutomatonHelper.TRANSITIONS_LETTERS[i]);
         }
     }
     
@@ -381,6 +421,9 @@ public class AutomataViewer
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) 
         {
+            if (value == null)
+                return text;
+            
             if (isSelected)
                 setBackground(list.getSelectionBackground());
             else

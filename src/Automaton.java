@@ -158,20 +158,38 @@ public class Automaton
     {
         if (k < K) // edit transition
             matrix[out][k] = in;
-        else if (k == K)// add new transition
+        else if (k == K)// create new transition
         {
-            int[][] temp = new int[N][K+1];
-            for (int n = 0; n < N; n++)
-            {
-                System.arraycopy(matrix[n], 0, temp[n], 0, K);
-                temp[n][k] = n;
-            }
-            temp[out][k] = in;
-            matrix = temp;
-            K++;
+            createNewTransition();
+            matrix[out][k] = in;
         }
-        
         automatonChanged();
+    }
+    
+    public void createNewTransition()
+    {
+        int[][] temp = new int[N][K+1];
+        for (int n = 0; n < N; n++)
+        {
+            System.arraycopy(matrix[n], 0, temp[n], 0, K);
+            temp[n][K] = n;
+        }
+        matrix = temp;
+        K++;
+        automatonChanged();
+    }
+    
+    public void removeTransition()
+    {
+        if (K > 0)
+        {
+            int[][] temp = new int[N][K-1];
+            for (int n = 0; n < N; n++)
+                System.arraycopy(matrix[n], 0, temp[n], 0, K - 1);
+            matrix = temp;
+            K--;
+            automatonChanged();
+        }
     }
     
     public void selectState(Integer state)

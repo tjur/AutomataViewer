@@ -102,7 +102,17 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             public void propertyChange(PropertyChangeEvent ev)
             {
                 updateAutomatonData();
-                repaintAutomaton();
+                repaintCenterAutomaton();
+                firePropertyChange("updateTransitions", false, true);
+            }
+        });
+        
+        automaton.addPropertyChangeListener("automatonChanged", new PropertyChangeListener() {
+            
+            @Override
+            public void propertyChange(PropertyChangeEvent ev)
+            {
+                repaint();
             }
         });
         
@@ -195,7 +205,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             automaton.selectState(n);
         }
         
-        repaintAutomaton();
+        repaintCenterAutomaton();
     }
     
     public void updateAutomatonData()
@@ -218,7 +228,8 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         automaton.selectStates(selectedStates);
     }
     
-    public void repaintAutomaton()
+    // repaint automaton with states moved to center
+    public void repaintCenterAutomaton()
     {   
         int width = this.getWidth();
         int height = this.getHeight();
@@ -372,7 +383,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     {
         if (operation == Operation.ADD_TRANS)
         {
-            if (addTransFirstState >= 0 && highlighted >= 0)
+            if (addTransFirstState >= 0 && highlighted >= 0 && getK() > 0)
             {
                 automaton.addTransition(addTransFirstState, highlighted, selectedTransition);
                 firePropertyChange("updateTransitions", false, true);
@@ -489,7 +500,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         }
         
         // draw new transition when you are in ADD_TRANS mode
-        if (addTransFirstState >= 0 && operation == Operation.ADD_TRANS)
+        if (addTransFirstState >= 0 && operation == Operation.ADD_TRANS && K > 0)
         {
             g.setColor(AutomatonHelper.TRANSITIONS_COLORS[selectedTransition]);
             drawEdge(g, vertices[addTransFirstState].x, vertices[addTransFirstState].y,

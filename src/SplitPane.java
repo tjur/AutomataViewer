@@ -55,31 +55,22 @@ public class SplitPane extends JSplitPane
         updateToolbars();
         codeToolbar.setCode("2 4 1 0 3 0 0 1 1 2");
         
-        codeToolbar.addPropertyChangeListener("repaintAutomaton", new PropertyChangeListener() {
+        codeToolbar.addPropertyChangeListener("repaintCenterAutomaton", new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
             {
-                paintPanel.repaintAutomaton();
+                paintPanel.repaintCenterAutomaton();
             }
         });
         
-        codeToolbar.addPropertyChangeListener("updateToolbars", new PropertyChangeListener() {
-            
-            @Override
-            public void propertyChange(PropertyChangeEvent ev)
-            {
-                updateToolbars();
-            }
-        });
-        
-        codeToolbar.addPropertyChangeListener("updateAndRepaintAutomaton", new PropertyChangeListener() {
+        codeToolbar.addPropertyChangeListener("updateAndRepaintCenterAutomaton", new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
             {
                 paintPanel.updateAutomatonData();
-                paintPanel.repaintAutomaton();
+                paintPanel.repaintCenterAutomaton();
             }
         });
         
