@@ -55,10 +55,14 @@ public class SplitPane extends JSplitPane
         ShortestChangingWordToolbar changeWordToolbar = new ShortestChangingWordToolbar("Shortest decreasing/increasing word", automaton);
         innerPanel.add(changeWordToolbar);
         
+        BasicPropertiesToolbar basicPropertiesToolbar = new BasicPropertiesToolbar("Basic properties", automaton);
+        innerPanel.add(basicPropertiesToolbar);
+        
         dockToolbars.add(codeToolbar);
         dockToolbars.add(resetWordToolbar);
         //dockToolbars.add(applyWordToolbar);
         dockToolbars.add(changeWordToolbar);
+        dockToolbars.add(basicPropertiesToolbar);
         
         updateToolbars();
         codeToolbar.setCode("2 4 1 0 3 0 0 1 1 2");
