@@ -93,7 +93,6 @@ public class Automaton
         
         matrix = temp;
         N++;
-        selectState(N - 1);
         
         automatonChanged();
     }
@@ -117,13 +116,15 @@ public class Automaton
         matrix = temp;
         N--;
         
+        selectedStates.remove((Integer) state);
+        
         for (int i = 0; i < selectedStates.size(); i++)
         {
             if (selectedStates.get(i) > state)
                 selectedStates.set(i, selectedStates.get(i) - 1);
         }
 
-        unselectState(state);
+        automatonChanged();
     }
     
     public void replaceStates(int state1, int state2)
@@ -211,6 +212,12 @@ public class Automaton
     public void unselectState(Integer state)
     {
         selectedStates.remove(state);
+        automatonChanged();
+    }
+    
+    public void clearSelectedStates()
+    {
+        selectedStates.clear();
         automatonChanged();
     }
     

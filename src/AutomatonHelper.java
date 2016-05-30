@@ -4,6 +4,10 @@ import java.awt.Color;
 
 public final class AutomatonHelper
 {
+    public static final Color defaultUnselectedStateColor = Color.WHITE;
+    
+    public static final Color defaultSelectedStateColor = Color.ORANGE;
+    
     public static final char[] TRANSITIONS_LETTERS =
     {
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'

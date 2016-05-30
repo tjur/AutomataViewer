@@ -185,6 +185,7 @@ public class ApplyWordToolbar extends DockToolbar
     protected void update() 
     {
         reversedAutomaton = new ReversedAutomaton(getAutomaton());
+        hashMap.clear();
         for (int i = 0; i < getAutomaton().getK(); i++)
             hashMap.put(AutomatonHelper.TRANSITIONS_LETTERS[i], i);
     }

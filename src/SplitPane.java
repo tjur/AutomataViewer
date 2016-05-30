@@ -46,11 +46,11 @@ public class SplitPane extends JSplitPane
         codeToolbar = new AutomatonCodeToolbar("Automaton code", automaton);
         innerPanel.add(codeToolbar);
         
+        ApplyWordToolbar applyWordToolbar = new ApplyWordToolbar("Apply word", automaton);
+        innerPanel.add(applyWordToolbar);
+        
         ShortestResetWordToolbar resetWordToolbar = new ShortestResetWordToolbar("Shortest reset word", automaton);
         innerPanel.add(resetWordToolbar);
-        
-        /*ApplyWordToolbar applyWordToolbar = new ApplyWordToolbar("Apply word", automaton);
-        innerPanel.add(applyWordToolbar);*/
         
         ShortestChangingWordToolbar changeWordToolbar = new ShortestChangingWordToolbar("Shortest decreasing/increasing word", automaton);
         innerPanel.add(changeWordToolbar);
@@ -59,8 +59,8 @@ public class SplitPane extends JSplitPane
         innerPanel.add(basicPropertiesToolbar);
         
         dockToolbars.add(codeToolbar);
+        dockToolbars.add(applyWordToolbar);
         dockToolbars.add(resetWordToolbar);
-        //dockToolbars.add(applyWordToolbar);
         dockToolbars.add(changeWordToolbar);
         dockToolbars.add(basicPropertiesToolbar);
         
