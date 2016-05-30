@@ -5,14 +5,20 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
@@ -20,14 +26,20 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 
-public class ShortestResetWordToolbar extends DockToolbar
+public class ShortestChangingWordToolbar extends DockToolbar
 {
     private final int MAX_STATES = 25; // max number of states in automaton
     private final JTextPane textPane;
     
-    public ShortestResetWordToolbar(String name, Automaton automaton)
+    private JRadioButton decreasingButton;
+    private JRadioButton increasingButton;
+    
+    private ReversedAutomaton reversedAutomaton;
+    
+    public ShortestChangingWordToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
+        reversedAutomaton = new ReversedAutomaton(automaton);
         
         JPanel panel = getPanel();
         textPane = new JTextPane();
@@ -67,9 +79,42 @@ public class ShortestResetWordToolbar extends DockToolbar
         });
         
         panel.add(textPane, BorderLayout.CENTER);
+        
+        ButtonGroup buttonGroup = new ButtonGroup();
+        decreasingButton = new JRadioButton("Decreasing");
+        increasingButton = new JRadioButton("Increasing");
+        decreasingButton.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent ev)
+            {
+                if (ev.getStateChange() == ItemEvent.SELECTED)
+                    recalculate();
+            }
+        });
+        increasingButton.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent ev)
+            {
+                if (ev.getStateChange() == ItemEvent.SELECTED)
+                    recalculate();
+            }
+        });
+        decreasingButton.setSelected(true);
+        buttonGroup.add(decreasingButton);
+        buttonGroup.add(increasingButton);
+        
+        JPanel borderPanel = new JPanel();
+        borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.Y_AXIS));
+        borderPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        borderPanel.add(decreasingButton);
+        borderPanel.add(new Separator());
+        borderPanel.add(increasingButton);
+        panel.add(borderPanel, BorderLayout.EAST);
     }
     
-    private ArrayList<Integer> findShortestResetWord(int[] subset) throws WordNotFoundException
+    private ArrayList<Integer> findShortestDecreasingWord(int[] subset) throws WordNotFoundException
     {
         boolean[] visited = new boolean[(int) Math.pow(2, getAutomaton().getN())];
         int[] fromWhereSubsetVal = new int[visited.length];
@@ -82,6 +127,7 @@ public class ShortestResetWordToolbar extends DockToolbar
         int start = 0;
         int end = 0;
         int subsetValue = subsetToValue(subset);
+        int bitCount = Integer.bitCount(subsetValue);
         queue[end] = subsetToValue(subset);
         end++;
         visited[subsetValue] = true;
@@ -91,7 +137,7 @@ public class ShortestResetWordToolbar extends DockToolbar
             subsetValue = queue[start];
             start++;
             
-            if (Integer.bitCount(subsetValue) == 1) // singleton is a power of two
+            if (Integer.bitCount(subsetValue) < bitCount)
             {
                 ArrayList<Integer> transitions = new ArrayList<>();
                 while (fromWhereSubsetVal[subsetValue] != -1)
@@ -113,6 +159,79 @@ public class ShortestResetWordToolbar extends DockToolbar
                     {
                         if (subset[i] == 1)
                             newSubset[getAutomaton().getMatrix()[i][trans]] = 1;
+                    }
+                    
+                    int newSubsetValue = subsetToValue(newSubset);
+                    if (!visited[newSubsetValue])
+                    {
+                        fromWhereSubsetVal[newSubsetValue] = subsetValue;
+                        fromWhereTransition[newSubsetValue] = trans;
+                        queue[end] = newSubsetValue;
+                        end++;
+                        visited[newSubsetValue] = true;
+                    }
+                }
+            }
+        }
+        
+        throw new WordNotFoundException();
+    }
+    
+    private ArrayList<Integer> findShortestIncreasingWord(int[] subset) throws WordNotFoundException
+    {
+        int N = getAutomaton().getN();
+        int K = getAutomaton().getK();
+        
+        boolean[] visited = new boolean[(int) Math.pow(2, getAutomaton().getN())];
+        int[] fromWhereSubsetVal = new int[visited.length];
+        int[] fromWhereTransition = new int[visited.length];
+        Arrays.fill(visited, false);
+        Arrays.fill(fromWhereSubsetVal, -1);
+        Arrays.fill(fromWhereTransition, -1);
+        
+        int[] queue = new int[visited.length];
+        int start = 0;
+        int end = 0;
+        int subsetValue = subsetToValue(subset);
+        int bitCount = Integer.bitCount(subsetValue);
+        queue[end] = subsetToValue(subset);
+        end++;
+        visited[subsetValue] = true;
+        
+        while (start < end)
+        {
+            subsetValue = queue[start];
+            start++;
+            
+            if (Integer.bitCount(subsetValue) > bitCount)
+            {
+                ArrayList<Integer> transitions = new ArrayList<>();
+                while (fromWhereSubsetVal[subsetValue] != -1)
+                {
+                    transitions.add(fromWhereTransition[subsetValue]);
+                    subsetValue = fromWhereSubsetVal[subsetValue];
+                }
+                
+                Collections.reverse(transitions);
+                return transitions;
+            }
+            else
+            {
+                subset = valueToSubset(subsetValue);
+                for (int trans = 0; trans < K; trans++)
+                {
+                    int[] newSubset = new int[N];
+                    for (int i = 0; i < subset.length; i++)
+                    {
+                        if (subset[i] == 1)
+                        {
+                            int[] subset2 = reversedAutomaton.getMatrix()[i][trans];
+                            for (int j = 0; j < N; j++)
+                            {
+                                if (subset2[j] == 1)
+                                    newSubset[j] = 1;
+                            }
+                        }
                     }
                     
                     int newSubsetValue = subsetToValue(newSubset);
@@ -168,20 +287,16 @@ public class ShortestResetWordToolbar extends DockToolbar
         }
         catch (BadLocationException e) {}
     }
-
-    @Override
-    protected void update()
+    
+    private void recalculate()
     {
-        if (getAutomaton().getN() > MAX_STATES)
-        {
-            textPane.setText("");
-            insertStringToTextPane(String.format("Automaton must have no more than %d states", MAX_STATES), Color.BLACK);
-            return;
-        }
-
         int[] subset = getAutomaton().getSelectedStates();
         try {
-            ArrayList<Integer> transitions = findShortestResetWord(subset);
+            ArrayList<Integer> transitions;
+            if (decreasingButton.isSelected())
+                transitions = findShortestDecreasingWord(subset);
+            else
+                transitions = findShortestIncreasingWord(subset);
             textPane.setText("");
             for (int trans : transitions)
             {
@@ -195,5 +310,19 @@ public class ShortestResetWordToolbar extends DockToolbar
             textPane.setText("");
             insertStringToTextPane("Word not found", Color.BLACK);
         }
+    }
+
+    @Override
+    protected void update()
+    {   
+        if (getAutomaton().getN() > MAX_STATES)
+        {
+            textPane.setText("");
+            insertStringToTextPane(String.format("Automaton must have no more than %d states", MAX_STATES), Color.BLACK);
+            return;
+        }
+
+        reversedAutomaton = new ReversedAutomaton(getAutomaton());
+        recalculate();
     }
 }

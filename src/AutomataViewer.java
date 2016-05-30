@@ -393,7 +393,7 @@ public class AutomataViewer
         int K = splitPane.getAutomatonK();
         if (transitions.getItemCount() == K - 1)
         {
-            transitions.addItem(AutomatonHelper.TRANSITIONS_LETTERS[K - 1]);
+            transitions.addItem(Character.toString(AutomatonHelper.TRANSITIONS_LETTERS[K - 1]));
             transitions.setSelectedIndex(K - 1);
         }
         else if (transitions.getItemCount() == K + 1)
@@ -402,7 +402,7 @@ public class AutomataViewer
         {
             transitions.removeAllItems();
             for (int i = 0; i < K; i++)
-                transitions.addItem(AutomatonHelper.TRANSITIONS_LETTERS[i]);
+                transitions.addItem(Character.toString(AutomatonHelper.TRANSITIONS_LETTERS[i]));
         }
     }
     

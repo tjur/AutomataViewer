@@ -26,7 +26,7 @@ public class AutomatonCodeToolbar extends DockToolbar
         textPane = new JTextPane();
         textPane.setPreferredSize(new Dimension(0, 55));
         
-        // create popup menu for text area
+        // create popup menu for text pane
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem menuItemCut, menuItemCopy, menuItemPaste;
         menuItemCut = new JMenuItem("Cut");

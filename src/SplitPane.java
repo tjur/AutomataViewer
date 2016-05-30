@@ -49,8 +49,16 @@ public class SplitPane extends JSplitPane
         ShortestResetWordToolbar resetWordToolbar = new ShortestResetWordToolbar("Shortest reset word", automaton);
         innerPanel.add(resetWordToolbar);
         
+        /*ApplyWordToolbar applyWordToolbar = new ApplyWordToolbar("Apply word", automaton);
+        innerPanel.add(applyWordToolbar);*/
+        
+        ShortestChangingWordToolbar changeWordToolbar = new ShortestChangingWordToolbar("Shortest decreasing/increasing word", automaton);
+        innerPanel.add(changeWordToolbar);
+        
         dockToolbars.add(codeToolbar);
         dockToolbars.add(resetWordToolbar);
+        //dockToolbars.add(applyWordToolbar);
+        dockToolbars.add(changeWordToolbar);
         
         updateToolbars();
         codeToolbar.setCode("2 4 1 0 3 0 0 1 1 2");

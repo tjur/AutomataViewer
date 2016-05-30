@@ -515,7 +515,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             g.setColor(colors[n]);
             if (highlighted != -1 && highlighted == n)
                 g.setColor(g.getColor().brighter());
-
+            
             g.fillOval(vertices[n].x - VERTEX_RADIUS, vertices[n].y - VERTEX_RADIUS, VERTEX_RADIUS * 2, VERTEX_RADIUS * 2);
             g.setColor(Color.BLACK);
             if (highlighted != -1 && highlighted == n)

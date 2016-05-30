@@ -4,9 +4,9 @@ import java.awt.Color;
 
 public final class AutomatonHelper
 {
-    public static final String[] TRANSITIONS_LETTERS =
+    public static final char[] TRANSITIONS_LETTERS =
     {
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j"
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'
     };
     
     public static final Color[] TRANSITIONS_COLORS =

@@ -190,6 +190,18 @@ public class Automaton
         automatonChanged();
     }
     
+    public void selectStates(int[] selectedStates)
+    {
+        ArrayList<Integer> states = new ArrayList<>();
+        for (int i = 0; i < selectedStates.length; i++)
+        {
+            if (selectedStates[i] == 1)
+                states.add(i);
+        }
+        this.selectedStates = states;
+        automatonChanged();
+    }
+    
     public void selectStates(ArrayList<Integer> selectedStates)
     {
         this.selectedStates = selectedStates;
@@ -215,9 +227,8 @@ public class Automaton
     public int[] getSelectedStates()
     {
         int[] subset = new int[N];
-        Arrays.fill(subset, 0);
         for (int state : selectedStates)
-            subset[N - 1 - state] = 1;
+            subset[state] = 1;
         
         return subset;
     }
