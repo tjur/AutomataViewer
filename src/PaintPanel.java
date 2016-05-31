@@ -168,6 +168,16 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     {
         if (!color.equals(selectedStateColor))
         {
+            int[] selectedStates = automaton.getSelectedStates();
+            for (int i = 0; i < selectedStates.length; i++)
+            {
+                if (selectedStates[i] == 1)
+                {
+                    automaton.unselectState(i);
+                    colors[i] = selectedStateColor;
+                }
+            }
+            
             selectedStateColor = color;
             repaint();
         }

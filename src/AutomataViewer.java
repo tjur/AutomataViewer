@@ -65,10 +65,6 @@ public class AutomataViewer
     private final String [] buttonLabels = { "Add states", "Remove states", "Replace states", "Add/Remove transitions", "Select states", "Move states" };
     private final JButton [] toolBarButtons = new JButton[buttonLabels.length];
     
-    private JPanel unselectedColorPanel;
-    private JPanel selectedColorPanel;
-    private JPanel colorChoosersPanel;
-    
     private JButton addTransButton;
     private JButton removeTransButton;
     private JComboBox<String> transitions;
@@ -204,19 +200,6 @@ public class AutomataViewer
                             toolBarButtons[i].setBackground(selectedButtonColor);
                         }
 
-                        if (paintPanel.getOperation() == PaintPanel.Operation.SELECT_STATES.getValue())
-                        {
-                            unselectedColorPanel.setVisible(true);
-                            selectedColorPanel.setVisible(true);
-                            colorChoosersPanel.setVisible(true);
-                        }
-                        else
-                        {
-                            unselectedColorPanel.setVisible(false);
-                            selectedColorPanel.setVisible(false);
-                            colorChoosersPanel.setVisible(false);
-                        }
-
                         if (paintPanel.getOperation() == PaintPanel.Operation.ADD_TRANS.getValue())
                         {
                             addTransButton.setVisible(true);
@@ -239,7 +222,6 @@ public class AutomataViewer
             }
         };
         
-        toolbar.addSeparator(new Dimension(0, 50));
         for (int i = 0; i < buttonLabels.length; i++) 
         {
             ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(iconFiles[i]));
@@ -274,77 +256,6 @@ public class AutomataViewer
         toolbar.add(selectedStatesLabel);
         
         toolbar.add(Box.createHorizontalGlue());
-        
-        int cols = 5;
-        int rows = PaintPanel.STATES_COLORS.length / cols;
-        if (PaintPanel.STATES_COLORS.length % cols != 0)
-            rows++;
-          
-        selectedColorPanel = new JPanel(new BorderLayout());
-        selectedColorPanel.setVisible(false);
-        unselectedColorPanel = new JPanel(new BorderLayout());
-        unselectedColorPanel.setVisible(false);
-        Dimension dim = new Dimension(toolbar.getPreferredSize().height, toolbar.getPreferredSize().height);
-        selectedColorPanel.setPreferredSize(dim);
-        selectedColorPanel.setMinimumSize(dim);
-        selectedColorPanel.setMaximumSize(dim);
-        unselectedColorPanel.setPreferredSize(dim);
-        unselectedColorPanel.setMinimumSize(dim);
-        unselectedColorPanel.setMaximumSize(dim);
-        JPanel selectedInnerPanel = new JPanel();
-        selectedInnerPanel.setBackground(paintPanel.getSelectedStateColor());
-        selectedInnerPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.BLACK));
-        selectedColorPanel.add(selectedInnerPanel, BorderLayout.CENTER);
-        JPanel unselectedInnerPanel = new JPanel();
-        unselectedInnerPanel.setBackground(paintPanel.getUnselectedStateColor());
-        unselectedInnerPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.BLACK));
-        unselectedColorPanel.add(unselectedInnerPanel, BorderLayout.CENTER);
-        selectedColorPanel.setToolTipText("Color 1 (for selected states)");
-        unselectedColorPanel.setToolTipText("Color 2");
-        selectedColorPanel.setBorder(BorderFactory.createLineBorder(new Color(219, 219, 219), 10));
-        unselectedColorPanel.setBorder(BorderFactory.createLineBorder(new Color(219, 219, 219), 10));
-         
-        toolbar.add(selectedColorPanel);
-        toolbar.addSeparator();
-        toolbar.add(unselectedColorPanel);
-        
-        toolbar.addSeparator(new Dimension(toolbar.getPreferredSize().height / 2, toolbar.getPreferredSize().height));
-        
-        colorChoosersPanel = new JPanel(new GridLayout(rows, cols));
-        colorChoosersPanel.setVisible(false);
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < cols; j++)
-            {
-                if (i*cols + j < PaintPanel.STATES_COLORS.length)
-                {
-                    Color stateColor = PaintPanel.STATES_COLORS[i*cols + j];
-                    JButton chooseColorButton = new JButton(createIcon(stateColor, 15, 15));
-                    chooseColorButton.addMouseListener(new MouseAdapter()
-                    {
-
-                        @Override
-                        public void mousePressed(MouseEvent ev)
-                        {
-                            if (ev.getButton() == MouseEvent.BUTTON1)
-                            {
-                                selectedInnerPanel.setBackground(stateColor);
-                                paintPanel.setSelectedStateColor(stateColor);
-                            }
-                            else if (ev.getButton() == MouseEvent.BUTTON3)
-                            {
-                                unselectedInnerPanel.setBackground(stateColor);
-                                paintPanel.setUnselectedStateColor(stateColor);
-                            }
-                        }
-                    });
-                    colorChoosersPanel.add(chooseColorButton);
-                }
-            }
-        }
-        toolbar.add(colorChoosersPanel);
-        dim = new Dimension(toolbar.getPreferredSize().width / 3, toolbar.getPreferredSize().height);
-        colorChoosersPanel.setMaximumSize(dim);
         
         addTransButton = new JButton("Add");
         removeTransButton = new JButton("Remove");
@@ -400,6 +311,76 @@ public class AutomataViewer
         transitions.setRenderer(renderer);
         updateTransitionsComboBox();
         toolbar.add(transitions);      
+        toolbar.addSeparator(new Dimension(toolbar.getPreferredSize().height, 0));
+        
+        int cols = 5;
+        int rows = PaintPanel.STATES_COLORS.length / cols;
+        if (PaintPanel.STATES_COLORS.length % cols != 0)
+            rows++;
+          
+        JPanel selectedColorPanel = new JPanel(new BorderLayout());
+        JPanel unselectedColorPanel = new JPanel(new BorderLayout());
+        Dimension dim = new Dimension(toolbar.getPreferredSize().height, toolbar.getPreferredSize().height);
+        selectedColorPanel.setPreferredSize(dim);
+        selectedColorPanel.setMinimumSize(dim);
+        selectedColorPanel.setMaximumSize(dim);
+        unselectedColorPanel.setPreferredSize(dim);
+        unselectedColorPanel.setMinimumSize(dim);
+        unselectedColorPanel.setMaximumSize(dim);
+        JPanel selectedInnerPanel = new JPanel();
+        selectedInnerPanel.setBackground(paintPanel.getSelectedStateColor());
+        selectedInnerPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.BLACK));
+        selectedColorPanel.add(selectedInnerPanel, BorderLayout.CENTER);
+        JPanel unselectedInnerPanel = new JPanel();
+        unselectedInnerPanel.setBackground(paintPanel.getUnselectedStateColor());
+        unselectedInnerPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.BLACK));
+        unselectedColorPanel.add(unselectedInnerPanel, BorderLayout.CENTER);
+        selectedColorPanel.setToolTipText("Color 1 (for selected states)");
+        unselectedColorPanel.setToolTipText("Color 2");
+        selectedColorPanel.setBorder(BorderFactory.createLineBorder(new Color(219, 219, 219), 10));
+        unselectedColorPanel.setBorder(BorderFactory.createLineBorder(new Color(219, 219, 219), 10));
+         
+        toolbar.add(selectedColorPanel);
+        toolbar.addSeparator();
+        toolbar.add(unselectedColorPanel);
+        
+        toolbar.addSeparator(new Dimension(toolbar.getPreferredSize().height / 2, 0));
+        
+        JPanel colorChoosersPanel = new JPanel(new GridLayout(rows, cols));
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                if (i*cols + j < PaintPanel.STATES_COLORS.length)
+                {
+                    Color stateColor = PaintPanel.STATES_COLORS[i*cols + j];
+                    JButton chooseColorButton = new JButton(createIcon(stateColor, 15, 15));
+                    chooseColorButton.addMouseListener(new MouseAdapter()
+                    {
+
+                        @Override
+                        public void mousePressed(MouseEvent ev)
+                        {
+                            if (ev.getButton() == MouseEvent.BUTTON1)
+                            {
+                                selectedInnerPanel.setBackground(stateColor);
+                                paintPanel.setSelectedStateColor(stateColor);
+                            }
+                            else if (ev.getButton() == MouseEvent.BUTTON3)
+                            {
+                                unselectedInnerPanel.setBackground(stateColor);
+                                paintPanel.setUnselectedStateColor(stateColor);
+                            }
+                        }
+                    });
+                    colorChoosersPanel.add(chooseColorButton);
+                }
+            }
+        }
+        toolbar.add(colorChoosersPanel);
+        dim = new Dimension(toolbar.getPreferredSize().width / 3, toolbar.getPreferredSize().height);
+        colorChoosersPanel.setMaximumSize(dim);
+        
         toolbar.addSeparator();
     }
     
