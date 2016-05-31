@@ -153,7 +153,7 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
         int end = 0;
         int subsetValue = subsetToValue(subset);
         int bitCount = Integer.bitCount(subsetValue);
-        queue[end] = subsetToValue(subset);
+        queue[end] = subsetValue;
         end++;
         visited[subsetValue] = true;
         
@@ -215,7 +215,7 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
         int start = 0;
         int end = 0;
         int subsetValue = subsetToValue(subset);
-        queue[end] = subsetToValue(subset);
+        queue[end] = subsetValue;
         end++;
         visited[subsetValue] = true;
         
@@ -281,7 +281,7 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
         int end = 0;
         int subsetValue = subsetToValue(subset);
         int bitCount = Integer.bitCount(subsetValue);
-        queue[end] = subsetToValue(subset);
+        queue[end] = subsetValue;
         end++;
         visited[subsetValue] = true;
         
@@ -353,7 +353,7 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
         int start = 0;
         int end = 0;
         int subsetValue = subsetToValue(subset);
-        queue[end] = subsetToValue(subset);
+        queue[end] = subsetValue;
         end++;
         visited[subsetValue] = true;
         
@@ -362,7 +362,7 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
             subsetValue = queue[start];
             start++;
             
-            if (Integer.bitCount(subsetValue) == N)
+            if (Integer.bitCount(subsetValue) == N && N > 0)
             {
                 ArrayList<Integer> transitions = new ArrayList<>();
                 while (fromWhereSubsetVal[subsetValue] != -1)

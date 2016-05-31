@@ -68,8 +68,10 @@ public class ShortestResetWordToolbar extends DockToolbar
         panel.add(textPane, BorderLayout.CENTER);
     }
     
-    private ArrayList<Integer> findShortestResetWord(int[] subset) throws WordNotFoundException
+    private ArrayList<Integer> findShortestResetWord() throws WordNotFoundException
     {
+        int[] subset = new int[getAutomaton().getN()];
+        Arrays.fill(subset, 1);
         boolean[] visited = new boolean[(int) Math.pow(2, getAutomaton().getN())];
         int[] fromWhereSubsetVal = new int[visited.length];
         int[] fromWhereTransition = new int[visited.length];
@@ -81,7 +83,7 @@ public class ShortestResetWordToolbar extends DockToolbar
         int start = 0;
         int end = 0;
         int subsetValue = subsetToValue(subset);
-        queue[end] = subsetToValue(subset);
+        queue[end] = subsetValue;
         end++;
         visited[subsetValue] = true;
         
@@ -178,9 +180,8 @@ public class ShortestResetWordToolbar extends DockToolbar
             return;
         }
 
-        int[] subset = getAutomaton().getSelectedStates();
         try {
-            ArrayList<Integer> transitions = findShortestResetWord(subset);
+            ArrayList<Integer> transitions = findShortestResetWord();
             textPane.setText("");
             for (int trans : transitions)
             {
