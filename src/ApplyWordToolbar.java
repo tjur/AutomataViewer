@@ -34,7 +34,7 @@ public class ApplyWordToolbar extends DockToolbar
         JPanel panel = getPanel();
         textPane = new JTextPane();
         textPane.setFont(getDeafultFont());
-        textPane.setPreferredSize(new Dimension(0, 55));
+        textPane.setPreferredSize(new Dimension(0, 60));
         
         // create popup menu for text pane
         JPopupMenu popupMenu = new JPopupMenu();

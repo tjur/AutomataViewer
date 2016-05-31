@@ -52,7 +52,7 @@ public class SplitPane extends JSplitPane
         ShortestResetWordToolbar resetWordToolbar = new ShortestResetWordToolbar("Shortest reset word", automaton);
         innerPanel.add(resetWordToolbar);
         
-        ShortestWordForSubsetsToolbar shortestWordSubsetsToolbar = new ShortestWordForSubsetsToolbar("Shortest compressing/extending word", automaton);
+        ShortestWordForSubsetsToolbar shortestWordSubsetsToolbar = new ShortestWordForSubsetsToolbar("Shortest word for subsets", automaton);
         innerPanel.add(shortestWordSubsetsToolbar);
         
         BasicPropertiesToolbar basicPropertiesToolbar = new BasicPropertiesToolbar("Basic properties", automaton);

@@ -1,8 +1,6 @@
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -32,7 +30,9 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
     private final JTextPane textPane;
     
     private final JRadioButton compressingButton;
+    private final JRadioButton resetButton;
     private final JRadioButton extendingButton;
+    private final JRadioButton fullyExtendingButton;
     
     private ReversedAutomaton reversedAutomaton;
     
@@ -44,8 +44,7 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
         JPanel panel = getPanel();
         textPane = new JTextPane();
         textPane.setEditable(false);
-        textPane.setFont(new Font("Arial", Font.ITALIC + Font.BOLD, 14));
-        textPane.setPreferredSize(new Dimension(0, 55));
+        textPane.setFont(getDeafultFont());
         
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem menuItemCopy;
@@ -82,8 +81,19 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
         
         ButtonGroup buttonGroup = new ButtonGroup();
         compressingButton = new JRadioButton("Compressing");
+        resetButton = new JRadioButton("Reset");
         extendingButton = new JRadioButton("Extending");
+        fullyExtendingButton = new JRadioButton("Fully extending");
         compressingButton.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent ev)
+            {
+                if (ev.getStateChange() == ItemEvent.SELECTED)
+                    recalculate();
+            }
+        });
+        resetButton.addItemListener(new ItemListener() {
 
             @Override
             public void itemStateChanged(ItemEvent ev)
@@ -101,16 +111,31 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
                     recalculate();
             }
         });
+        fullyExtendingButton.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent ev)
+            {
+                if (ev.getStateChange() == ItemEvent.SELECTED)
+                    recalculate();
+            }
+        });
         compressingButton.setSelected(true);
         buttonGroup.add(compressingButton);
+        buttonGroup.add(resetButton);
         buttonGroup.add(extendingButton);
+        buttonGroup.add(fullyExtendingButton);
         
         JPanel borderPanel = new JPanel();
         borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.Y_AXIS));
         borderPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
         borderPanel.add(compressingButton);
         borderPanel.add(new Separator());
+        borderPanel.add(resetButton);
+        borderPanel.add(new Separator());
         borderPanel.add(extendingButton);
+        borderPanel.add(new Separator());
+        borderPanel.add(fullyExtendingButton);
         panel.add(borderPanel, BorderLayout.EAST);
     }
     
@@ -138,6 +163,68 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
             start++;
             
             if (Integer.bitCount(subsetValue) < bitCount)
+            {
+                ArrayList<Integer> transitions = new ArrayList<>();
+                while (fromWhereSubsetVal[subsetValue] != -1)
+                {
+                    transitions.add(fromWhereTransition[subsetValue]);
+                    subsetValue = fromWhereSubsetVal[subsetValue];
+                }
+                
+                Collections.reverse(transitions);
+                return transitions;
+            }
+            else
+            {
+                subset = valueToSubset(subsetValue);
+                for (int trans = 0; trans < getAutomaton().getK(); trans++)
+                {
+                    int[] newSubset = new int[getAutomaton().getN()];
+                    for (int i = 0; i < subset.length; i++)
+                    {
+                        if (subset[i] == 1)
+                            newSubset[getAutomaton().getMatrix()[i][trans]] = 1;
+                    }
+                    
+                    int newSubsetValue = subsetToValue(newSubset);
+                    if (!visited[newSubsetValue])
+                    {
+                        fromWhereSubsetVal[newSubsetValue] = subsetValue;
+                        fromWhereTransition[newSubsetValue] = trans;
+                        queue[end] = newSubsetValue;
+                        end++;
+                        visited[newSubsetValue] = true;
+                    }
+                }
+            }
+        }
+        
+        throw new WordNotFoundException();
+    }
+    
+    private ArrayList<Integer> findShortestResetWord(int[] subset) throws WordNotFoundException
+    {
+        boolean[] visited = new boolean[(int) Math.pow(2, getAutomaton().getN())];
+        int[] fromWhereSubsetVal = new int[visited.length];
+        int[] fromWhereTransition = new int[visited.length];
+        Arrays.fill(visited, false);
+        Arrays.fill(fromWhereSubsetVal, -1);
+        Arrays.fill(fromWhereTransition, -1);
+        
+        int[] queue = new int[visited.length];
+        int start = 0;
+        int end = 0;
+        int subsetValue = subsetToValue(subset);
+        queue[end] = subsetToValue(subset);
+        end++;
+        visited[subsetValue] = true;
+        
+        while (start < end)
+        {
+            subsetValue = queue[start];
+            start++;
+            
+            if (Integer.bitCount(subsetValue) == 1) // singleton is a power of two
             {
                 ArrayList<Integer> transitions = new ArrayList<>();
                 while (fromWhereSubsetVal[subsetValue] != -1)
@@ -250,6 +337,78 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
         throw new WordNotFoundException();
     }
     
+    private ArrayList<Integer> findShortestFullyExtendingWord(int[] subset) throws WordNotFoundException
+    {
+        int N = getAutomaton().getN();
+        int K = getAutomaton().getK();
+        
+        boolean[] visited = new boolean[(int) Math.pow(2, getAutomaton().getN())];
+        int[] fromWhereSubsetVal = new int[visited.length];
+        int[] fromWhereTransition = new int[visited.length];
+        Arrays.fill(visited, false);
+        Arrays.fill(fromWhereSubsetVal, -1);
+        Arrays.fill(fromWhereTransition, -1);
+        
+        int[] queue = new int[visited.length];
+        int start = 0;
+        int end = 0;
+        int subsetValue = subsetToValue(subset);
+        queue[end] = subsetToValue(subset);
+        end++;
+        visited[subsetValue] = true;
+        
+        while (start < end)
+        {
+            subsetValue = queue[start];
+            start++;
+            
+            if (Integer.bitCount(subsetValue) == N)
+            {
+                ArrayList<Integer> transitions = new ArrayList<>();
+                while (fromWhereSubsetVal[subsetValue] != -1)
+                {
+                    transitions.add(fromWhereTransition[subsetValue]);
+                    subsetValue = fromWhereSubsetVal[subsetValue];
+                }
+                
+                Collections.reverse(transitions);
+                return transitions;
+            }
+            else
+            {
+                subset = valueToSubset(subsetValue);
+                for (int trans = 0; trans < K; trans++)
+                {
+                    int[] newSubset = new int[N];
+                    for (int i = 0; i < subset.length; i++)
+                    {
+                        if (subset[i] == 1)
+                        {
+                            int[] subset2 = reversedAutomaton.getMatrix()[i][trans];
+                            for (int j = 0; j < N; j++)
+                            {
+                                if (subset2[j] == 1)
+                                    newSubset[j] = 1;
+                            }
+                        }
+                    }
+                    
+                    int newSubsetValue = subsetToValue(newSubset);
+                    if (!visited[newSubsetValue])
+                    {
+                        fromWhereSubsetVal[newSubsetValue] = subsetValue;
+                        fromWhereTransition[newSubsetValue] = trans;
+                        queue[end] = newSubsetValue;
+                        end++;
+                        visited[newSubsetValue] = true;
+                    }
+                }
+            }
+        }
+        
+        throw new WordNotFoundException();
+    }
+    
     private int subsetToValue(int[] subset)
     {
         int value = 0;
@@ -292,11 +451,16 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
     {
         int[] subset = getAutomaton().getSelectedStates();
         try {
-            ArrayList<Integer> transitions;
+            ArrayList<Integer> transitions = new ArrayList<>();
             if (compressingButton.isSelected())
                 transitions = findShortestCompressingWord(subset);
-            else
+            else if (resetButton.isSelected())
+                transitions = findShortestResetWord(subset);
+            else if (extendingButton.isSelected())
                 transitions = findShortestExtendingWord(subset);
+            else if (fullyExtendingButton.isSelected())
+                transitions = findShortestFullyExtendingWord(subset);
+            
             textPane.setText("");
             for (int trans : transitions)
             {

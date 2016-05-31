@@ -2,7 +2,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -33,7 +32,7 @@ public class ShortestResetWordToolbar extends DockToolbar
         textPane = new JTextPane();
         textPane.setEditable(false);
         textPane.setFont(getDeafultFont());
-        textPane.setPreferredSize(new Dimension(0, 55));
+        textPane.setPreferredSize(new Dimension(0, 60));
         
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem menuItemCopy;

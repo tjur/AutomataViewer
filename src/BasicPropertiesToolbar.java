@@ -2,7 +2,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.util.Arrays;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
@@ -29,7 +28,7 @@ public class BasicPropertiesToolbar extends DockToolbar
         textPane = new JTextPane();
         textPane.setEditable(false);
         textPane.setFont(getDeafultFont());
-        textPane.setPreferredSize(new Dimension(0, 55));
+        textPane.setPreferredSize(new Dimension(0, 60));
 
         panel.add(textPane, BorderLayout.CENTER);
     }
