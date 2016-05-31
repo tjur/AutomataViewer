@@ -163,7 +163,7 @@ public abstract class DockToolbar extends JToolBar
     // updates toolbar only if it is visible
     public void updateToolbar()
     {
-        if (panel.isVisible())
+        if (isVisible())
             update();
     }
     
