@@ -2,6 +2,7 @@
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class Automaton
@@ -9,7 +10,7 @@ public class Automaton
 
     private int K, N; // max number of out edges for one state / number of states
     private int [][] matrix;
-    private ArrayList<Integer> selectedStates;
+    private int[] selectedStates;
     
     private final PropertyChangeSupport PCS;
 
@@ -42,7 +43,7 @@ public class Automaton
             }
         }
         
-        selectedStates = new ArrayList<>();
+        selectedStates = new int[N];
     }
     
     @Override
@@ -78,7 +79,7 @@ public class Automaton
         this.K = automaton.K;
         this.N = automaton.N;
         this.matrix = automaton.matrix;
-        this.selectedStates = new ArrayList<>();
+        this.selectedStates = new int[N];
     }
     
     public void addState()
@@ -88,11 +89,14 @@ public class Automaton
             System.arraycopy(matrix[n], 0, temp[n], 0, K);
         
         for (int k = 0; k < K; k++)
-            temp[N][k] = N;
-        
+            temp[N][k] = N; 
         matrix = temp;
-        N++;
         
+        int[] newSelectedStates = new int[N+1];
+        System.arraycopy(selectedStates, 0, newSelectedStates, 0, N);
+        selectedStates = newSelectedStates;
+        
+        N++;    
         automatonChanged();
     }
     
@@ -110,19 +114,20 @@ public class Automaton
                 else if (temp[n][k] > state)
                     temp[n][k]--;
             }
-        }
-        
+        }    
         matrix = temp;
-        N--;
         
-        selectedStates.remove((Integer) state);
-        
-        for (int i = 0; i < selectedStates.size(); i++)
+        int[] newSelectedStates = new int[N-1];
+        for (int i = 0; i < N - 1; i++)
         {
-            if (selectedStates.get(i) > state)
-                selectedStates.set(i, selectedStates.get(i) - 1);
+            if (i < state)
+                newSelectedStates[i] = selectedStates[i];
+            else
+                newSelectedStates[i] = selectedStates[i+1];
         }
-
+        selectedStates = newSelectedStates;
+        
+        N--;
         automatonChanged();
     }
     
@@ -184,59 +189,53 @@ public class Automaton
         }
     }
     
-    public void selectState(Integer state)
+    public void selectState(int state)
     {
-        selectedStates.add(state);
+        selectedStates[state] = 1;
         automatonChanged();
     }
     
     public void selectStates(int[] selectedStates)
     {
-        ArrayList<Integer> states = new ArrayList<>();
-        for (int i = 0; i < selectedStates.length; i++)
+        if (selectedStates.length == N)
         {
-            if (selectedStates[i] == 1)
-                states.add(i);
+            this.selectedStates = selectedStates;
+            automatonChanged();
         }
-        this.selectedStates = states;
-        automatonChanged();
     }
     
-    public void selectStates(ArrayList<Integer> selectedStates)
+    public void unselectState(int state)
     {
-        this.selectedStates = selectedStates;
-        automatonChanged();
-    }
-    
-    public void unselectState(Integer state)
-    {
-        selectedStates.remove(state);
+        selectedStates[state] = 0;
         automatonChanged();
     }
     
     public void clearSelectedStates()
     {
-        selectedStates.clear();
+        Arrays.fill(selectedStates, 0);
         automatonChanged();
     }
     
-    public boolean isSelected(Integer state)
+    public boolean isSelected(int state)
     {
-        return selectedStates.contains(state);
+        return selectedStates[state] == 1;
     }
     
     public int getSelectedStatesNumber()
     {
-        return selectedStates.size();
+        int count = 0;
+        for (int i : selectedStates)
+        {
+            if (i == 1)
+                count++;
+        }
+        
+        return count;
     }
     
     public int[] getSelectedStates()
-    {
-        int[] subset = new int[N];
-        for (int state : selectedStates)
-            subset[state] = 1;
-        
-        return subset;
+    {   
+        return selectedStates;
     }
     
     public void automatonChanged()

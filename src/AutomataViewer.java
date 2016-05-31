@@ -67,7 +67,6 @@ public class AutomataViewer
     
     private JPanel unselectedColorPanel;
     private JPanel selectedColorPanel;
-    boolean selectedColorPanelIsSelected;
     private JPanel colorChoosersPanel;
     
     private JButton addTransButton;
@@ -300,71 +299,10 @@ public class AutomataViewer
         unselectedInnerPanel.setBackground(paintPanel.getUnselectedStateColor());
         unselectedInnerPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.BLACK));
         unselectedColorPanel.add(unselectedInnerPanel, BorderLayout.CENTER);
-        selectedColorPanel.setToolTipText("Selected state color");
-        unselectedColorPanel.setToolTipText("Unselected state color");
-        
-        Color unselectedPanelColor = new Color(219, 219, 219);
-        Color selectedPanelColor = new Color(53, 200, 229);
-        int thickness = 10;
-        selectedColorPanel.addMouseListener(new MouseAdapter() {
-
-            @Override
-            public void mouseClicked(MouseEvent ev)
-            {
-                selectedColorPanelIsSelected = true;
-                selectedColorPanel.setBorder(BorderFactory.createLineBorder(selectedPanelColor, thickness));
-                unselectedColorPanel.setBorder(BorderFactory.createLineBorder(unselectedPanelColor, thickness));
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent ev)
-            {
-                if (selectedColorPanelIsSelected)
-                    selectedColorPanel.setBorder(BorderFactory.createLineBorder(selectedPanelColor.brighter(), thickness));
-                else
-                    selectedColorPanel.setBorder(BorderFactory.createLineBorder(unselectedPanelColor.brighter(), thickness));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent ev)
-            {
-                if (selectedColorPanelIsSelected)
-                    selectedColorPanel.setBorder(BorderFactory.createLineBorder(selectedPanelColor, thickness));
-                else
-                    selectedColorPanel.setBorder(BorderFactory.createLineBorder(unselectedPanelColor, thickness));
-            }       
-        });
-        unselectedColorPanel.addMouseListener(new MouseAdapter() {
-
-            @Override
-            public void mouseClicked(MouseEvent ev)
-            {
-                selectedColorPanelIsSelected = false;
-                selectedColorPanel.setBorder(BorderFactory.createLineBorder(unselectedPanelColor, thickness));
-                unselectedColorPanel.setBorder(BorderFactory.createLineBorder(selectedPanelColor, thickness));
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent ev)
-            {
-                if (selectedColorPanelIsSelected)
-                    unselectedColorPanel.setBorder(BorderFactory.createLineBorder(unselectedPanelColor.brighter(), thickness));
-                else
-                    unselectedColorPanel.setBorder(BorderFactory.createLineBorder(selectedPanelColor.brighter(), thickness));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent ev)
-            {
-                if (selectedColorPanelIsSelected)
-                    unselectedColorPanel.setBorder(BorderFactory.createLineBorder(unselectedPanelColor, thickness));
-                else
-                    unselectedColorPanel.setBorder(BorderFactory.createLineBorder(selectedPanelColor, thickness));
-            }
-        });
-        selectedColorPanelIsSelected = true;
-        selectedColorPanel.setBorder(BorderFactory.createLineBorder(selectedPanelColor, thickness));
-        unselectedColorPanel.setBorder(BorderFactory.createLineBorder(unselectedPanelColor, thickness));
+        selectedColorPanel.setToolTipText("Color 1 (for selected states)");
+        unselectedColorPanel.setToolTipText("Color 2");
+        selectedColorPanel.setBorder(BorderFactory.createLineBorder(new Color(219, 219, 219), 10));
+        unselectedColorPanel.setBorder(BorderFactory.createLineBorder(new Color(219, 219, 219), 10));
          
         toolbar.add(selectedColorPanel);
         toolbar.addSeparator();
@@ -382,18 +320,18 @@ public class AutomataViewer
                 {
                     Color stateColor = PaintPanel.STATES_COLORS[i*cols + j];
                     JButton chooseColorButton = new JButton(createIcon(stateColor, 15, 15));
-                    chooseColorButton.addActionListener(new ActionListener()
+                    chooseColorButton.addMouseListener(new MouseAdapter()
                     {
 
                         @Override
-                        public void actionPerformed(ActionEvent ev)
+                        public void mousePressed(MouseEvent ev)
                         {
-                            if (selectedColorPanelIsSelected)
+                            if (ev.getButton() == MouseEvent.BUTTON1)
                             {
                                 selectedInnerPanel.setBackground(stateColor);
                                 paintPanel.setSelectedStateColor(stateColor);
                             }
-                            else
+                            else if (ev.getButton() == MouseEvent.BUTTON3)
                             {
                                 unselectedInnerPanel.setBackground(stateColor);
                                 paintPanel.setUnselectedStateColor(stateColor);

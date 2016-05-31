@@ -114,7 +114,6 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             @Override
             public void propertyChange(PropertyChangeEvent ev)
             {
-                updateColors();
                 repaint();
             }
         });
@@ -169,13 +168,6 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     {
         if (!color.equals(selectedStateColor))
         {
-            int[] selectedStates = automaton.getSelectedStates();
-            for (int i = 0; i < selectedStates.length; i++)
-            {
-                if (selectedStates[i] == 1)
-                    colors[i] = color;
-            }
-
             selectedStateColor = color;
             repaint();
         }
@@ -188,18 +180,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     
     public void setUnselectedStateColor(Color color)
     {
-        if (!color.equals(unselectedStateColor))
-        {
-            int[] selectedStates = automaton.getSelectedStates();
-            for (int i = 0; i < selectedStates.length; i++)
-            {
-                if (selectedStates[i] == 0)
-                    colors[i] = color;
-            }
-            
-            unselectedStateColor = color;
-            repaint();
-        }
+        unselectedStateColor = color;
     }
     
     public void setSelectedTransition(int trans)
@@ -223,12 +204,12 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         this.highlighted = -1;
         this.addTransFirstState = -1;
         this.replaceStatesFirstState = -1;
-        ArrayList<Integer> selectedStates = new ArrayList<>();
+        int[] selectedStates = new int[N];
         for (int n = 0; n < N; n++)
         {
             orders[n] = n;
-            colors[n] = selectedStateColor;
-            selectedStates.add(n);
+            colors[n] = unselectedStateColor;
+            selectedStates[n] = 1;
         }
         
         automaton.selectStates(selectedStates);
@@ -251,21 +232,6 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         }
         
         automaton.clearSelectedStates();
-    }
-    
-    public void updateColors()
-    {
-        int N = automaton.getN();
-        int[] selectedStates = automaton.getSelectedStates();
-        Color[] newColors = new Color[N];
-        for (int i = 0; i < selectedStates.length; i++)
-        {
-            if (selectedStates[i] == 1)
-                newColors[i] = selectedStateColor;
-            else
-                newColors[i] = unselectedStateColor;
-        }
-        colors = newColors;
     }
     
     // repaint automaton with states moved to center
@@ -391,13 +357,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             else if (highlighted >= 0 && operation == Operation.ADD_TRANS)
                 addTransFirstState = highlighted;
             else if (highlighted >= 0 && operation == Operation.SELECT_STATES)
-            {
-                if (!automaton.isSelected(highlighted))
-                {
-                    automaton.selectState(highlighted);
-                    colors[highlighted] = selectedStateColor;
-                }
-            }
+                automaton.selectState(highlighted);
             else if (highlighted >= 0)
             {         
                 grabShiftX = (vertices[highlighted].x - grabX);
@@ -418,13 +378,11 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         {
             if (highlighted >= 0 && operation == Operation.SELECT_STATES)
             {
-                if (automaton.isSelected(highlighted))
-                {
-                    automaton.unselectState(highlighted);
-                    colors[highlighted] = unselectedStateColor;
-                }
+                automaton.unselectState(highlighted);
+                colors[highlighted] = unselectedStateColor;
             }
         }
+        
         repaint();
     }
 
@@ -562,7 +520,11 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         for (int i = 0; i < N; i++)
         {
             int n = orders[i];
-            g.setColor(colors[n]);
+            if (automaton.isSelected(n))
+                g.setColor(selectedStateColor);
+            else
+                g.setColor(colors[n]);
+            
             if (highlighted != -1 && highlighted == n)
                 g.setColor(g.getColor().brighter());
             
