@@ -49,6 +49,7 @@ public class AutomataViewer
         frame.setSize(1300,750);
         frame.setMinimumSize(new Dimension(700, 525));
         frame.setVisible(true);
+        automataViewer.repaint();
     }
 
     private final JFrame frame;
@@ -261,7 +262,6 @@ public class AutomataViewer
         JLabel selectedStatesLabel = new JLabel(Integer.toString(splitPane.getSelectedStatesNumber()));
         label.setFont(font);
         selectedStatesLabel.setFont(font);
-        selectedStatesLabel.setForeground(paintPanel.getSelectedStateColor());
         splitPane.getAutomaton().addPropertyChangeListener("automatonChanged", new PropertyChangeListener() {
             
             @Override
@@ -391,7 +391,6 @@ public class AutomataViewer
                             if (selectedColorPanelIsSelected)
                             {
                                 selectedInnerPanel.setBackground(stateColor);
-                                selectedStatesLabel.setForeground(stateColor);
                                 paintPanel.setSelectedStateColor(stateColor);
                             }
                             else
@@ -495,6 +494,11 @@ public class AutomataViewer
             for (int i = 0; i < K; i++)
                 transitions.addItem(Character.toString(AutomatonHelper.TRANSITIONS_LETTERS[i]));
         }
+    }
+    
+    public void repaint()
+    {
+        paintPanel.repaintCenterAutomaton();
     }
     
     private class ComboBoxRenderer extends JPanel implements ListCellRenderer

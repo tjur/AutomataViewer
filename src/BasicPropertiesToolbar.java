@@ -28,7 +28,7 @@ public class BasicPropertiesToolbar extends DockToolbar
         JPanel panel = getPanel();
         textPane = new JTextPane();
         textPane.setEditable(false);
-        textPane.setFont(new Font("Arial", Font.ITALIC + Font.BOLD, 14));
+        textPane.setFont(getDeafultFont());
         textPane.setPreferredSize(new Dimension(0, 55));
 
         panel.add(textPane, BorderLayout.CENTER);

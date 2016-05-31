@@ -3,6 +3,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
@@ -152,6 +153,11 @@ public abstract class DockToolbar extends JToolBar
             JDialog toolBarDialog = (JDialog) SwingUtilities.getWindowAncestor(this);
             toolBarDialog.dispatchEvent(new WindowEvent(toolBarDialog, WindowEvent.WINDOW_CLOSING));
         }
+    }
+    
+    public Font getDeafultFont()
+    {
+        return new Font("Arial", Font.ITALIC + Font.BOLD, 14);
     }
     
     // updates toolbar only if it is visible

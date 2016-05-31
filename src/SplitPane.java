@@ -30,7 +30,7 @@ public class SplitPane extends JSplitPane
         
         setBackground(new Color(224, 224, 224));
         
-        automaton = new Automaton("0 0");
+        automaton = new Automaton("2 5 1 0 2 1 3 2 4 3 0 0");
         paintPanel = new PaintPanel(automaton);
         setTopComponent(paintPanel);
         
@@ -52,8 +52,8 @@ public class SplitPane extends JSplitPane
         ShortestResetWordToolbar resetWordToolbar = new ShortestResetWordToolbar("Shortest reset word", automaton);
         innerPanel.add(resetWordToolbar);
         
-        ShortestChangingWordToolbar changeWordToolbar = new ShortestChangingWordToolbar("Shortest decreasing/increasing word", automaton);
-        innerPanel.add(changeWordToolbar);
+        ShortestWordForSubsetsToolbar shortestWordSubsetsToolbar = new ShortestWordForSubsetsToolbar("Shortest compressing/extending word", automaton);
+        innerPanel.add(shortestWordSubsetsToolbar);
         
         BasicPropertiesToolbar basicPropertiesToolbar = new BasicPropertiesToolbar("Basic properties", automaton);
         innerPanel.add(basicPropertiesToolbar);
@@ -61,11 +61,10 @@ public class SplitPane extends JSplitPane
         dockToolbars.add(codeToolbar);
         dockToolbars.add(applyWordToolbar);
         dockToolbars.add(resetWordToolbar);
-        dockToolbars.add(changeWordToolbar);
+        dockToolbars.add(shortestWordSubsetsToolbar);
         dockToolbars.add(basicPropertiesToolbar);
         
         updateToolbars();
-        codeToolbar.setCode("2 4 1 0 3 0 0 1 1 2");
         
         codeToolbar.addPropertyChangeListener("repaintCenterAutomaton", new PropertyChangeListener() {
             

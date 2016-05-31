@@ -127,12 +127,12 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                 int width = PaintPanel.this.getSize().width;
                 int height = PaintPanel.this.getSize().height;
                 
-                for (Point vertice : vertices)
+                for (Point vertex : vertices)
                 {
-                    if (vertice.x + VERTEX_RADIUS > width)
-                        vertice.x = width - VERTEX_RADIUS;
-                    if (vertice.y + VERTEX_RADIUS > height)
-                        vertice.y = height - VERTEX_RADIUS;
+                    if (vertex.x + VERTEX_RADIUS > width)
+                        vertex.x = width - VERTEX_RADIUS;
+                    if (vertex.y + VERTEX_RADIUS > height)
+                        vertex.y = height - VERTEX_RADIUS;
                 }
                 
                 repaint();
@@ -223,12 +223,15 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         this.highlighted = -1;
         this.addTransFirstState = -1;
         this.replaceStatesFirstState = -1;
+        ArrayList<Integer> selectedStates = new ArrayList<>();
         for (int n = 0; n < N; n++)
         {
             orders[n] = n;
-            colors[n] = unselectedStateColor;
+            colors[n] = selectedStateColor;
+            selectedStates.add(n);
         }
         
+        automaton.selectStates(selectedStates);
         repaintCenterAutomaton();
     }
     

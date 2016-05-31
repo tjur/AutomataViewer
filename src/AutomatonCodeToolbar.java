@@ -24,6 +24,7 @@ public class AutomatonCodeToolbar extends DockToolbar
         
         JPanel panel = getPanel();
         textPane = new JTextPane();
+        textPane.setFont(getDeafultFont());
         textPane.setPreferredSize(new Dimension(0, 55));
         
         // create popup menu for text pane

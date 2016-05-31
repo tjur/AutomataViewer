@@ -26,17 +26,17 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 
-public class ShortestChangingWordToolbar extends DockToolbar
+public class ShortestWordForSubsetsToolbar extends DockToolbar
 {
     private final int MAX_STATES = 25; // max number of states in automaton
     private final JTextPane textPane;
     
-    private JRadioButton decreasingButton;
-    private JRadioButton increasingButton;
+    private final JRadioButton compressingButton;
+    private final JRadioButton extendingButton;
     
     private ReversedAutomaton reversedAutomaton;
     
-    public ShortestChangingWordToolbar(String name, Automaton automaton)
+    public ShortestWordForSubsetsToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
         reversedAutomaton = new ReversedAutomaton(automaton);
@@ -81,9 +81,9 @@ public class ShortestChangingWordToolbar extends DockToolbar
         panel.add(textPane, BorderLayout.CENTER);
         
         ButtonGroup buttonGroup = new ButtonGroup();
-        decreasingButton = new JRadioButton("Decreasing");
-        increasingButton = new JRadioButton("Increasing");
-        decreasingButton.addItemListener(new ItemListener() {
+        compressingButton = new JRadioButton("Compressing");
+        extendingButton = new JRadioButton("Extending");
+        compressingButton.addItemListener(new ItemListener() {
 
             @Override
             public void itemStateChanged(ItemEvent ev)
@@ -92,7 +92,7 @@ public class ShortestChangingWordToolbar extends DockToolbar
                     recalculate();
             }
         });
-        increasingButton.addItemListener(new ItemListener() {
+        extendingButton.addItemListener(new ItemListener() {
 
             @Override
             public void itemStateChanged(ItemEvent ev)
@@ -101,20 +101,20 @@ public class ShortestChangingWordToolbar extends DockToolbar
                     recalculate();
             }
         });
-        decreasingButton.setSelected(true);
-        buttonGroup.add(decreasingButton);
-        buttonGroup.add(increasingButton);
+        compressingButton.setSelected(true);
+        buttonGroup.add(compressingButton);
+        buttonGroup.add(extendingButton);
         
         JPanel borderPanel = new JPanel();
         borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.Y_AXIS));
         borderPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-        borderPanel.add(decreasingButton);
+        borderPanel.add(compressingButton);
         borderPanel.add(new Separator());
-        borderPanel.add(increasingButton);
+        borderPanel.add(extendingButton);
         panel.add(borderPanel, BorderLayout.EAST);
     }
     
-    private ArrayList<Integer> findShortestDecreasingWord(int[] subset) throws WordNotFoundException
+    private ArrayList<Integer> findShortestCompressingWord(int[] subset) throws WordNotFoundException
     {
         boolean[] visited = new boolean[(int) Math.pow(2, getAutomaton().getN())];
         int[] fromWhereSubsetVal = new int[visited.length];
@@ -177,7 +177,7 @@ public class ShortestChangingWordToolbar extends DockToolbar
         throw new WordNotFoundException();
     }
     
-    private ArrayList<Integer> findShortestIncreasingWord(int[] subset) throws WordNotFoundException
+    private ArrayList<Integer> findShortestExtendingWord(int[] subset) throws WordNotFoundException
     {
         int N = getAutomaton().getN();
         int K = getAutomaton().getK();
@@ -293,10 +293,10 @@ public class ShortestChangingWordToolbar extends DockToolbar
         int[] subset = getAutomaton().getSelectedStates();
         try {
             ArrayList<Integer> transitions;
-            if (decreasingButton.isSelected())
-                transitions = findShortestDecreasingWord(subset);
+            if (compressingButton.isSelected())
+                transitions = findShortestCompressingWord(subset);
             else
-                transitions = findShortestIncreasingWord(subset);
+                transitions = findShortestExtendingWord(subset);
             textPane.setText("");
             for (int trans : transitions)
             {

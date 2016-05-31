@@ -33,6 +33,7 @@ public class ApplyWordToolbar extends DockToolbar
         
         JPanel panel = getPanel();
         textPane = new JTextPane();
+        textPane.setFont(getDeafultFont());
         textPane.setPreferredSize(new Dimension(0, 55));
         
         // create popup menu for text pane
@@ -107,7 +108,7 @@ public class ApplyWordToolbar extends DockToolbar
         });
         JButton preimageButton = new JButton("Preimage");
         preimageButton.addActionListener(new ActionListener() {
-
+            
             @Override
             public void actionPerformed(ActionEvent ev)
             {
@@ -118,6 +119,8 @@ public class ApplyWordToolbar extends DockToolbar
                     JOptionPane.showMessageDialog(textPane, "Invalid word");
             }       
         });
+        
+        imageButton.setMaximumSize(preimageButton.getPreferredSize());
         
         JPanel borderPanel = new JPanel();
         borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.Y_AXIS));
