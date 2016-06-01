@@ -33,13 +33,95 @@ public class BasicPropertiesToolbar extends DockToolbar
         panel.add(textPane, BorderLayout.CENTER);
     }
     
+    private boolean isSynchronizing()
+    {
+        int N = getAutomaton().getN();
+        int K = getAutomaton().getK();
+        
+        visited = new boolean[N*(N-1)];
+        Arrays.fill(visited, false);
+        int[] stackN1 = new int[N*(N-1)/2];
+        int[] stackN2 = new int[N*(N-1)/2];
+        int top = 0;
+        
+        for (int n = 0; n < N; n++)
+        {
+            for (int k = 0; k < K; k++)
+            {
+                int[] states = reversedAutomaton.getMatrix()[n][k];
+                for (int i1 = 0; i1 < states.length; i1++)
+                {
+                    for (int i2 = i1+1; i2 < states.length; i2++)
+                    {
+                        if (states[i1] == 1 && states[i2] == 1)
+                        {
+                            if (!visited[i1*N + i2]) 
+                            {
+                                visited[i1*N + i2] = true;
+                                stackN1[top] = i1;
+                                stackN2[top] = i2;
+                                top++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        while (top > 0) 
+        {
+            top--;
+            int q = stackN1[top];
+            int p = stackN2[top];
+            for (int k = 0; k < K; k++)
+            {
+                int[] states1 = reversedAutomaton.getMatrix()[q][k];
+                int[] states2 = reversedAutomaton.getMatrix()[p][k];
+
+                for (int i1 = 0; i1 < states1.length; i1++)
+                {
+                    for (int i2 = 0; i2 < states2.length; i2++) 
+                    {
+                        if (states1[i1] == 1 && states2[i2] == 1)
+                        {
+                            int i = i1;
+                            int j = i2;
+                            if (i1 > i2)
+                            {
+                                i = i2;
+                                j = i1;
+                            }
+
+                            if (visited[i*N + j]) 
+                                continue;
+                            visited[i*N + j] = true;
+                            stackN1[top] = i;
+                            stackN2[top] = j;
+                            top++;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < N-1; i++)
+        {
+            for (int j = i+1; j < N; j++)
+            {
+              if (!visited[i*N + j])
+                return false;
+            }
+        }
+        return true;
+    }
+    
     private boolean isStronglyConnected()
     {
         if (getAutomaton().getN() == 0)
             return false;
         
+        visited = new boolean[getAutomaton().getN()];
         int vertex = 0; // choose arbitrary vertex
-        Arrays.fill(visited, false);
         
         dfs(vertex);
         for (boolean val : visited)
@@ -89,12 +171,13 @@ public class BasicPropertiesToolbar extends DockToolbar
         if (getAutomaton().getN() == 0)
             return false;
         
-        int vertex = 0; // choose arbitrary vertex
-        Arrays.fill(visited, false);
-        
         int N = getAutomaton().getN();
         int K = getAutomaton().getK();
+        
+        visited = new boolean[N];
+        
         int[][] matrix = new int[N][N];
+        int vertex = 0; // choose arbitrary vertex
         
         // make undirected graph
         for (int i = 0; i < N; i++)
@@ -146,6 +229,13 @@ public class BasicPropertiesToolbar extends DockToolbar
         visited = new boolean[getAutomaton().getN()];
         
         textPane.setText("");
+        
+        if (isSynchronizing())
+            insertStringToTextPane("Synchronizing", Color.BLACK);
+        else
+            insertStringToTextPane("Not synchronizing", Color.BLACK);
+            
+        insertStringToTextPane("\n", Color.BLACK);
         
         if (isStronglyConnected())
             insertStringToTextPane("Strongly connected", Color.BLACK);
