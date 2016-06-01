@@ -1,5 +1,6 @@
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,6 +15,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextPane;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import javax.swing.text.StyledDocument;
 
 
 public class ApplyWordToolbar extends DockToolbar
@@ -32,7 +39,46 @@ public class ApplyWordToolbar extends DockToolbar
             hashMap.put(AutomatonHelper.TRANSITIONS_LETTERS[i], i);
         
         JPanel panel = getPanel();
-        textPane = new JTextPane();
+        
+        StyleContext cont = StyleContext.getDefaultStyleContext();
+        AttributeSet attrBlack = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, Color.BLACK);
+        AttributeSet attrGray = cont.addAttribute(cont.getEmptySet(), StyleConstants.Background, Color.LIGHT_GRAY);
+        AttributeSet attrDefault = cont.getStyle(StyleContext.DEFAULT_STYLE);
+        DefaultStyledDocument doc = new DefaultStyledDocument() {
+            
+            @Override
+            public void insertString (int offset, String str, AttributeSet a)
+            {
+                try {
+                    super.insertString(offset, str, a);
+                } 
+                catch (BadLocationException ex) {}
+                
+                for (int i = 0; i < str.length(); i++)
+                {
+                    char letter = str.charAt(i);
+                    
+                    if (hashMap.containsKey(letter))
+                    {
+                        AttributeSet attr = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, AutomatonHelper.TRANSITIONS_COLORS[hashMap.get(letter)]);
+                        setCharacterAttributes(offset + i, 1, attr, true);
+                    }
+                    else if (!Character.isWhitespace(letter))
+                        setCharacterAttributes(offset + i, 1, attrGray, true);
+                    else
+                        setCharacterAttributes(offset + i, 1, attrDefault, true);
+                }
+            }
+            
+            @Override
+            public void remove (int offset, int len) throws BadLocationException 
+            {
+                setCharacterAttributes(offset, len, attrDefault, true);
+                super.remove(offset, len);
+            }
+        };  
+        
+        textPane = new JTextPane(doc);
         textPane.setFont(getDeafultFont());
         textPane.setPreferredSize(new Dimension(0, 60));
         
@@ -191,5 +237,9 @@ public class ApplyWordToolbar extends DockToolbar
         hashMap.clear();
         for (int i = 0; i < getAutomaton().getK(); i++)
             hashMap.put(AutomatonHelper.TRANSITIONS_LETTERS[i], i);
+        
+        StyledDocument doc = textPane.getStyledDocument();
+        doc.setCharacterAttributes(0, doc.getLength(), StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE), true);
+        textPane.setText(textPane.getText());
     }
 }
