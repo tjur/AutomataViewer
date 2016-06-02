@@ -42,18 +42,7 @@ import javax.swing.ListCellRenderer;
 
 public class AutomataViewer
 {
-
-    public static void main(String[] args) 
-    {
-        JFrame frame = new JFrame("Automata viewer");
-        AutomataViewer automataViewer = new AutomataViewer(frame);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1300,750);
-        frame.setMinimumSize(new Dimension(700, 525));
-        frame.setVisible(true);
-        automataViewer.repaint();
-    }
-
+    
     private final JFrame frame;
     
     private final SplitPane splitPane;
