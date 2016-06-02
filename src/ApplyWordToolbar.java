@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
@@ -166,15 +167,15 @@ public class ApplyWordToolbar extends DockToolbar
             }       
         });
         
-        imageButton.setMaximumSize(preimageButton.getPreferredSize());
+        imageButton.setPreferredSize(preimageButton.getPreferredSize());
         
         JPanel borderPanel = new JPanel();
-        borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.Y_AXIS));
-        borderPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.X_AXIS));
+        borderPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         borderPanel.add(imageButton);
-        borderPanel.add(new Separator());
+        borderPanel.add(Box.createHorizontalGlue());
         borderPanel.add(preimageButton);
-        panel.add(borderPanel, BorderLayout.EAST);
+        panel.add(borderPanel, BorderLayout.SOUTH);
     }
     
     private boolean check(String word)

@@ -238,25 +238,6 @@ public class AutomataViewer
         toolBarButtons[paintPanel.getOperation()].setBackground(selectedButtonColor);
         
         toolbar.addSeparator(new Dimension(50, 0));
-        Font font = new Font("Times New Roman", Font.PLAIN + Font.BOLD, 20);
-        JLabel label = new JLabel("Selected states:  ");
-        JLabel selectedStatesLabel = new JLabel(Integer.toString(splitPane.getSelectedStatesNumber()));
-        label.setFont(font);
-        selectedStatesLabel.setFont(font);
-        splitPane.getAutomaton().addPropertyChangeListener("automatonChanged", new PropertyChangeListener() {
-            
-            @Override
-            public void propertyChange(PropertyChangeEvent ev)
-            {
-                int selectedStatesNumber = splitPane.getSelectedStatesNumber();
-                selectedStatesLabel.setText(Integer.toString(selectedStatesNumber));
-            }
-        });
-        toolbar.add(label);
-        toolbar.add(selectedStatesLabel);
-        
-        toolbar.add(Box.createHorizontalGlue());
-        
         addTransButton = new JButton("Add");
         removeTransButton = new JButton("Remove");
         addTransButton.setToolTipText("Create new transition");
@@ -310,7 +291,26 @@ public class AutomataViewer
         ComboBoxRenderer renderer = new ComboBoxRenderer(transitions);
         transitions.setRenderer(renderer);
         updateTransitionsComboBox();
-        toolbar.add(transitions);      
+        toolbar.add(transitions);
+        
+        toolbar.add(Box.createHorizontalGlue());
+        
+        Font font = new Font("Times New Roman", Font.PLAIN + Font.BOLD, 20);
+        JLabel label = new JLabel("Selected states:  ");
+        JLabel selectedStatesLabel = new JLabel(Integer.toString(splitPane.getSelectedStatesNumber()));
+        label.setFont(font);
+        selectedStatesLabel.setFont(font);
+        splitPane.getAutomaton().addPropertyChangeListener("automatonChanged", new PropertyChangeListener() {
+            
+            @Override
+            public void propertyChange(PropertyChangeEvent ev)
+            {
+                int selectedStatesNumber = splitPane.getSelectedStatesNumber();
+                selectedStatesLabel.setText(Integer.toString(selectedStatesNumber));
+            }
+        });
+        toolbar.add(label);
+        toolbar.add(selectedStatesLabel);   
         toolbar.addSeparator(new Dimension(toolbar.getPreferredSize().height, 0));
         
         int cols = 5;
@@ -363,13 +363,13 @@ public class AutomataViewer
                         {
                             if (ev.getButton() == MouseEvent.BUTTON1)
                             {
-                                selectedInnerPanel.setBackground(stateColor);
                                 paintPanel.setSelectedStateColor(stateColor);
+                                selectedInnerPanel.setBackground(paintPanel.getSelectedStateColor());
                             }
                             else if (ev.getButton() == MouseEvent.BUTTON3)
                             {
-                                unselectedInnerPanel.setBackground(stateColor);
                                 paintPanel.setUnselectedStateColor(stateColor);
+                                unselectedInnerPanel.setBackground(paintPanel.getUnselectedStateColor());
                             }
                         }
                     });

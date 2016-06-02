@@ -9,6 +9,9 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -22,13 +25,24 @@ import javax.swing.text.StyledDocument;
 public class ShortestResetWordToolbar extends DockToolbar
 {
     private final int MAX_STATES = 25; // max number of states in automaton
+    
     private final JTextPane textPane;
+    private final JLabel lengthLabel;
     
     public ShortestResetWordToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
         
         JPanel panel = getPanel();
+        
+        lengthLabel = new JLabel();
+        lengthLabel.setFont(getDeafultFont());
+        JPanel labelPanel = new JPanel();
+        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.X_AXIS));
+        labelPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        labelPanel.add(lengthLabel);
+        panel.add(labelPanel, BorderLayout.NORTH);
+        
         textPane = new JTextPane();
         textPane.setEditable(false);
         textPane.setFont(getDeafultFont());
@@ -189,11 +203,12 @@ public class ShortestResetWordToolbar extends DockToolbar
                 Color color = AutomatonHelper.TRANSITIONS_COLORS[trans];
                 insertStringToTextPane(Character.toString(letter), color);
             }
-            insertStringToTextPane(String.format("%nLength: %d", transitions.size()), Color.BLACK);
+            lengthLabel.setText(String.format("%nLength: %d", transitions.size()));
         }
         catch(WordNotFoundException ex) {
             textPane.setText("");
             insertStringToTextPane("Word not found", Color.BLACK);
+            lengthLabel.setText("Length: -");
         }
     }
 }

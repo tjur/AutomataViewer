@@ -1,6 +1,7 @@
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -24,10 +26,12 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 
-public class ShortestWordForSubsetsToolbar extends DockToolbar
+public class ShortestWordForSubsetToolbar extends DockToolbar
 {
     private final int MAX_STATES = 25; // max number of states in automaton
+    
     private final JTextPane textPane;
+    private final JLabel lengthLabel;
     
     private final JRadioButton compressingButton;
     private final JRadioButton resetButton;
@@ -36,15 +40,25 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
     
     private ReversedAutomaton reversedAutomaton;
     
-    public ShortestWordForSubsetsToolbar(String name, Automaton automaton)
+    public ShortestWordForSubsetToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
         reversedAutomaton = new ReversedAutomaton(automaton);
         
         JPanel panel = getPanel();
+        
+        lengthLabel = new JLabel();
+        lengthLabel.setFont(getDeafultFont());
+        JPanel labelPanel = new JPanel();
+        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.X_AXIS));
+        labelPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        labelPanel.add(lengthLabel);
+        panel.add(labelPanel, BorderLayout.NORTH);
+        
         textPane = new JTextPane();
         textPane.setEditable(false);
         textPane.setFont(getDeafultFont());
+        textPane.setPreferredSize(new Dimension(0, 60));
         
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem menuItemCopy;
@@ -126,17 +140,19 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
         buttonGroup.add(extendingButton);
         buttonGroup.add(fullyExtendingButton);
         
-        JPanel borderPanel = new JPanel();
-        borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.Y_AXIS));
-        borderPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-        borderPanel.add(compressingButton);
-        borderPanel.add(new Separator());
-        borderPanel.add(resetButton);
-        borderPanel.add(new Separator());
-        borderPanel.add(extendingButton);
-        borderPanel.add(new Separator());
-        borderPanel.add(fullyExtendingButton);
-        panel.add(borderPanel, BorderLayout.EAST);
+        JPanel leftPanel = new JPanel();
+        JPanel rightPanel = new JPanel();
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+        leftPanel.add(compressingButton);
+        leftPanel.add(resetButton);
+        rightPanel.add(extendingButton);
+        rightPanel.add(fullyExtendingButton);
+        
+        JPanel outerPanel = new JPanel();
+        outerPanel.add(leftPanel);
+        outerPanel.add(rightPanel);
+        panel.add(outerPanel, BorderLayout.SOUTH);
     }
     
     private ArrayList<Integer> findShortestCompressingWord(int[] subset) throws WordNotFoundException
@@ -468,11 +484,12 @@ public class ShortestWordForSubsetsToolbar extends DockToolbar
                 Color color = AutomatonHelper.TRANSITIONS_COLORS[trans];
                 insertStringToTextPane(Character.toString(letter), color);
             }
-            insertStringToTextPane(String.format("%nLength: %d", transitions.size()), Color.BLACK);
+            lengthLabel.setText(String.format("%nLength: %d", transitions.size()));
         }
         catch(WordNotFoundException ex) {
             textPane.setText("");
             insertStringToTextPane("Word not found", Color.BLACK);
+            lengthLabel.setText("Length: -");
         }
     }
 

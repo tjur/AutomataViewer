@@ -15,6 +15,7 @@ import java.awt.geom.AffineTransform;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class PaintPanel extends JPanel implements MouseListener, MouseMotionListener
@@ -166,6 +167,12 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     
     public void setSelectedStateColor(Color color)
     {
+        if (color.equals(unselectedStateColor))
+        {
+            JOptionPane.showMessageDialog(this, "Color 1 and Color 2 must be different.");
+            return;
+        }
+        
         if (!color.equals(selectedStateColor))
         {
             int[] selectedStates = automaton.getSelectedStates();
@@ -175,6 +182,15 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                 {
                     automaton.unselectState(i);
                     colors[i] = selectedStateColor;
+                }
+            }
+            
+            for (int i = 0; i < colors.length; i++)
+            {
+                if (colors[i].equals(color))
+                {
+                    automaton.selectState(i);
+                    colors[i] = unselectedStateColor;
                 }
             }
             
@@ -190,7 +206,10 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     
     public void setUnselectedStateColor(Color color)
     {
-        unselectedStateColor = color;
+        if (color.equals(selectedStateColor))
+            JOptionPane.showMessageDialog(this, "Color 1 and Color 2 must be different.");
+        else       
+            unselectedStateColor = color;
     }
     
     public void setSelectedTransition(int trans)
