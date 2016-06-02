@@ -1,4 +1,8 @@
 
+package AutomataViewer;
+
+import AutomatonAlgorithms.ShortestResetWord;
+import AutomatonAlgorithms.WordNotFoundException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -9,7 +13,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -84,95 +87,6 @@ public class ShortestResetWordToolbar extends DockToolbar
         panel.add(textPane, BorderLayout.CENTER);
     }
     
-    private ArrayList<Integer> findShortestResetWord() throws WordNotFoundException
-    {
-        int[] subset = new int[getAutomaton().getN()];
-        Arrays.fill(subset, 1);
-        boolean[] visited = new boolean[(int) Math.pow(2, getAutomaton().getN())];
-        int[] fromWhereSubsetVal = new int[visited.length];
-        int[] fromWhereTransition = new int[visited.length];
-        Arrays.fill(visited, false);
-        Arrays.fill(fromWhereSubsetVal, -1);
-        Arrays.fill(fromWhereTransition, -1);
-        
-        int[] queue = new int[visited.length];
-        int start = 0;
-        int end = 0;
-        int subsetValue = subsetToValue(subset);
-        queue[end] = subsetValue;
-        end++;
-        visited[subsetValue] = true;
-        
-        while (start < end)
-        {
-            subsetValue = queue[start];
-            start++;
-            
-            if (Integer.bitCount(subsetValue) == 1) // singleton is a power of two
-            {
-                ArrayList<Integer> transitions = new ArrayList<>();
-                while (fromWhereSubsetVal[subsetValue] != -1)
-                {
-                    transitions.add(fromWhereTransition[subsetValue]);
-                    subsetValue = fromWhereSubsetVal[subsetValue];
-                }
-                
-                Collections.reverse(transitions);
-                return transitions;
-            }
-            else
-            {
-                subset = valueToSubset(subsetValue);
-                for (int trans = 0; trans < getAutomaton().getK(); trans++)
-                {
-                    int[] newSubset = new int[getAutomaton().getN()];
-                    for (int i = 0; i < subset.length; i++)
-                    {
-                        if (subset[i] == 1)
-                            newSubset[getAutomaton().getMatrix()[i][trans]] = 1;
-                    }
-                    
-                    int newSubsetValue = subsetToValue(newSubset);
-                    if (!visited[newSubsetValue])
-                    {
-                        fromWhereSubsetVal[newSubsetValue] = subsetValue;
-                        fromWhereTransition[newSubsetValue] = trans;
-                        queue[end] = newSubsetValue;
-                        end++;
-                        visited[newSubsetValue] = true;
-                    }
-                }
-            }
-        }
-        
-        throw new WordNotFoundException();
-    }
-    
-    private int subsetToValue(int[] subset)
-    {
-        int value = 0;
-        for (int i = 0; i < subset.length; i++)
-            value = 2 * value + subset[i];
-        
-        return value;
-    }
-    
-    private int[] valueToSubset(int value)
-    {
-        int[] subset = new int[getAutomaton().getN()];
-        for (int i = 0; i < subset.length; i++)
-        {
-            subset[subset.length - 1 - i] = (int) (value % 2);
-            value /= 2;
-            if (value == 0)
-                break;
-        }
-        
-        return subset;
-    }
-    
-    private class WordNotFoundException extends Exception {}
-    
     private void insertStringToTextPane(String text, Color color)
     {
         StyledDocument doc = textPane.getStyledDocument();
@@ -197,7 +111,9 @@ public class ShortestResetWordToolbar extends DockToolbar
         }
 
         try {
-            ArrayList<Integer> transitions = findShortestResetWord();
+            int[] subset = new int[getAutomaton().getN()];
+            Arrays.fill(subset, 1);
+            ArrayList<Integer> transitions = ShortestResetWord.find(getAutomaton(), subset);
             textPane.setText("");
             for (int trans : transitions)
             {

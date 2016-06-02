@@ -1,8 +1,10 @@
 
+package AutomataViewer;
+
 import java.awt.Color;
 
 
-public final class AutomatonHelper
+public abstract class AutomatonHelper
 {
     public static final Color defaultUnselectedStateColor = Color.WHITE;
     

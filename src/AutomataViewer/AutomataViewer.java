@@ -1,4 +1,6 @@
 
+package AutomataViewer;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -54,16 +56,16 @@ public class AutomataViewer
 
     private final JFrame frame;
     
-    private SplitPane splitPane;
-    private PaintPanel paintPanel;
+    private final SplitPane splitPane;
+    private final PaintPanel paintPanel;
     
     private JToolBar toolbar;
     private final String[] iconFiles = { 
-        "icons/add_states.png", "icons/remove_states.png", "icons/replace_states.png",
-        "icons/add_transitions.png", "icons/select_states.png", "icons/move_states.png"
+        "icons/move_states.png", "icons/add_states.png", "icons/remove_states.png",
+        "icons/replace_states.png", "icons/add_transitions.png", "icons/select_states.png"
     };
-    private final String [] buttonLabels = { "Add states", "Remove states", "Replace states", "Add/Remove transitions", "Select states", "Move states" };
-    private final JButton [] toolBarButtons = new JButton[buttonLabels.length];
+    private final String[] buttonLabels = { "Move states", "Add states", "Remove states", "Replace states", "Add/Remove transitions", "Select states" };
+    private final JButton[] toolBarButtons = new JButton[buttonLabels.length];
     
     private JButton addTransButton;
     private JButton removeTransButton;

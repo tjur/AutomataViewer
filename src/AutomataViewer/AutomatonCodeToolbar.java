@@ -1,4 +1,6 @@
 
+package AutomataViewer;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -85,8 +87,8 @@ public class AutomatonCodeToolbar extends DockToolbar
         panel.add(textPane, BorderLayout.CENTER);
         
         
-        JButton buttonSetGraph = new JButton("OK");
-        buttonSetGraph.addActionListener(new ActionListener() {
+        JButton realignButton = new JButton("Realign");
+        realignButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ev)
@@ -110,7 +112,7 @@ public class AutomatonCodeToolbar extends DockToolbar
         });
         JPanel borderPanel = new JPanel();
         borderPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-        borderPanel.add(buttonSetGraph);
+        borderPanel.add(realignButton);
         panel.add(borderPanel, BorderLayout.EAST);
     }
     

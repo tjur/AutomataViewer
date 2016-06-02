@@ -1,4 +1,6 @@
 
+package AutomataViewer;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -46,7 +48,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     
     public static enum Operation
     {
-        ADD_STATES(0), REMOVE_STATES(1), REPLACE_STATES(2), ADD_TRANS(3), SELECT_STATES(4), MOVE_STATES(5);
+        MOVE_STATES(0), ADD_STATES(1), REMOVE_STATES(2), REPLACE_STATES(3), ADD_TRANS(4), SELECT_STATES(5);
         
         private final int value;
         

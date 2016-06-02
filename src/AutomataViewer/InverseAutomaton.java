@@ -1,4 +1,6 @@
 
+package AutomataViewer;
+
 public class InverseAutomaton
 {
     
