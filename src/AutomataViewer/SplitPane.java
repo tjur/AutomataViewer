@@ -40,7 +40,7 @@ public class SplitPane extends JSplitPane
         JPanel innerPanel = new JPanel();
         innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
         rightPanel.add(new JScrollPane(innerPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
-        Dimension rightPanelMinimumSize = new Dimension(300, 0);
+        Dimension rightPanelMinimumSize = new Dimension(320, 0);
         rightPanel.setMinimumSize(rightPanelMinimumSize);
         setBottomComponent(rightPanel);
         setResizeWeight(1.0);
@@ -174,7 +174,7 @@ public class SplitPane extends JSplitPane
         return paintPanel;
     }
     
-    public AutomatonCodeToolbar getTextPanel()
+    public AutomatonCodeToolbar getCodeToolbar()
     {
         return codeToolbar;
     }
@@ -182,5 +182,10 @@ public class SplitPane extends JSplitPane
     public ArrayList<DockToolbar> getDockToolbars()
     {
         return dockToolbars;
+    }
+    
+    public void realign()
+    {
+        codeToolbar.realign();
     }
 }

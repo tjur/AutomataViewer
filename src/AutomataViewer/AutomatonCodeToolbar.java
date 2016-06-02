@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -93,32 +94,40 @@ public class AutomatonCodeToolbar extends DockToolbar
             @Override
             public void actionPerformed(ActionEvent ev)
             {
-                String matrix = textPane.getText().trim();
-                try 
-                {
-                    if (getAutomaton().toString().equals(matrix))
-                        firePropertyChange("repaintCenterAutomaton", false, true);
-                    else
-                    {
-                        getAutomaton().update(new Automaton(matrix));
-                        firePropertyChange("updateAndRepaintCenterAutomaton", false, true);
-                        firePropertyChange("updateTransitions", false, true);
-                    }
-                } 
-                catch (IllegalArgumentException e) {
-                    JOptionPane.showMessageDialog(null, e.toString());
-                }
+                realign();
             }       
         });
+        
+        
         JPanel borderPanel = new JPanel();
-        borderPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.X_AXIS));
+        borderPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         borderPanel.add(realignButton);
-        panel.add(borderPanel, BorderLayout.EAST);
+        panel.add(borderPanel, BorderLayout.SOUTH);
     }
     
     public void setCode(String text)
     {
         textPane.setText(text);
+    }
+    
+    public void realign()
+    {
+        String matrix = textPane.getText().trim();
+        try 
+        {
+            if (getAutomaton().toString().equals(matrix))
+                firePropertyChange("repaintCenterAutomaton", false, true);
+            else
+            {
+                getAutomaton().update(new Automaton(matrix));
+                firePropertyChange("updateAndRepaintCenterAutomaton", false, true);
+                firePropertyChange("updateTransitions", false, true);
+            }
+        } 
+        catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, e.toString());
+        }
     }
 
     @Override

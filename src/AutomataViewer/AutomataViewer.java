@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -36,6 +38,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu.Separator;
 import javax.swing.JToolBar;
 import javax.swing.ListCellRenderer;
 
@@ -74,7 +77,7 @@ public class AutomataViewer
                 updateTransitionsComboBox();
             }
         };
-        splitPane.getTextPanel().addPropertyChangeListener("updateTransitions", pcl);
+        splitPane.getCodeToolbar().addPropertyChangeListener("updateTransitions", pcl);
         paintPanel.addPropertyChangeListener("updateTransitions", pcl);
         
         createMenuBar();
@@ -130,6 +133,16 @@ public class AutomataViewer
             }   
         });
         
+        JMenuItem realignMenuItem = new JMenuItem("Realign");
+        realignMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                splitPane.realign();
+            }
+        });
+        
         JMenuItem resetMenuItem = new JMenuItem("Reset");
         resetMenuItem.addActionListener(new ActionListener() {
 
@@ -140,9 +153,22 @@ public class AutomataViewer
             }
         });
         
+        JMenuItem exitMenuItem = new JMenuItem("Exit");
+        exitMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+            }
+        });
+        
         automatonMenu.add(saveMenuItem);
         automatonMenu.addSeparator();
+        automatonMenu.add(realignMenuItem);
         automatonMenu.add(resetMenuItem);
+        automatonMenu.addSeparator();
+        automatonMenu.add(exitMenuItem);
         menuBar.add(automatonMenu);
         
         JMenu toolbarsMenu = new JMenu("Toolbars");
@@ -162,6 +188,49 @@ public class AutomataViewer
             });
         }
         menuBar.add(toolbarsMenu);
+        
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem aboutMenuItem = new JMenuItem("About");
+        aboutMenuItem.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                JFrame aboutFrame = new JFrame("About");
+                aboutFrame.setLayout(new GridLayout());
+                
+                JPanel panel = new JPanel();
+                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+                
+                String[] strings = {
+                    "<html>AutomataViewer is a graphical interface for</html>",
+                    "<html>creating and operating on automata<br><br></html>",
+                    "<html>Authors:</html>",
+                    "<html>Tomasz Jurkiewicz<br></html>",
+                    "<html>Marek Szykuła<br><br><br></html>",
+                    "<html>2016</html>"
+                };
+                
+                panel.add(new Separator());
+                for (String str : strings)
+                {
+                    JLabel label = new JLabel(str, JLabel.CENTER);
+                    label.setFont(new Font("Arial", Font.ITALIC + Font.BOLD, 14));
+                    panel.add(label);
+                }
+                panel.add(new Separator());
+                
+                aboutFrame.add(panel);
+                aboutFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                aboutFrame.setSize(350, 200);
+                aboutFrame.setLocationRelativeTo(null);
+                aboutFrame.setResizable(false);
+                aboutFrame.setVisible(true);
+            }
+        });
+        helpMenu.add(aboutMenuItem);
+        menuBar.add(helpMenu);
+        
         frame.setJMenuBar(menuBar);
     }
     

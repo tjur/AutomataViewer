@@ -29,13 +29,13 @@ import javax.swing.text.StyledDocument;
 public class ApplyWordToolbar extends DockToolbar
 {
     private JTextPane textPane;
-    private InverseAutomaton reversedAutomaton;
+    private InverseAutomaton inverseAutomaton;
     private final HashMap<Character, Integer> hashMap;
     
     public ApplyWordToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
-        reversedAutomaton = new InverseAutomaton(automaton);
+        inverseAutomaton = new InverseAutomaton(automaton);
         
         hashMap = new HashMap<>();
         for (int i = 0; i < automaton.getK(); i++)
@@ -170,6 +170,7 @@ public class ApplyWordToolbar extends DockToolbar
         });
         
         imageButton.setPreferredSize(preimageButton.getPreferredSize());
+        preimageButton.setPreferredSize(imageButton.getPreferredSize());
         
         JPanel borderPanel = new JPanel();
         borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.X_AXIS));
@@ -220,7 +221,7 @@ public class ApplyWordToolbar extends DockToolbar
             {
                 if (subset[i] == 1)
                 {
-                    int[] subset2 = reversedAutomaton.getMatrix()[i][hashMap.get(letter)];
+                    int[] subset2 = inverseAutomaton.getMatrix()[i][hashMap.get(letter)];
                     for (int j = 0; j < N; j++)
                     {
                         if (subset2[j] == 1)
@@ -236,7 +237,7 @@ public class ApplyWordToolbar extends DockToolbar
     @Override
     protected void update() 
     {
-        reversedAutomaton = new InverseAutomaton(getAutomaton());
+        inverseAutomaton = new InverseAutomaton(getAutomaton());
         hashMap.clear();
         for (int i = 0; i < getAutomaton().getK(); i++)
             hashMap.put(AutomatonHelper.TRANSITIONS_LETTERS[i], i);
