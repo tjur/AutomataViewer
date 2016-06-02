@@ -2,35 +2,40 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.util.Arrays;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 
 public class BasicPropertiesToolbar extends DockToolbar
 {
-    private final JTextPane textPane;
+    private final JLabel syncLabel;
+    private final JLabel connectedLabel;
     
-    private ReversedAutomaton reversedAutomaton;
+    private InverseAutomaton inverseAutomaton;
     private boolean[] visited;
     
     public BasicPropertiesToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
         
-        reversedAutomaton = new ReversedAutomaton(automaton);
+        inverseAutomaton = new InverseAutomaton(automaton);
         visited = new boolean[getAutomaton().getN()];
         
         JPanel panel = getPanel();
-        textPane = new JTextPane();
-        textPane.setEditable(false);
-        textPane.setFont(getDeafultFont());
-        textPane.setPreferredSize(new Dimension(0, 60));
-
-        panel.add(textPane, BorderLayout.CENTER);
+        
+        syncLabel = new JLabel();
+        connectedLabel = new JLabel();
+        Font font = syncLabel.getFont().deriveFont((float) getDeafultFont().getSize());
+        syncLabel.setFont(font);
+        connectedLabel.setFont(font);
+        
+        JPanel labelPanel = new JPanel();
+        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
+        labelPanel.add(syncLabel);
+        labelPanel.add(connectedLabel);
+        panel.add(labelPanel, BorderLayout.CENTER);
     }
     
     private boolean isSynchronizing()
@@ -48,7 +53,7 @@ public class BasicPropertiesToolbar extends DockToolbar
         {
             for (int k = 0; k < K; k++)
             {
-                int[] states = reversedAutomaton.getMatrix()[n][k];
+                int[] states = inverseAutomaton.getMatrix()[n][k];
                 for (int i1 = 0; i1 < states.length; i1++)
                 {
                     for (int i2 = i1+1; i2 < states.length; i2++)
@@ -75,8 +80,8 @@ public class BasicPropertiesToolbar extends DockToolbar
             int p = stackN2[top];
             for (int k = 0; k < K; k++)
             {
-                int[] states1 = reversedAutomaton.getMatrix()[q][k];
-                int[] states2 = reversedAutomaton.getMatrix()[p][k];
+                int[] states1 = inverseAutomaton.getMatrix()[q][k];
+                int[] states2 = inverseAutomaton.getMatrix()[p][k];
 
                 for (int i1 = 0; i1 < states1.length; i1++)
                 {
@@ -155,7 +160,7 @@ public class BasicPropertiesToolbar extends DockToolbar
     private void dfsReversed(int vertex)
     {
         visited[vertex] = true;
-        int[][][] reversedMatrix = reversedAutomaton.getMatrix();
+        int[][][] reversedMatrix = inverseAutomaton.getMatrix();
         for (int i = 0; i < getAutomaton().getK(); i++)
         {
             for (int j = 0; j < getAutomaton().getN(); j++)
@@ -208,40 +213,24 @@ public class BasicPropertiesToolbar extends DockToolbar
                 dfsUndirected(i, matrix);
         }
     }
-    
-    private void insertStringToTextPane(String text, Color color)
-    {
-        StyledDocument doc = textPane.getStyledDocument();
-        Style style = textPane.addStyle("Style", null);
-        StyleConstants.setForeground(style, color);
-
-        try { 
-            doc.insertString(doc.getLength(), text, style);
-            textPane.removeStyle("Style");
-        }
-        catch (BadLocationException e) {}
-    }
 
     @Override
     protected void update()
     {
-        reversedAutomaton = new ReversedAutomaton(getAutomaton());
+        inverseAutomaton = new InverseAutomaton(getAutomaton());
         visited = new boolean[getAutomaton().getN()];
         
-        textPane.setText("");
-        
         if (isSynchronizing())
-            insertStringToTextPane("Synchronizing", Color.BLACK);
+            syncLabel.setText("Synchronizing");
         else
-            insertStringToTextPane("Not synchronizing", Color.BLACK);
+            syncLabel.setText("Not synchronizing");
             
-        insertStringToTextPane("\n", Color.BLACK);
         
         if (isStronglyConnected())
-            insertStringToTextPane("Strongly connected", Color.BLACK);
+            connectedLabel.setText("Strongly connected");
         else if (isConnected())
-            insertStringToTextPane("Connected", Color.BLACK);
+            connectedLabel.setText("Connected");
         else
-            insertStringToTextPane("Not connected", Color.BLACK);
+            connectedLabel.setText("Not connected");
     }
 }

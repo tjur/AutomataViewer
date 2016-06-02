@@ -2,6 +2,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -38,17 +39,18 @@ public class ShortestWordForSubsetToolbar extends DockToolbar
     private final JRadioButton extendingButton;
     private final JRadioButton fullyExtendingButton;
     
-    private ReversedAutomaton reversedAutomaton;
+    private InverseAutomaton inverseAutomaton;
     
     public ShortestWordForSubsetToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
-        reversedAutomaton = new ReversedAutomaton(automaton);
+        inverseAutomaton = new InverseAutomaton(automaton);
         
         JPanel panel = getPanel();
         
         lengthLabel = new JLabel();
-        lengthLabel.setFont(getDeafultFont());
+        Font font = lengthLabel.getFont().deriveFont((float) getDeafultFont().getSize());
+        lengthLabel.setFont(font);
         JPanel labelPanel = new JPanel();
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.X_AXIS));
         labelPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
@@ -328,7 +330,7 @@ public class ShortestWordForSubsetToolbar extends DockToolbar
                     {
                         if (subset[i] == 1)
                         {
-                            int[] subset2 = reversedAutomaton.getMatrix()[i][trans];
+                            int[] subset2 = inverseAutomaton.getMatrix()[i][trans];
                             for (int j = 0; j < N; j++)
                             {
                                 if (subset2[j] == 1)
@@ -400,7 +402,7 @@ public class ShortestWordForSubsetToolbar extends DockToolbar
                     {
                         if (subset[i] == 1)
                         {
-                            int[] subset2 = reversedAutomaton.getMatrix()[i][trans];
+                            int[] subset2 = inverseAutomaton.getMatrix()[i][trans];
                             for (int j = 0; j < N; j++)
                             {
                                 if (subset2[j] == 1)
@@ -503,7 +505,7 @@ public class ShortestWordForSubsetToolbar extends DockToolbar
             return;
         }
 
-        reversedAutomaton = new ReversedAutomaton(getAutomaton());
+        inverseAutomaton = new InverseAutomaton(getAutomaton());
         recalculate();
     }
 }

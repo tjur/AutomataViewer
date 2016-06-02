@@ -2,6 +2,7 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -36,7 +37,8 @@ public class ShortestResetWordToolbar extends DockToolbar
         JPanel panel = getPanel();
         
         lengthLabel = new JLabel();
-        lengthLabel.setFont(getDeafultFont());
+        Font font = lengthLabel.getFont().deriveFont((float) getDeafultFont().getSize());
+        lengthLabel.setFont(font);
         JPanel labelPanel = new JPanel();
         labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.X_AXIS));
         labelPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));

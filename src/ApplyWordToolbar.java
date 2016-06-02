@@ -27,13 +27,13 @@ import javax.swing.text.StyledDocument;
 public class ApplyWordToolbar extends DockToolbar
 {
     private JTextPane textPane;
-    private ReversedAutomaton reversedAutomaton;
+    private InverseAutomaton reversedAutomaton;
     private final HashMap<Character, Integer> hashMap;
     
     public ApplyWordToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
-        reversedAutomaton = new ReversedAutomaton(automaton);
+        reversedAutomaton = new InverseAutomaton(automaton);
         
         hashMap = new HashMap<>();
         for (int i = 0; i < automaton.getK(); i++)
@@ -234,7 +234,7 @@ public class ApplyWordToolbar extends DockToolbar
     @Override
     protected void update() 
     {
-        reversedAutomaton = new ReversedAutomaton(getAutomaton());
+        reversedAutomaton = new InverseAutomaton(getAutomaton());
         hashMap.clear();
         for (int i = 0; i < getAutomaton().getK(); i++)
             hashMap.put(AutomatonHelper.TRANSITIONS_LETTERS[i], i);

@@ -1,11 +1,11 @@
 
-public class ReversedAutomaton
+public class InverseAutomaton
 {
     
     private int K, N;
     private int [][][] matrix; // matrix[state][transition] - array of states
 
-    public ReversedAutomaton(Automaton automaton)
+    public InverseAutomaton(Automaton automaton)
     {
         K = automaton.getK();
         N = automaton.getN();

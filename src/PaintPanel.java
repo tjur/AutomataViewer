@@ -208,8 +208,11 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     {
         if (color.equals(selectedStateColor))
             JOptionPane.showMessageDialog(this, "Color 1 and Color 2 must be different.");
-        else       
+        else
+        {
             unselectedStateColor = color;
+            repaint();
+        }
     }
     
     public void setSelectedTransition(int trans)
@@ -550,7 +553,10 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         {
             int n = orders[i];
             if (automaton.isSelected(n))
+            {
                 g.setColor(selectedStateColor);
+                colors[n] = unselectedStateColor;
+            }
             else
                 g.setColor(colors[n]);
             
