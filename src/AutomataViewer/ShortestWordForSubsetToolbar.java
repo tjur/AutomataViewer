@@ -184,9 +184,9 @@ public class ShortestWordForSubsetToolbar extends DockToolbar
             else if (resetButton.isSelected())
                 transitions = ShortestResetWord.find(getAutomaton(), subset);
             else if (extendingButton.isSelected())
-                transitions = ShortestExtendingWord.find(getAutomaton(), inverseAutomaton, subset, false);
+                transitions = ShortestExtendingWord.find(getAutomaton(), inverseAutomaton, subset, getAutomaton().getSelectedStatesNumber() + 1);
             else if (fullyExtendingButton.isSelected())
-                transitions = ShortestExtendingWord.find(getAutomaton(), inverseAutomaton, subset, true);
+                transitions = ShortestExtendingWord.find(getAutomaton(), inverseAutomaton, subset, getAutomaton().getN());
             
             textPane.setText("");
             for (int trans : transitions)

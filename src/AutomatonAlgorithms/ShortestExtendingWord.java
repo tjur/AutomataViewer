@@ -10,10 +10,13 @@ import java.util.Collections;
 
 public abstract class ShortestExtendingWord
 {
-    public static ArrayList<Integer> find(Automaton automaton, InverseAutomaton inverseAutomaton, int[] subset, boolean fullyExtending) throws WordNotFoundException
+    public static ArrayList<Integer> find(Automaton automaton, InverseAutomaton inverseAutomaton, int[] subset, int destinationSize) throws WordNotFoundException
     {
         int N = automaton.getN();
         int K = automaton.getK();
+        
+        if (N == 0)
+            throw new WordNotFoundException();
         
         boolean[] visited = new boolean[(int) Math.pow(2, automaton.getN())];
         int[] fromWhereSubsetVal = new int[visited.length];
@@ -26,7 +29,6 @@ public abstract class ShortestExtendingWord
         int start = 0;
         int end = 0;
         int subsetValue = Helper.subsetToValue(automaton, subset);
-        int bitCount = Integer.bitCount(subsetValue);
         queue[end] = subsetValue;
         end++;
         visited[subsetValue] = true;
@@ -36,7 +38,7 @@ public abstract class ShortestExtendingWord
             subsetValue = queue[start];
             start++;
             
-            if ((fullyExtending && Integer.bitCount(subsetValue) == N && N > 0) || (!fullyExtending && Integer.bitCount(subsetValue) > bitCount))
+            if (Integer.bitCount(subsetValue) >= destinationSize)
             {
                 ArrayList<Integer> transitions = new ArrayList<>();
                 while (fromWhereSubsetVal[subsetValue] != -1)
