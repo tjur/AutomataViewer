@@ -1,6 +1,7 @@
 
 package AutomataViewer;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -22,7 +23,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -54,10 +54,11 @@ public class AutomataViewer
     private JToolBar toolbar;
     private final String[] iconFiles = { 
         "icons/move_states.png", "icons/add_states.png", "icons/remove_states.png",
-        "icons/replace_states.png", "icons/add_transitions.png", "icons/select_states.png"
+        "icons/replace_states.png", "icons/add_transitions.png"
     };
     private final String[] buttonLabels = { "Move states", "Add states", "Remove states", "Replace states", "Add/Remove transitions", "Select states" };
     private final JButton[] toolBarButtons = new JButton[buttonLabels.length];
+    private JButton selectedColorsButton;
     
     private JButton addTransButton;
     private JButton removeTransButton;
@@ -284,16 +285,24 @@ public class AutomataViewer
         
         for (int i = 0; i < buttonLabels.length; i++) 
         {
-            ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(iconFiles[i]));
-            Image image = icon.getImage();  
-            Image newimage = image.getScaledInstance(35, 35, java.awt.Image.SCALE_SMOOTH);  
-            icon = new ImageIcon(newimage);
-            toolBarButtons[i] = new JButton(icon);
+            if (i != PaintPanel.Operation.SELECT_STATES.getValue())
+            {
+                ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(iconFiles[i]));
+                Image image = icon.getImage();  
+                Image newimage = image.getScaledInstance(35, 35, java.awt.Image.SCALE_SMOOTH);  
+                icon = new ImageIcon(newimage);
+                toolBarButtons[i] = new JButton(icon);
+                if (i != 0)
+                    toolbar.addSeparator();
+                toolbar.add(toolBarButtons[i]);
+            }
+            else
+            {
+                toolBarButtons[i] = new JButton();
+                selectedColorsButton = toolBarButtons[i];
+            }
             toolBarButtons[i].setToolTipText(buttonLabels[i]);
             toolBarButtons[i].addActionListener(actionListener);
-            if (i != 0)
-                toolbar.addSeparator();
-            toolbar.add(toolBarButtons[i]);
         }     
         toolBarButtons[paintPanel.getOperation()].setBackground(selectedButtonColor);
         
@@ -377,33 +386,10 @@ public class AutomataViewer
         int rows = PaintPanel.STATES_COLORS.length / cols;
         if (PaintPanel.STATES_COLORS.length % cols != 0)
             rows++;
-          
-        JPanel selectedColorPanel = new JPanel(new BorderLayout());
-        JPanel unselectedColorPanel = new JPanel(new BorderLayout());
-        Dimension dim = new Dimension(toolbar.getPreferredSize().height, toolbar.getPreferredSize().height);
-        selectedColorPanel.setPreferredSize(dim);
-        selectedColorPanel.setMinimumSize(dim);
-        selectedColorPanel.setMaximumSize(dim);
-        unselectedColorPanel.setPreferredSize(dim);
-        unselectedColorPanel.setMinimumSize(dim);
-        unselectedColorPanel.setMaximumSize(dim);
-        JPanel selectedInnerPanel = new JPanel();
-        selectedInnerPanel.setBackground(paintPanel.getSelectedStateColor());
-        selectedInnerPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.BLACK));
-        selectedColorPanel.add(selectedInnerPanel, BorderLayout.CENTER);
-        JPanel unselectedInnerPanel = new JPanel();
-        unselectedInnerPanel.setBackground(paintPanel.getUnselectedStateColor());
-        unselectedInnerPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, Color.BLACK));
-        unselectedColorPanel.add(unselectedInnerPanel, BorderLayout.CENTER);
-        selectedColorPanel.setToolTipText("Color 1 (for selected states)");
-        unselectedColorPanel.setToolTipText("Color 2");
-        selectedColorPanel.setBorder(BorderFactory.createLineBorder(new Color(219, 219, 219), 10));
-        unselectedColorPanel.setBorder(BorderFactory.createLineBorder(new Color(219, 219, 219), 10));
-         
-        toolbar.add(selectedColorPanel);
-        toolbar.addSeparator();
-        toolbar.add(unselectedColorPanel);
         
+        selectedColorsButton.setIcon(createSelectedColorsIcon(paintPanel.getSelectedStateColor(), paintPanel.getUnselectedStateColor(), 40, 40));
+        toolbar.add(selectedColorsButton);
+        toolbar.addSeparator();        
         toolbar.addSeparator(new Dimension(toolbar.getPreferredSize().height / 2, 0));
         
         JPanel colorChoosersPanel = new JPanel(new GridLayout(rows, cols));
@@ -424,12 +410,12 @@ public class AutomataViewer
                             if (ev.getButton() == MouseEvent.BUTTON1)
                             {
                                 paintPanel.setSelectedStateColor(stateColor);
-                                selectedInnerPanel.setBackground(paintPanel.getSelectedStateColor());
+                                selectedColorsButton.setIcon(createSelectedColorsIcon(paintPanel.getSelectedStateColor(), paintPanel.getUnselectedStateColor(), 40, 40));
                             }
                             else if (ev.getButton() == MouseEvent.BUTTON3)
                             {
                                 paintPanel.setUnselectedStateColor(stateColor);
-                                unselectedInnerPanel.setBackground(paintPanel.getUnselectedStateColor());
+                                selectedColorsButton.setIcon(createSelectedColorsIcon(paintPanel.getSelectedStateColor(), paintPanel.getUnselectedStateColor(), 40, 40));
                             }
                         }
                     });
@@ -438,7 +424,7 @@ public class AutomataViewer
             }
         }
         toolbar.add(colorChoosersPanel);
-        dim = new Dimension(toolbar.getPreferredSize().width / 3, toolbar.getPreferredSize().height);
+        Dimension dim = new Dimension(toolbar.getPreferredSize().width / 3, toolbar.getPreferredSize().height);
         colorChoosersPanel.setMaximumSize(dim);
         
         toolbar.addSeparator();
@@ -452,6 +438,25 @@ public class AutomataViewer
         graphics.fillRect(0, 0, width, height);
         graphics.setXORMode(Color.DARK_GRAY);
         graphics.drawRect(0, 0, width - 1, height - 1);
+        image.flush();
+        ImageIcon icon = new ImageIcon(image);
+        return icon;
+    }
+    
+    private ImageIcon createSelectedColorsIcon(Color selected, Color unselected, int width, int height) 
+    {
+        BufferedImage image = new BufferedImage(width, height, java.awt.image.BufferedImage.TRANSLUCENT);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setColor(unselected);
+        graphics.fillRect(width/3, height/3, 2*width/3, 2*height/3);
+        graphics.setStroke(new BasicStroke(2));
+        graphics.setColor(Color.BLACK);
+        graphics.drawRect(width/3, height/3, 2*width/3, 2*height/3);
+        graphics.setColor(selected);
+        graphics.fillRect(0, 0, 2*width/3, 2*height/3);
+        graphics.setStroke(new BasicStroke(2));
+        graphics.setColor(Color.BLACK);
+        graphics.drawRect(0, 0, 2*width/3, 2*height/3);
         image.flush();
         ImageIcon icon = new ImageIcon(image);
         return icon;
