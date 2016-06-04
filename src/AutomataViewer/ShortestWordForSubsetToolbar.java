@@ -9,6 +9,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -146,18 +148,19 @@ public class ShortestWordForSubsetToolbar extends DockToolbar
         buttonGroup.add(extendingButton);
         buttonGroup.add(fullyExtendingButton);
         
-        JPanel leftPanel = new JPanel();
-        JPanel rightPanel = new JPanel();
-        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        leftPanel.add(compressingButton);
-        leftPanel.add(resetButton);
-        rightPanel.add(extendingButton);
-        rightPanel.add(fullyExtendingButton);
-        
         JPanel outerPanel = new JPanel();
-        outerPanel.add(leftPanel);
-        outerPanel.add(rightPanel);
+        outerPanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.WEST;
+        c.weightx = 1.0;
+        c.gridwidth = 1; 
+        outerPanel.add(compressingButton, c);
+        c.gridwidth = GridBagConstraints.REMAINDER; 
+        outerPanel.add(resetButton, c);
+        c.gridwidth = 1; 
+        outerPanel.add(extendingButton, c);
+        c.gridwidth = GridBagConstraints.REMAINDER; 
+        outerPanel.add(fullyExtendingButton, c);
         panel.add(outerPanel, BorderLayout.SOUTH);
     }
     
@@ -180,7 +183,7 @@ public class ShortestWordForSubsetToolbar extends DockToolbar
         try {
             ArrayList<Integer> transitions = new ArrayList<>();
             if (compressingButton.isSelected())
-                transitions = ShortestCompressingWord.find(getAutomaton(), subset);
+                transitions = ShortestCompressingWord.find(getAutomaton(), inverseAutomaton, subset);
             else if (resetButton.isSelected())
                 transitions = ShortestResetWord.find(getAutomaton(), subset);
             else if (extendingButton.isSelected())

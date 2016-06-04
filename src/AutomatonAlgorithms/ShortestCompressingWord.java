@@ -2,72 +2,116 @@
 package AutomatonAlgorithms;
 
 import AutomataViewer.Automaton;
+import AutomataViewer.InverseAutomaton;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 public abstract class ShortestCompressingWord
 { 
-    public static ArrayList<Integer> find(Automaton automaton, int[] subset) throws WordNotFoundException
+  
+    public static ArrayList<Integer> find(Automaton automaton, InverseAutomaton inverseAutomaton, int[] subset) throws WordNotFoundException
     {
-        boolean[] visited = new boolean[(int) Math.pow(2, automaton.getN())];
-        int[] fromWhereSubsetVal = new int[visited.length];
-        int[] fromWhereTransition = new int[visited.length];
+        int N = automaton.getN();
+        int K = automaton.getK();
+        
+        boolean[] visited = new boolean[N*(N-1)];
+        int[] fromWherePair = new int[N*(N-1)];
+        int[] fromWhereTransition = new int[N*(N-1)];
         Arrays.fill(visited, false);
-        Arrays.fill(fromWhereSubsetVal, -1);
+        Arrays.fill(fromWherePair, -1);
         Arrays.fill(fromWhereTransition, -1);
         
-        int[] queue = new int[visited.length];
+        int[] queue = new int[N*(N-1)/2];
+        Arrays.fill(queue, -1);
         int start = 0;
         int end = 0;
-        int subsetValue = Helper.subsetToValue(automaton, subset);
-        int bitCount = Integer.bitCount(subsetValue);
-        queue[end] = subsetValue;
-        end++;
-        visited[subsetValue] = true;
         
-        while (start < end)
+        for (int n = 0; n < N; n++)
         {
-            subsetValue = queue[start];
-            start++;
-            
-            if (Integer.bitCount(subsetValue) < bitCount)
-            {
-                ArrayList<Integer> transitions = new ArrayList<>();
-                while (fromWhereSubsetVal[subsetValue] != -1)
+            for (int k = 0; k < K; k++)
+            {   
+                int[] states = inverseAutomaton.getMatrix()[n][k];
+                for (int i1 = 0; i1 < states.length; i1++)
                 {
-                    transitions.add(fromWhereTransition[subsetValue]);
-                    subsetValue = fromWhereSubsetVal[subsetValue];
-                }
-                
-                Collections.reverse(transitions);
-                return transitions;
-            }
-            else
-            {
-                subset = Helper.valueToSubset(automaton, subsetValue);
-                for (int trans = 0; trans < automaton.getK(); trans++)
-                {
-                    int[] newSubset = new int[automaton.getN()];
-                    for (int i = 0; i < subset.length; i++)
+                    for (int i2 = i1+1; i2 < states.length; i2++)
                     {
-                        if (subset[i] == 1)
-                            newSubset[automaton.getMatrix()[i][trans]] = 1;
-                    }
-                    
-                    int newSubsetValue = Helper.subsetToValue(automaton, newSubset);
-                    if (!visited[newSubsetValue])
-                    {
-                        fromWhereSubsetVal[newSubsetValue] = subsetValue;
-                        fromWhereTransition[newSubsetValue] = trans;
-                        queue[end] = newSubsetValue;
-                        end++;
-                        visited[newSubsetValue] = true;
+                        if (states[i1] == 1 && states[i2] == 1)
+                        {
+                            if (!visited[i1*N + i2]) 
+                            {
+                                if (subset[i1] == 1 && subset[i2] == 1)
+                                {
+                                    ArrayList<Integer> transitions = new ArrayList<>();
+                                    transitions.add(k);
+                                    return transitions;
+                                }
+                                
+                                visited[i1*N + i2] = true;
+                                fromWhereTransition[i1*N + i2] = k;
+                                queue[end] = i1*N + i2;
+                                end++;
+                            }
+                        }
                     }
                 }
             }
         }
         
+        while (start < end) 
+        {
+            int q = queue[start] / N;
+            int p = queue[start] % N;
+            start++;
+            
+            for (int k = 0; k < K; k++)
+            {   
+                int[] states1 = inverseAutomaton.getMatrix()[q][k];
+                int[] states2 = inverseAutomaton.getMatrix()[p][k];
+
+                for (int i1 = 0; i1 < states1.length; i1++)
+                {
+                    for (int i2 = 0; i2 < states2.length; i2++) 
+                    {
+                        if (states1[i1] == 1 && states2[i2] == 1)
+                        {   
+                            int i = i1;
+                            int j = i2;
+                            if (i1 > i2)
+                            {
+                                i = i2;
+                                j = i1;
+                            }
+
+                            if (visited[i*N + j])
+                                continue;
+                            
+                            visited[i*N + j] = true;
+                            fromWherePair[i*N + j] = q*N + p;
+                            fromWhereTransition[i*N + j] = k;
+                            queue[end] = i*N + j;
+                            end++;
+                            
+                            if (subset[i1] == 1 && subset[i2] == 1)
+                            {
+                                int pair = i*N + j;
+                                ArrayList<Integer> transitions = new ArrayList<>();
+                                while (true)
+                                {
+                                    transitions.add(fromWhereTransition[pair]);
+                                    pair = fromWherePair[pair];
+                                    
+                                    if (pair == -1)
+                                        break;
+                                }
+
+                                return transitions;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         throw new WordNotFoundException();
     }
 }

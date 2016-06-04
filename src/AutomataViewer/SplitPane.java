@@ -26,6 +26,8 @@ public class SplitPane extends JSplitPane
     
     private ArrayList<DockToolbar> dockToolbars = new ArrayList<>();
     
+    private final int MIN_WIDTH = 320;
+    
     public SplitPane()
     {
         super(JSplitPane.HORIZONTAL_SPLIT);
@@ -40,7 +42,7 @@ public class SplitPane extends JSplitPane
         JPanel innerPanel = new JPanel();
         innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.Y_AXIS));
         rightPanel.add(new JScrollPane(innerPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
-        Dimension rightPanelMinimumSize = new Dimension(320, 0);
+        Dimension rightPanelMinimumSize = new Dimension(MIN_WIDTH, 0);
         rightPanel.setMinimumSize(rightPanelMinimumSize);
         setBottomComponent(rightPanel);
         setResizeWeight(1.0);
