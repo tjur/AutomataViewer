@@ -6,6 +6,7 @@ import AutomataViewer.Automaton;
 
 public abstract class Helper
 {
+    
     public static int subsetToValue(Automaton automaton, int[] subset)
     {
         int value = 0;

@@ -8,14 +8,9 @@ import java.util.Arrays;
 
 public abstract class BasicProperties
 {
-    private static Automaton automaton;
-    private static InverseAutomaton inverseAutomaton;
-    private static boolean visited[];
     
     public static boolean isIrreduciblySynchronizing(Automaton automaton, InverseAutomaton inverseAutomaton)
     {
-        BasicProperties.automaton = automaton;
-        BasicProperties.inverseAutomaton = inverseAutomaton;
         int K = automaton.getK();
         
         if (!isSynchronizing(automaton, inverseAutomaton))
@@ -31,8 +26,6 @@ public abstract class BasicProperties
     
     public static boolean isSynchronizing(Automaton automaton, InverseAutomaton inverseAutomaton)
     {
-        BasicProperties.automaton = automaton;
-        BasicProperties.inverseAutomaton = inverseAutomaton;
         return isSynchronizing(automaton, inverseAutomaton, -1);
     }
     
@@ -41,7 +34,7 @@ public abstract class BasicProperties
         int N = automaton.getN();
         int K = automaton.getK();
         
-        visited = new boolean[N*(N-1)];
+        boolean[] visited = new boolean[N*(N-1)];
         Arrays.fill(visited, false);
         int[] stackN1 = new int[N*(N-1)/2];
         int[] stackN2 = new int[N*(N-1)/2];
@@ -125,17 +118,14 @@ public abstract class BasicProperties
     }
     
     public static boolean isStronglyConnected(Automaton automaton, InverseAutomaton inverseAutomaton)
-    {
-        BasicProperties.automaton = automaton;
-        BasicProperties.inverseAutomaton = inverseAutomaton;
-        
+    {     
         if (automaton.getN() == 0)
             return false;
         
-        visited = new boolean[automaton.getN()];
+        boolean[] visited = new boolean[automaton.getN()];
         int vertex = 0; // choose arbitrary vertex
         
-        dfs(vertex);
+        dfs(vertex, visited, automaton);
         for (boolean val : visited)
         {
             if (!val)
@@ -143,7 +133,7 @@ public abstract class BasicProperties
         }
         
         Arrays.fill(visited, false);
-        dfsReversed(vertex);
+        dfsReversed(vertex, visited, automaton, inverseAutomaton);
         for (boolean val : visited)
         {
             if (!val)
@@ -153,18 +143,18 @@ public abstract class BasicProperties
         return true;
     }
     
-    private static void dfs(int vertex)
+    private static void dfs(int vertex, boolean[] visited, Automaton automaton)
     {
         visited[vertex] = true;
         int[][] matrix = automaton.getMatrix();
         for (int i = 0; i < automaton.getK(); i++)
         {
             if (!visited[matrix[vertex][i]])
-                dfs(matrix[vertex][i]);
+                dfs(matrix[vertex][i], visited, automaton);
         }
     }
     
-    private static void dfsReversed(int vertex)
+    private static void dfsReversed(int vertex, boolean[] visited, Automaton automaton, InverseAutomaton inverseAutomaton)
     {
         visited[vertex] = true;
         int[][][] reversedMatrix = inverseAutomaton.getMatrix();
@@ -173,22 +163,20 @@ public abstract class BasicProperties
             for (int j = 0; j < automaton.getN(); j++)
             {
                 if (reversedMatrix[vertex][i][j] == 1 && !visited[j])
-                    dfsReversed(j);
+                    dfsReversed(j, visited, automaton, inverseAutomaton);
             }
         }
     }
     
     public static boolean isConnected(Automaton automaton)
     {
-        BasicProperties.automaton = automaton;
-        
         if (automaton.getN() == 0)
             return false;
         
         int N = automaton.getN();
         int K = automaton.getK();
         
-        visited = new boolean[N];
+        boolean[] visited = new boolean[N];
         
         int[][] matrix = new int[N][N];
         int vertex = 0; // choose arbitrary vertex
@@ -203,7 +191,7 @@ public abstract class BasicProperties
             }
         }
         
-        dfsUndirected(vertex, matrix);
+        dfsUndirected(vertex, matrix, visited);
         for (boolean val : visited)
         {
             if (!val)
@@ -213,13 +201,13 @@ public abstract class BasicProperties
         return true;
     }
     
-    private static void dfsUndirected(int vertex, int[][] matrix)
+    private static void dfsUndirected(int vertex, int[][] matrix, boolean[] visited)
     {
         visited[vertex] = true;
-        for (int i = 0; i < automaton.getN(); i++)
+        for (int i = 0; i < matrix[vertex].length; i++)
         {
             if (matrix[vertex][i] == 1 && !visited[i])
-                dfsUndirected(i, matrix);
+                dfsUndirected(i, matrix, visited);
         }
     }
 }

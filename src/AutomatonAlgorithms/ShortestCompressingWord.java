@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public abstract class ShortestCompressingWord
-{ 
+{
   
     public static ArrayList<Integer> find(Automaton automaton, InverseAutomaton inverseAutomaton, int[] subset) throws WordNotFoundException
     {

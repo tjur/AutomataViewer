@@ -10,6 +10,7 @@ import java.util.Collections;
 
 public abstract class ShortestExtendingWord
 {
+    
     public static ArrayList<Integer> find(Automaton automaton, InverseAutomaton inverseAutomaton, int[] subset, int destinationSize) throws WordNotFoundException
     {
         int N = automaton.getN();
