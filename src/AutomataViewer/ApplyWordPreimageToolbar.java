@@ -10,7 +10,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
@@ -26,13 +25,13 @@ import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
 
-public class ApplyWordToolbar extends DockToolbar
+public class ApplyWordPreimageToolbar extends DockToolbar
 {
     private JTextPane textPane;
     private InverseAutomaton inverseAutomaton;
     private final HashMap<Character, Integer> hashMap;
     
-    public ApplyWordToolbar(String name, Automaton automaton)
+    public ApplyWordPreimageToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
         inverseAutomaton = new InverseAutomaton(automaton);
@@ -142,19 +141,6 @@ public class ApplyWordToolbar extends DockToolbar
         
         panel.add(textPane, BorderLayout.CENTER);        
         
-        JButton imageButton = new JButton("Image");
-        imageButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent ev)
-            {
-                String word = textPane.getText().replaceAll("\\s+","");
-                if (check(word))
-                apply(word);
-                else
-                    JOptionPane.showMessageDialog(textPane, "Invalid word");
-            }       
-        });
         JButton preimageButton = new JButton("Preimage");
         preimageButton.addActionListener(new ActionListener() {
             
@@ -169,14 +155,9 @@ public class ApplyWordToolbar extends DockToolbar
             }       
         });
         
-        imageButton.setPreferredSize(preimageButton.getPreferredSize());
-        preimageButton.setPreferredSize(imageButton.getPreferredSize());
-        
         JPanel borderPanel = new JPanel();
         borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.X_AXIS));
         borderPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        borderPanel.add(imageButton);
-        borderPanel.add(Box.createHorizontalGlue());
         borderPanel.add(preimageButton);
         panel.add(borderPanel, BorderLayout.SOUTH);
     }
@@ -190,24 +171,6 @@ public class ApplyWordToolbar extends DockToolbar
         }
         
         return true;
-    }
-    
-    private void apply(String word)
-    {
-        int[] subset = getAutomaton().getSelectedStates();
-        int N = getAutomaton().getN();
-        for (char letter : word.toCharArray())
-        {
-            int[] newSubset = new int[N];
-            for (int i = 0; i < N; i++)
-            {
-                if (subset[i] == 1)
-                    newSubset[getAutomaton().getMatrix()[i][hashMap.get(letter)]] = 1;
-            }
-            subset = newSubset;
-        }
-        
-        getAutomaton().selectStates(subset);
     }
     
     private void applyReversed(String word)

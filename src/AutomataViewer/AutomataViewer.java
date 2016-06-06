@@ -364,9 +364,9 @@ public class AutomataViewer
         
         toolbar.add(Box.createHorizontalGlue());
         
-        Font font = new Font("Times New Roman", Font.PLAIN + Font.BOLD, 20);
         JLabel label = new JLabel("Selected states:  ");
         JLabel selectedStatesLabel = new JLabel(Integer.toString(splitPane.getSelectedStatesNumber()));
+        Font font = label.getFont().deriveFont(Font.PLAIN + Font.BOLD, 20);
         label.setFont(font);
         selectedStatesLabel.setFont(font);
         splitPane.getAutomaton().addPropertyChangeListener("automatonChanged", new PropertyChangeListener() {
