@@ -4,14 +4,18 @@ package AutomataViewer;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -30,6 +34,7 @@ public class ApplyWordPreimageToolbar extends DockToolbar
     private JTextPane textPane;
     private InverseAutomaton inverseAutomaton;
     private final HashMap<Character, Integer> hashMap;
+    private JCheckBox rangeCheckBox;
     
     public ApplyWordPreimageToolbar(String name, Automaton automaton)
     {
@@ -43,7 +48,6 @@ public class ApplyWordPreimageToolbar extends DockToolbar
         JPanel panel = getPanel();
         
         StyleContext cont = StyleContext.getDefaultStyleContext();
-        AttributeSet attrBlack = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, Color.BLACK);
         AttributeSet attrGray = cont.addAttribute(cont.getEmptySet(), StyleConstants.Background, Color.LIGHT_GRAY);
         AttributeSet attrDefault = cont.getStyle(StyleContext.DEFAULT_STYLE);
         DefaultStyledDocument doc = new DefaultStyledDocument() {
@@ -70,6 +74,8 @@ public class ApplyWordPreimageToolbar extends DockToolbar
                     else
                         setCharacterAttributes(offset + i, 1, attrDefault, true);
                 }
+                
+                showRange();
             }
             
             @Override
@@ -77,6 +83,8 @@ public class ApplyWordPreimageToolbar extends DockToolbar
             {
                 setCharacterAttributes(offset, len, attrDefault, true);
                 super.remove(offset, len);
+                
+                showRange();
             }
         };  
         
@@ -155,11 +163,43 @@ public class ApplyWordPreimageToolbar extends DockToolbar
             }       
         });
         
-        JPanel borderPanel = new JPanel();
-        borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.X_AXIS));
-        borderPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        borderPanel.add(preimageButton);
-        panel.add(borderPanel, BorderLayout.SOUTH);
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        buttonPanel.add(preimageButton);
+        
+        JPanel rangePanel = new JPanel();
+        rangePanel.setBorder(BorderFactory.createEmptyBorder(0, 1, 0, 5));
+        rangeCheckBox = new JCheckBox("Show range");
+        rangePanel.add(rangeCheckBox);
+        
+        JPanel actionPanel = new JPanel();
+        actionPanel.setBorder(BorderFactory.createEmptyBorder(0, 1, 0, 5));
+        JCheckBox actionCheckBox = new JCheckBox("Show action");
+        rangeCheckBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent ev)
+            {
+                showRange();
+                if (!rangeCheckBox.isSelected())
+                    firePropertyChange("showRange", false, true);
+            }
+        });
+        actionPanel.add(actionCheckBox);
+        
+        JPanel outerPanel = new JPanel();
+        outerPanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.WEST;
+        c.weightx = 1.0;
+        c.gridwidth = 1;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        outerPanel.add(buttonPanel, c);
+        c.gridwidth = 1; 
+        outerPanel.add(rangePanel, c);
+        c.gridwidth = GridBagConstraints.REMAINDER; 
+        outerPanel.add(actionPanel, c);
+        panel.add(outerPanel, BorderLayout.SOUTH);
     }
     
     private boolean check(String word)
@@ -174,6 +214,11 @@ public class ApplyWordPreimageToolbar extends DockToolbar
     }
     
     private void applyReversed(String word)
+    {
+        getAutomaton().selectStates(getSubset(word));
+    }
+    
+    private int[] getSubset(String word)
     {
         int[] subset = getAutomaton().getSelectedStates();
         int N = getAutomaton().getN();
@@ -194,9 +239,27 @@ public class ApplyWordPreimageToolbar extends DockToolbar
             }
             subset = newSubset;
         }
-        getAutomaton().selectStates(subset);
+        
+        return subset;
     }
 
+    private void showRange()
+    {
+        if (rangeCheckBox.isSelected())
+        {
+            String word = textPane.getText().replaceAll("\\s+","");
+            if (check(word))
+                firePropertyChange("showRange", null, getSubset(word));
+            else
+                firePropertyChange("showRange", null, new int[getAutomaton().getN()]);
+        }
+    }
+    
+    public void rangeCheckBoxSetSelected(boolean b)
+    {
+        rangeCheckBox.setSelected(b);
+    }
+    
     @Override
     protected void update() 
     {
@@ -208,5 +271,7 @@ public class ApplyWordPreimageToolbar extends DockToolbar
         StyledDocument doc = textPane.getStyledDocument();
         doc.setCharacterAttributes(0, doc.getLength(), StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE), true);
         textPane.setText(textPane.getText());
+        
+        showRange();
     }
 }

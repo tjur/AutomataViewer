@@ -4,14 +4,18 @@ package AutomataViewer;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -29,6 +33,7 @@ public class ApplyWordImageToolbar extends DockToolbar
 {
     private JTextPane textPane;
     private final HashMap<Character, Integer> hashMap;
+    private JCheckBox rangeCheckBox;
     
     public ApplyWordImageToolbar(String name, Automaton automaton)
     {
@@ -41,7 +46,6 @@ public class ApplyWordImageToolbar extends DockToolbar
         JPanel panel = getPanel();
         
         StyleContext cont = StyleContext.getDefaultStyleContext();
-        AttributeSet attrBlack = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, Color.BLACK);
         AttributeSet attrGray = cont.addAttribute(cont.getEmptySet(), StyleConstants.Background, Color.LIGHT_GRAY);
         AttributeSet attrDefault = cont.getStyle(StyleContext.DEFAULT_STYLE);
         DefaultStyledDocument doc = new DefaultStyledDocument() {
@@ -68,6 +72,8 @@ public class ApplyWordImageToolbar extends DockToolbar
                     else
                         setCharacterAttributes(offset + i, 1, attrDefault, true);
                 }
+                
+                showRange();
             }
             
             @Override
@@ -75,6 +81,8 @@ public class ApplyWordImageToolbar extends DockToolbar
             {
                 setCharacterAttributes(offset, len, attrDefault, true);
                 super.remove(offset, len);
+                
+                showRange();
             }
         };  
         
@@ -147,17 +155,49 @@ public class ApplyWordImageToolbar extends DockToolbar
             {
                 String word = textPane.getText().replaceAll("\\s+","");
                 if (check(word))
-                apply(word);
+                    apply(word);
                 else
                     JOptionPane.showMessageDialog(textPane, "Invalid word");
             }       
         });
         
-        JPanel borderPanel = new JPanel();
-        borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.X_AXIS));
-        borderPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        borderPanel.add(imageButton);
-        panel.add(borderPanel, BorderLayout.SOUTH);
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        buttonPanel.add(imageButton);
+        
+        JPanel rangePanel = new JPanel();
+        rangePanel.setBorder(BorderFactory.createEmptyBorder(0, 1, 0, 5));
+        rangeCheckBox = new JCheckBox("Show range");
+        rangeCheckBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent ev)
+            {
+                showRange();
+                if (!rangeCheckBox.isSelected())
+                    firePropertyChange("showRange", false, true);
+            }
+        });
+        rangePanel.add(rangeCheckBox);
+        
+        JPanel actionPanel = new JPanel();
+        actionPanel.setBorder(BorderFactory.createEmptyBorder(0, 1, 0, 5));
+        JCheckBox actionCheckBox = new JCheckBox("Show action");
+        actionPanel.add(actionCheckBox);
+        
+        JPanel outerPanel = new JPanel();
+        outerPanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.WEST;
+        c.weightx = 1.0;
+        c.gridwidth = 1;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        outerPanel.add(buttonPanel, c);
+        c.gridwidth = 1; 
+        outerPanel.add(rangePanel, c);
+        c.gridwidth = GridBagConstraints.REMAINDER; 
+        outerPanel.add(actionPanel, c);
+        panel.add(outerPanel, BorderLayout.SOUTH);
     }
     
     private boolean check(String word)
@@ -173,6 +213,11 @@ public class ApplyWordImageToolbar extends DockToolbar
     
     private void apply(String word)
     {
+        getAutomaton().selectStates(getSubset(word));
+    }
+    
+    private int[] getSubset(String word)
+    {
         int[] subset = getAutomaton().getSelectedStates();
         int N = getAutomaton().getN();
         for (char letter : word.toCharArray())
@@ -186,7 +231,24 @@ public class ApplyWordImageToolbar extends DockToolbar
             subset = newSubset;
         }
         
-        getAutomaton().selectStates(subset);
+        return subset;
+    }
+    
+    private void showRange()
+    {
+        if (rangeCheckBox.isSelected())
+        {
+            String word = textPane.getText().replaceAll("\\s+","");
+            if (check(word))
+                firePropertyChange("showRange", null, getSubset(word));
+            else
+                firePropertyChange("showRange", null, new int[getAutomaton().getN()]);
+        }
+    }
+    
+    public void rangeCheckBoxSetSelected(boolean b)
+    {
+        rangeCheckBox.setSelected(b);
     }
 
     @Override
@@ -199,5 +261,7 @@ public class ApplyWordImageToolbar extends DockToolbar
         StyledDocument doc = textPane.getStyledDocument();
         doc.setCharacterAttributes(0, doc.getLength(), StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE), true);
         textPane.setText(textPane.getText());
+        
+        showRange();
     }
 }

@@ -30,6 +30,11 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     private static final int VERTEX_RADIUS = 25;
     private static final int ARR_SIZE = 10;
     
+    private boolean showRange;
+    private boolean showAction;
+    private int[] rangeStates;
+    private int[] actionStates;
+    
     private class Transition
     {
         public int stateOut;
@@ -98,6 +103,9 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         this.operation = Operation.MOVE_STATES;
         this.unselectedStateColor = AutomatonHelper.defaultUnselectedStateColor;
         this.selectedStateColor = AutomatonHelper.defaultSelectedStateColor;
+        
+        showRange = false;
+        showAction = false;
         
         setAutomaton(automaton);
         
@@ -225,6 +233,19 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     public void resetReplaceStatesFirstState()
     {
         replaceStatesFirstState = -1;
+    }
+    
+    public void setShowRange(boolean showRange)
+    {
+        this.showRange = showRange;
+        repaint();
+    }
+    
+    public void showRange(int[] states)
+    {
+        showRange = true;
+        rangeStates = states;
+        repaint();
     }
 
     private void setAutomaton(Automaton automaton)
@@ -566,6 +587,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                 g.setColor(g.getColor().brighter());
             
             g.fillOval(vertices[n].x - VERTEX_RADIUS, vertices[n].y - VERTEX_RADIUS, VERTEX_RADIUS * 2, VERTEX_RADIUS * 2);
+                     
             g.setColor(Color.BLACK);
             if (highlighted != -1 && highlighted == n)
                 g.setColor(Color.LIGHT_GRAY);
@@ -573,10 +595,20 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             if (operation == Operation.REPLACE_STATES && replaceStatesFirstState == n)
             {
                 g.setColor(Color.RED.darker());
-                g.setStroke(new BasicStroke(2));
+                g.setStroke(new BasicStroke(4));
             }
  
             g.drawOval(vertices[n].x - VERTEX_RADIUS, vertices[n].y - VERTEX_RADIUS, VERTEX_RADIUS * 2, VERTEX_RADIUS * 2);
+            
+            if (showRange && rangeStates[n] == 1)
+            {
+                g.setStroke(new BasicStroke(3));
+                g.setColor(selectedStateColor);
+                if (highlighted != -1 && highlighted == n)
+                    g.setColor(g.getColor().brighter());
+                g.drawOval(vertices[n].x - VERTEX_RADIUS - 2, vertices[n].y - VERTEX_RADIUS - 2, (VERTEX_RADIUS * 2) + 4, (VERTEX_RADIUS * 2) + 4);
+            }
+            
             g.setStroke(new BasicStroke());
             g.setColor(Color.BLACK);
             String label = Integer.toString(n);

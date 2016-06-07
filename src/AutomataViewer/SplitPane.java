@@ -18,7 +18,6 @@ import javax.swing.JSplitPane;
 public class SplitPane extends JSplitPane
 {
     private final Automaton automaton;
-    private int K, N;
     
     private PaintPanel paintPanel;
     
@@ -90,6 +89,38 @@ public class SplitPane extends JSplitPane
             {
                 paintPanel.updateAutomatonData();
                 paintPanel.repaintCenterAutomaton();
+            }
+        });
+        
+        PropertyChangeListener showRangeListener = new PropertyChangeListener() {
+            
+            @Override
+            public void propertyChange(PropertyChangeEvent ev)
+            {
+                if (ev.getOldValue() == null)
+                {
+                    if (ev.getSource().equals(applyWordImageToolbar))
+                        applyWordPreimageToolbar.rangeCheckBoxSetSelected(false);
+                    else
+                        applyWordImageToolbar.rangeCheckBoxSetSelected(false);
+                    
+                    int[] states = (int[]) ev.getNewValue();
+                    paintPanel.showRange(states);
+                }
+                else
+                    paintPanel.setShowRange(false);
+            }
+        };
+        
+        applyWordImageToolbar.addPropertyChangeListener("showRange", showRangeListener);
+        applyWordPreimageToolbar.addPropertyChangeListener("showRange", showRangeListener);
+        
+        applyWordImageToolbar.addPropertyChangeListener("showAction", new PropertyChangeListener() {
+            
+            @Override
+            public void propertyChange(PropertyChangeEvent ev)
+            {
+                
             }
         });
         

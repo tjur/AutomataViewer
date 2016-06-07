@@ -99,11 +99,11 @@ public class AutomatonCodeToolbar extends DockToolbar
         });
         
         
-        JPanel borderPanel = new JPanel();
-        borderPanel.setLayout(new BoxLayout(borderPanel, BoxLayout.X_AXIS));
-        borderPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        borderPanel.add(realignButton);
-        panel.add(borderPanel, BorderLayout.SOUTH);
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        buttonPanel.add(realignButton);
+        panel.add(buttonPanel, BorderLayout.SOUTH);
     }
     
     public void setCode(String text)
