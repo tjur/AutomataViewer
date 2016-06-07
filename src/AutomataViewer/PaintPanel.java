@@ -17,6 +17,8 @@ import java.awt.geom.AffineTransform;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -33,7 +35,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     private boolean showRange;
     private boolean showAction;
     private int[] rangeStates;
-    private int[] actionStates;
+    private HashMap<Integer, ArrayList<Integer>> actionStates;
     
     private class Transition
     {
@@ -241,10 +243,23 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         repaint();
     }
     
+    public void setShowAction(boolean showAction)
+    {
+        this.showAction = showAction;
+        repaint();
+    }
+    
     public void showRange(int[] states)
     {
         showRange = true;
         rangeStates = states;
+        repaint();
+    }
+    
+    public void showAction(HashMap<Integer, ArrayList<Integer>> actionStates)
+    {
+        showAction = true;
+        this.actionStates = actionStates;
         repaint();
     }
 
@@ -524,12 +539,34 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
 
-        // draw transitions
-        g.setColor(Color.BLACK);
         int[][] matrix = automaton.getMatrix();
         int N = getN();
         int K = getK();
         
+        // draw oval of range states at the beginning
+        for (int i = 0; i < N; i++)
+        {
+            int n = orders[i];
+            if (showRange && rangeStates[n] == 1)
+            {
+                g.setStroke(new BasicStroke(5));
+                g.setColor(selectedStateColor);
+                if (highlighted != -1 && highlighted == n)
+                    g.setColor(g.getColor().brighter());
+                g.drawOval(vertices[n].x - VERTEX_RADIUS - 3, vertices[n].y - VERTEX_RADIUS - 3, (VERTEX_RADIUS * 2) + 6, (VERTEX_RADIUS * 2) + 6);
+                g.setStroke(new BasicStroke());
+                if (highlighted != -1 && highlighted == n)
+                    g.setColor(Color.LIGHT_GRAY);
+                else
+                    g.setColor(Color.BLACK);
+                g.drawOval(vertices[n].x - VERTEX_RADIUS - 4, vertices[n].y - VERTEX_RADIUS - 4, (VERTEX_RADIUS * 2) + 8, (VERTEX_RADIUS * 2) + 8);
+            }
+        }
+        
+        g.setColor(Color.BLACK);
+        g.setStroke(new BasicStroke());
+        
+        // draw transitions
         for (int n = 0; n < N; n++)
         {
             for (int n2 = n + 1; n2 < N; n2++)
@@ -545,19 +582,38 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                     if (matrix[n2][k] == n && matrix[n][k] != n2)
                         transitions.add(new Transition(n2, n, k, false));
                 }
-
-                if(!transitions.isEmpty())
+                
+                if (showAction)
                 {
-                    int transQuantity = transitions.size();
-                    for (int i = 0; i < transQuantity; i++)
+                    if (actionStates.getOrDefault(n, new ArrayList<>()).contains(n2))
                     {
-                        Transition trans = transitions.get(i);
-                        int j = (trans.stateOut == n) ? i : transQuantity - i - 1;
-                        g.setColor(AutomatonHelper.TRANSITIONS_COLORS[trans.k % AutomatonHelper.TRANSITIONS_COLORS.length]);
-                        drawEdge(g, vertices[trans.stateOut].x, vertices[trans.stateOut].y,
-                            vertices[trans.stateIn].x,
-                            vertices[trans.stateIn].y, j, transQuantity, trans.inverse, false, false);
+                        if (actionStates.getOrDefault(n2, new ArrayList<>()).contains(n))
+                            transitions.add(new Transition(n, n2, -1, true));
+                        else
+                            transitions.add(new Transition(n, n2, -1, false));
                     }
+                    else if (actionStates.getOrDefault(n2, new ArrayList<>()).contains(n))
+                        transitions.add(new Transition(n2, n, -1, false));
+                }
+
+                int transNumber = transitions.size();
+                for (int i = 0; i < transNumber; i++)
+                {
+                    Transition trans = transitions.get(i);
+                    int j = (trans.stateOut == n) ? i : transNumber - i - 1;
+                    if (trans.k == -1)
+                    {
+                        g.setStroke(new BasicStroke(2));
+                        g.setColor(Color.BLACK);
+                    }
+                    else
+                    {
+                        g.setStroke(new BasicStroke());
+                        g.setColor(AutomatonHelper.TRANSITIONS_COLORS[trans.k % AutomatonHelper.TRANSITIONS_COLORS.length]);
+                    }
+                    drawEdge(g, vertices[trans.stateOut].x, vertices[trans.stateOut].y,
+                        vertices[trans.stateIn].x,
+                        vertices[trans.stateIn].y, j, transNumber, trans.inverse, false, false);
                 }
             }
         }
@@ -598,17 +654,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                 g.setStroke(new BasicStroke(4));
             }
  
-            g.drawOval(vertices[n].x - VERTEX_RADIUS, vertices[n].y - VERTEX_RADIUS, VERTEX_RADIUS * 2, VERTEX_RADIUS * 2);
-            
-            if (showRange && rangeStates[n] == 1)
-            {
-                g.setStroke(new BasicStroke(3));
-                g.setColor(selectedStateColor);
-                if (highlighted != -1 && highlighted == n)
-                    g.setColor(g.getColor().brighter());
-                g.drawOval(vertices[n].x - VERTEX_RADIUS - 2, vertices[n].y - VERTEX_RADIUS - 2, (VERTEX_RADIUS * 2) + 4, (VERTEX_RADIUS * 2) + 4);
-            }
-            
+            g.drawOval(vertices[n].x - VERTEX_RADIUS, vertices[n].y - VERTEX_RADIUS, VERTEX_RADIUS * 2, VERTEX_RADIUS * 2);           
             g.setStroke(new BasicStroke());
             g.setColor(Color.BLACK);
             String label = Integer.toString(n);

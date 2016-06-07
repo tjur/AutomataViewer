@@ -9,6 +9,7 @@ import java.awt.event.ContainerListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -115,14 +116,28 @@ public class SplitPane extends JSplitPane
         applyWordImageToolbar.addPropertyChangeListener("showRange", showRangeListener);
         applyWordPreimageToolbar.addPropertyChangeListener("showRange", showRangeListener);
         
-        applyWordImageToolbar.addPropertyChangeListener("showAction", new PropertyChangeListener() {
+        PropertyChangeListener showActionListener = new PropertyChangeListener() {
             
             @Override
             public void propertyChange(PropertyChangeEvent ev)
             {
-                
+                if (ev.getOldValue() == null)
+                {
+                    if (ev.getSource().equals(applyWordImageToolbar))
+                        applyWordPreimageToolbar.actionCheckBoxSetSelected(false);
+                    else
+                        applyWordImageToolbar.actionCheckBoxSetSelected(false);
+                    
+                    HashMap<Integer, ArrayList<Integer>> actions = (HashMap<Integer, ArrayList<Integer>>) ev.getNewValue();
+                    paintPanel.showAction(actions);
+                }
+                else
+                    paintPanel.setShowAction(false);
             }
-        });
+        };
+        
+        applyWordImageToolbar.addPropertyChangeListener("showAction", showActionListener);
+        applyWordPreimageToolbar.addPropertyChangeListener("showAction", showActionListener);
         
         innerPanel.addContainerListener(new ContainerListener() {
 

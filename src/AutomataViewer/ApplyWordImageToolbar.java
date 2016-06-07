@@ -12,6 +12,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -34,6 +35,7 @@ public class ApplyWordImageToolbar extends DockToolbar
     private JTextPane textPane;
     private final HashMap<Character, Integer> hashMap;
     private JCheckBox rangeCheckBox;
+    private JCheckBox actionCheckBox;
     
     public ApplyWordImageToolbar(String name, Automaton automaton)
     {
@@ -74,6 +76,7 @@ public class ApplyWordImageToolbar extends DockToolbar
                 }
                 
                 showRange();
+                showAction();
             }
             
             @Override
@@ -83,6 +86,7 @@ public class ApplyWordImageToolbar extends DockToolbar
                 super.remove(offset, len);
                 
                 showRange();
+                showAction();
             }
         };  
         
@@ -165,9 +169,7 @@ public class ApplyWordImageToolbar extends DockToolbar
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         buttonPanel.add(imageButton);
         
-        JPanel rangePanel = new JPanel();
-        rangePanel.setBorder(BorderFactory.createEmptyBorder(0, 1, 0, 5));
-        rangeCheckBox = new JCheckBox("Show range");
+        rangeCheckBox = new JCheckBox("Range");
         rangeCheckBox.addItemListener(new ItemListener() {
 
             @Override
@@ -178,12 +180,18 @@ public class ApplyWordImageToolbar extends DockToolbar
                     firePropertyChange("showRange", false, true);
             }
         });
-        rangePanel.add(rangeCheckBox);
         
-        JPanel actionPanel = new JPanel();
-        actionPanel.setBorder(BorderFactory.createEmptyBorder(0, 1, 0, 5));
-        JCheckBox actionCheckBox = new JCheckBox("Show action");
-        actionPanel.add(actionCheckBox);
+        actionCheckBox = new JCheckBox("Action");
+        actionCheckBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent ev)
+            {
+                showAction();
+                if (!actionCheckBox.isSelected())
+                    firePropertyChange("showAction", false, true);
+            }
+        });
         
         JPanel outerPanel = new JPanel();
         outerPanel.setLayout(new GridBagLayout());
@@ -191,12 +199,10 @@ public class ApplyWordImageToolbar extends DockToolbar
         c.anchor = GridBagConstraints.WEST;
         c.weightx = 1.0;
         c.gridwidth = 1;
-        c.gridwidth = GridBagConstraints.REMAINDER;
         outerPanel.add(buttonPanel, c);
-        c.gridwidth = 1; 
-        outerPanel.add(rangePanel, c);
+        outerPanel.add(rangeCheckBox, c);
         c.gridwidth = GridBagConstraints.REMAINDER; 
-        outerPanel.add(actionPanel, c);
+        outerPanel.add(actionCheckBox, c);
         panel.add(outerPanel, BorderLayout.SOUTH);
     }
     
@@ -213,12 +219,11 @@ public class ApplyWordImageToolbar extends DockToolbar
     
     private void apply(String word)
     {
-        getAutomaton().selectStates(getSubset(word));
+        getAutomaton().selectStates(getSubset(word, getAutomaton().getSelectedStates()));
     }
     
-    private int[] getSubset(String word)
+    private int[] getSubset(String word, int[] subset)
     {
-        int[] subset = getAutomaton().getSelectedStates();
         int N = getAutomaton().getN();
         for (char letter : word.toCharArray())
         {
@@ -234,21 +239,61 @@ public class ApplyWordImageToolbar extends DockToolbar
         return subset;
     }
     
+    private HashMap<Integer, ArrayList<Integer>> getActions(String word)
+    {
+        int[] subset = getAutomaton().getSelectedStates();
+        HashMap<Integer, ArrayList<Integer>> actions = new HashMap<>();
+        for (int i = 0; i < subset.length; i++)
+        {
+            if (subset[i] == 1)
+            {
+                int[] state = new int[getAutomaton().getN()];
+                state[i] = 1;
+                int[] states = getSubset(word, state);
+                ArrayList<Integer> statesList = new ArrayList<>();
+                for (int j = 0; j < states.length; j++)
+                {
+                    if (states[j] == 1)
+                        statesList.add(j);
+                }
+                actions.put(i, statesList);
+            }
+        }
+        return actions;
+    }
+    
     private void showRange()
     {
         if (rangeCheckBox.isSelected())
         {
             String word = textPane.getText().replaceAll("\\s+","");
             if (check(word))
-                firePropertyChange("showRange", null, getSubset(word));
+                firePropertyChange("showRange", null, getSubset(word, getAutomaton().getSelectedStates()));
             else
                 firePropertyChange("showRange", null, new int[getAutomaton().getN()]);
+        }
+    }
+    
+    private void showAction()
+    {
+        if (actionCheckBox.isSelected())
+        {
+            String word = textPane.getText().replaceAll("\\s+","");
+            if (check(word))
+                firePropertyChange("showAction", null, getActions(word));
+            else
+                firePropertyChange("showAction", null, new HashMap<>());
         }
     }
     
     public void rangeCheckBoxSetSelected(boolean b)
     {
         rangeCheckBox.setSelected(b);
+    }
+    
+    public void actionCheckBoxSetSelected(boolean b)
+    {
+        actionCheckBox.setSelected(b);
     }
 
     @Override
@@ -263,5 +308,6 @@ public class ApplyWordImageToolbar extends DockToolbar
         textPane.setText(textPane.getText());
         
         showRange();
+        showAction();
     }
 }
