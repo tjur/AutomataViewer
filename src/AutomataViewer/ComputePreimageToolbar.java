@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JMenuItem;
@@ -38,11 +39,17 @@ public class ComputePreimageToolbar extends DockToolbar
     private JCheckBox rangeCheckBox;
     private JCheckBox actionCheckBox;
     
+    private int prefix; // prefix of letters that we already applied
+    private int[] startStates; // subset of states before we applied first letter
+    private boolean resetPrefix;
+    
     public ComputePreimageToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
-        inverseAutomaton = new InverseAutomaton(automaton);
         
+        prefix = -1;
+        startStates = automaton.getSelectedStates();
+        resetPrefix = true;
         hashMap = new HashMap<>();
         for (int i = 0; i < automaton.getK(); i++)
             hashMap.put(AutomatonHelper.TRANSITIONS_LETTERS[i], i);
@@ -50,7 +57,8 @@ public class ComputePreimageToolbar extends DockToolbar
         JPanel panel = getPanel();
         
         StyleContext cont = StyleContext.getDefaultStyleContext();
-        AttributeSet attrGray = cont.addAttribute(cont.getEmptySet(), StyleConstants.Background, Color.LIGHT_GRAY);
+        AttributeSet attrStrike = cont.addAttribute(cont.getEmptySet(), StyleConstants.StrikeThrough, true);
+        AttributeSet attrHighlighted = cont.addAttribute(cont.getEmptySet(), StyleConstants.Background, Color.LIGHT_GRAY);
         AttributeSet attrDefault = cont.getStyle(StyleContext.DEFAULT_STYLE);
         DefaultStyledDocument doc = new DefaultStyledDocument() {
             
@@ -59,24 +67,26 @@ public class ComputePreimageToolbar extends DockToolbar
             {
                 try {
                     super.insertString(offset, str, a);
-                } 
+                }
                 catch (BadLocationException ex) {}
                 
-                for (int i = 0; i < str.length(); i++)
+                String word = textPane.getText();
+                for (int i = 0; i < word.length(); i++)
                 {
-                    char letter = str.charAt(i);
-                    
+                    char letter = word.charAt(i);
                     if (hashMap.containsKey(letter))
                     {
                         AttributeSet attr = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, AutomatonHelper.TRANSITIONS_COLORS[hashMap.get(letter)]);
-                        setCharacterAttributes(offset + i, 1, attr, true);
+                        setCharacterAttributes(i, 1, attr, true);
                     }
                     else if (!Character.isWhitespace(letter))
-                        setCharacterAttributes(offset + i, 1, attrGray, true);
+                        setCharacterAttributes(i, 1, attrStrike, true);
                     else
-                        setCharacterAttributes(offset + i, 1, attrDefault, true);
+                        setCharacterAttributes(i, 1, attrDefault, true);
                 }
                 
+                prefix = -1;
+                startStates = getAutomaton().getSelectedStates();
                 showRange();
                 showAction();
             }
@@ -87,6 +97,23 @@ public class ComputePreimageToolbar extends DockToolbar
                 setCharacterAttributes(offset, len, attrDefault, true);
                 super.remove(offset, len);
                 
+                String word = textPane.getText();
+                for (int i = 0; i < word.length(); i++)
+                {
+                    char letter = word.charAt(i);
+                    if (hashMap.containsKey(letter))
+                    {
+                        AttributeSet attr = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, AutomatonHelper.TRANSITIONS_COLORS[hashMap.get(letter)]);
+                        setCharacterAttributes(i, 1, attr, true);
+                    }
+                    else if (!Character.isWhitespace(letter))
+                        setCharacterAttributes(i, 1, attrStrike, true);
+                    else
+                        setCharacterAttributes(i, 1, attrDefault, true);
+                }
+                
+                prefix = -1;
+                startStates = getAutomaton().getSelectedStates();
                 showRange();
                 showAction();
             }
@@ -151,25 +178,93 @@ public class ComputePreimageToolbar extends DockToolbar
             }
         });
         
-        panel.add(textPane, BorderLayout.CENTER);        
+        panel.add(textPane, BorderLayout.CENTER);
         
-        JButton preimageButton = new JButton("Preimage");
-        preimageButton.addActionListener(new ActionListener() {
-            
+        JButton undoImageButton = new JButton("<<");
+        undoImageButton.setToolTipText("Undo image");
+        undoImageButton.addActionListener(new ActionListener() {
+
             @Override
             public void actionPerformed(ActionEvent ev)
             {
-                String word = textPane.getText().replaceAll("\\s+","");
+                prefix = -1;
+                getAutomaton().selectStates(startStates); // states that we had before appling letters
+                resetTextPane();
+            }  
+        });
+        
+        JButton letterBackButton = new JButton("<");
+        letterBackButton.setToolTipText("Letter back");
+        letterBackButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                String word = textPane.getText();
+                prefix = (prefix == -1) ? -1 : prefix - 1;
+                while (prefix >= 0 && Character.isWhitespace(word.charAt(prefix)))
+                    prefix--;
+                
+                String subword = word.substring(0, prefix + 1).replaceAll("\\s+","");
+                resetPrefix = false;
+                getAutomaton().selectStates(startStates); // states that we have before appling letters
+                resetPrefix = false;
+                applyReversed(subword);
+                
+                resetTextPane();
+                doc.setCharacterAttributes(0, prefix + 1, attrHighlighted, false);
+            }      
+        });
+        
+        JButton letterForwardButton = new JButton(">");
+        letterForwardButton.setToolTipText("Letter forward");
+        letterForwardButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                String word = textPane.getText();
+                for (int i = prefix + 1; i < word.length(); i++)
+                {
+                    if (hashMap.containsKey(word.charAt(i)))
+                    {
+                        String letter = word.substring(prefix + 1, i + 1).replaceAll("\\s+","");
+                        prefix = i;
+                        resetPrefix = false;
+                        applyReversed(letter);
+                        
+                        StyledDocument doc = textPane.getStyledDocument();
+                        doc.setCharacterAttributes(0, prefix + 1, attrHighlighted, false);
+                        break;
+                    }
+                    else if (!Character.isWhitespace(word.charAt(i)))
+                    {
+                        JOptionPane.showMessageDialog(textPane, "Invalid letter found");
+                        break;
+                    }
+                }
+            }       
+        });
+        
+        JButton imageButton = new JButton(">>");
+        imageButton.setToolTipText("Image");
+        imageButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                String word = textPane.getText().substring(prefix + 1).replaceAll("\\s+","");
                 if (check(word))
+                {
+                    doc.setCharacterAttributes(prefix + 1, textPane.getText().length() - prefix - 1, attrHighlighted, false);
+                    prefix = textPane.getText().length() - 1;
+                    resetPrefix = false;
                     applyReversed(word);
+                }
                 else
                     JOptionPane.showMessageDialog(textPane, "Invalid word");
             }       
         });
-        
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        buttonPanel.add(preimageButton);
         
         rangeCheckBox = new JCheckBox("Range");
         rangeCheckBox.addItemListener(new ItemListener() {
@@ -193,7 +288,15 @@ public class ComputePreimageToolbar extends DockToolbar
                 if (!actionCheckBox.isSelected())
                     firePropertyChange("showAction", false, true);
             }
-        });
+        }); 
+        
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        buttonPanel.add(undoImageButton);
+        buttonPanel.add(letterBackButton);
+        buttonPanel.add(letterForwardButton);
+        buttonPanel.add(imageButton);
         
         JPanel outerPanel = new JPanel();
         outerPanel.setLayout(new GridBagLayout());
@@ -201,6 +304,7 @@ public class ComputePreimageToolbar extends DockToolbar
         c.anchor = GridBagConstraints.WEST;
         c.weightx = 1.0;
         c.gridwidth = 1;
+        imageButton.setEnabled(true);
         outerPanel.add(buttonPanel, c);
         outerPanel.add(rangeCheckBox, c);
         outerPanel.add(actionCheckBox, c);
@@ -274,7 +378,7 @@ public class ComputePreimageToolbar extends DockToolbar
     {
         if (rangeCheckBox.isSelected())
         {
-            String word = textPane.getText().replaceAll("\\s+","");
+            String word = textPane.getText().substring(prefix + 1).replaceAll("\\s+","");
             if (check(word))
                 firePropertyChange("showRange", null, getSubset(word, getAutomaton().getSelectedStates()));
             else
@@ -286,7 +390,7 @@ public class ComputePreimageToolbar extends DockToolbar
     {
         if (actionCheckBox.isSelected())
         {
-            String word = textPane.getText().replaceAll("\\s+","");
+            String word = textPane.getText().substring(prefix + 1).replaceAll("\\s+","");
             if (check(word))
                 firePropertyChange("showAction", null, getActions(word));
             else
@@ -304,6 +408,28 @@ public class ComputePreimageToolbar extends DockToolbar
         actionCheckBox.setSelected(b);
     }
     
+    private void resetTextPane()
+    {
+        StyledDocument doc = textPane.getStyledDocument();
+        StyleContext cont = StyleContext.getDefaultStyleContext();
+        AttributeSet attrStrike = cont.addAttribute(cont.getEmptySet(), StyleConstants.StrikeThrough, true);
+        AttributeSet attrDefault = cont.getStyle(StyleContext.DEFAULT_STYLE);
+        String word = textPane.getText();
+        for (int i = 0; i < word.length(); i++)
+        {
+            char letter = word.charAt(i);
+            if (hashMap.containsKey(letter))
+            {
+                AttributeSet attr = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, AutomatonHelper.TRANSITIONS_COLORS[hashMap.get(letter)]);
+                doc.setCharacterAttributes(i, 1, attr, true);
+            }
+            else if (!Character.isWhitespace(letter))
+                doc.setCharacterAttributes(i, 1, attrStrike, true);
+            else
+                doc.setCharacterAttributes(i, 1, attrDefault, true);
+        }
+    }
+    
     @Override
     protected void update() 
     {
@@ -312,9 +438,19 @@ public class ComputePreimageToolbar extends DockToolbar
         for (int i = 0; i < getAutomaton().getK(); i++)
             hashMap.put(AutomatonHelper.TRANSITIONS_LETTERS[i], i);
         
+        if (resetPrefix)
+        {
+            prefix = -1;
+            startStates = getAutomaton().getSelectedStates();
+        }
+        else
+            resetPrefix = true;
+        
+        resetTextPane();
         StyledDocument doc = textPane.getStyledDocument();
-        doc.setCharacterAttributes(0, doc.getLength(), StyleContext.getDefaultStyleContext().getStyle(StyleContext.DEFAULT_STYLE), true);
-        textPane.setText(textPane.getText());
+        StyleContext cont = StyleContext.getDefaultStyleContext();
+        AttributeSet attrHighlighted = cont.addAttribute(cont.getEmptySet(), StyleConstants.Background, Color.LIGHT_GRAY);
+        doc.setCharacterAttributes(0, prefix + 1, attrHighlighted, false);
         
         showRange();
         showAction();

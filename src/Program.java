@@ -11,7 +11,7 @@ public class Program
         JFrame frame = new JFrame("Automata viewer");
         AutomataViewer automataViewer = new AutomataViewer(frame);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1250,750);
+        frame.setSize(1300,750);
         frame.setMinimumSize(new Dimension(700, 525));
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
