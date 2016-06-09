@@ -30,16 +30,18 @@ import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
 
-public class ApplyWordImageToolbar extends DockToolbar
+public class ComputePreimageToolbar extends DockToolbar
 {
     private JTextPane textPane;
+    private InverseAutomaton inverseAutomaton;
     private final HashMap<Character, Integer> hashMap;
     private JCheckBox rangeCheckBox;
     private JCheckBox actionCheckBox;
     
-    public ApplyWordImageToolbar(String name, Automaton automaton)
+    public ComputePreimageToolbar(String name, Automaton automaton)
     {
         super(name, automaton);
+        inverseAutomaton = new InverseAutomaton(automaton);
         
         hashMap = new HashMap<>();
         for (int i = 0; i < automaton.getK(); i++)
@@ -151,15 +153,15 @@ public class ApplyWordImageToolbar extends DockToolbar
         
         panel.add(textPane, BorderLayout.CENTER);        
         
-        JButton imageButton = new JButton("Image");
-        imageButton.addActionListener(new ActionListener() {
-
+        JButton preimageButton = new JButton("Preimage");
+        preimageButton.addActionListener(new ActionListener() {
+            
             @Override
             public void actionPerformed(ActionEvent ev)
             {
                 String word = textPane.getText().replaceAll("\\s+","");
                 if (check(word))
-                    apply(word);
+                    applyReversed(word);
                 else
                     JOptionPane.showMessageDialog(textPane, "Invalid word");
             }       
@@ -167,7 +169,7 @@ public class ApplyWordImageToolbar extends DockToolbar
         
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        buttonPanel.add(imageButton);
+        buttonPanel.add(preimageButton);
         
         rangeCheckBox = new JCheckBox("Range");
         rangeCheckBox.addItemListener(new ItemListener() {
@@ -201,7 +203,6 @@ public class ApplyWordImageToolbar extends DockToolbar
         c.gridwidth = 1;
         outerPanel.add(buttonPanel, c);
         outerPanel.add(rangeCheckBox, c);
-        c.gridwidth = GridBagConstraints.REMAINDER; 
         outerPanel.add(actionCheckBox, c);
         panel.add(outerPanel, BorderLayout.SOUTH);
     }
@@ -217,7 +218,7 @@ public class ApplyWordImageToolbar extends DockToolbar
         return true;
     }
     
-    private void apply(String word)
+    private void applyReversed(String word)
     {
         getAutomaton().selectStates(getSubset(word, getAutomaton().getSelectedStates()));
     }
@@ -231,7 +232,14 @@ public class ApplyWordImageToolbar extends DockToolbar
             for (int i = 0; i < N; i++)
             {
                 if (subset[i] == 1)
-                    newSubset[getAutomaton().getMatrix()[i][hashMap.get(letter)]] = 1;
+                {
+                    int[] subset2 = inverseAutomaton.getMatrix()[i][hashMap.get(letter)];
+                    for (int j = 0; j < N; j++)
+                    {
+                        if (subset2[j] == 1)
+                            newSubset[j] = 1;
+                    }
+                }
             }
             subset = newSubset;
         }
@@ -261,7 +269,7 @@ public class ApplyWordImageToolbar extends DockToolbar
         }
         return actions;
     }
-    
+
     private void showRange()
     {
         if (rangeCheckBox.isSelected())
@@ -295,10 +303,11 @@ public class ApplyWordImageToolbar extends DockToolbar
     {
         actionCheckBox.setSelected(b);
     }
-
+    
     @Override
     protected void update() 
     {
+        inverseAutomaton = new InverseAutomaton(getAutomaton());
         hashMap.clear();
         for (int i = 0; i < getAutomaton().getK(); i++)
             hashMap.put(AutomatonHelper.TRANSITIONS_LETTERS[i], i);

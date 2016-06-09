@@ -289,18 +289,19 @@ public class AutomataViewer
             {
                 ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource(iconFiles[i]));
                 Image image = icon.getImage();  
-                Image newimage = image.getScaledInstance(35, 35, java.awt.Image.SCALE_SMOOTH);  
+                Image newimage = image.getScaledInstance(40, 40, java.awt.Image.SCALE_SMOOTH);  
                 icon = new ImageIcon(newimage);
                 toolBarButtons[i] = new JButton(icon);
-                if (i != 0)
-                    toolbar.addSeparator();
-                toolbar.add(toolBarButtons[i]);
             }
             else
             {
                 toolBarButtons[i] = new JButton();
                 selectedColorsButton = toolBarButtons[i];
+                selectedColorsButton.setIcon(createSelectedColorsIcon(paintPanel.getSelectedStateColor(), paintPanel.getUnselectedStateColor(), 40, 40));
             }
+            if (i != 0)
+                toolbar.addSeparator();
+            toolbar.add(toolBarButtons[i]);
             toolBarButtons[i].setToolTipText(buttonLabels[i]);
             toolBarButtons[i].addActionListener(actionListener);
         }     
@@ -366,7 +367,7 @@ public class AutomataViewer
         
         JLabel label = new JLabel("Selected states:  ");
         JLabel selectedStatesLabel = new JLabel(Integer.toString(splitPane.getSelectedStatesNumber()));
-        Font font = label.getFont().deriveFont(Font.PLAIN + Font.BOLD, 20);
+        Font font = label.getFont().deriveFont(Font.PLAIN, 20);
         label.setFont(font);
         selectedStatesLabel.setFont(font);
         splitPane.getAutomaton().addPropertyChangeListener("automatonChanged", new PropertyChangeListener() {
@@ -387,10 +388,10 @@ public class AutomataViewer
         if (PaintPanel.STATES_COLORS.length % cols != 0)
             rows++;
         
-        selectedColorsButton.setIcon(createSelectedColorsIcon(paintPanel.getSelectedStateColor(), paintPanel.getUnselectedStateColor(), 40, 40));
+        /*selectedColorsButton.setIcon(createSelectedColorsIcon(paintPanel.getSelectedStateColor(), paintPanel.getUnselectedStateColor(), 40, 40));
         toolbar.add(selectedColorsButton);
         toolbar.addSeparator();        
-        toolbar.addSeparator(new Dimension(toolbar.getPreferredSize().height / 2, 0));
+        toolbar.addSeparator(new Dimension(toolbar.getPreferredSize().height / 2, 0));*/
         
         JPanel colorChoosersPanel = new JPanel(new GridLayout(rows, cols));
         for (int i = 0; i < rows; i++)

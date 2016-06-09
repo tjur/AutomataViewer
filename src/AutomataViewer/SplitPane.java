@@ -46,31 +46,24 @@ public class SplitPane extends JSplitPane
         rightPanel.setMinimumSize(rightPanelMinimumSize);
         setBottomComponent(rightPanel);
         setResizeWeight(1.0);
-        
+            
         codeToolbar = new AutomatonCodeToolbar("Automaton code", automaton);
-        innerPanel.add(codeToolbar);
+        addToolbar(codeToolbar, innerPanel);
         
-        ApplyWordImageToolbar applyWordImageToolbar = new ApplyWordImageToolbar("Apply word image", automaton);
-        innerPanel.add(applyWordImageToolbar);
+        ComputeImageToolbar computeImageToolbar = new ComputeImageToolbar("Compute image", automaton);
+        addToolbar(computeImageToolbar, innerPanel);
         
-        ApplyWordPreimageToolbar applyWordPreimageToolbar = new ApplyWordPreimageToolbar("Apply word preimage", automaton);
-        innerPanel.add(applyWordPreimageToolbar);
+        ComputePreimageToolbar computePreimageToolbar = new ComputePreimageToolbar("Compute preimage", automaton);
+        addToolbar(computePreimageToolbar, innerPanel);
         
         ShortestResetWordToolbar resetWordToolbar = new ShortestResetWordToolbar("Shortest reset word", automaton);
-        innerPanel.add(resetWordToolbar);
+        addToolbar(resetWordToolbar, innerPanel);
         
         ShortestWordForSubsetToolbar shortestWordSubsetToolbar = new ShortestWordForSubsetToolbar("Shortest word for subset", automaton);
-        innerPanel.add(shortestWordSubsetToolbar);
+        addToolbar(shortestWordSubsetToolbar, innerPanel);
         
         BasicPropertiesToolbar basicPropertiesToolbar = new BasicPropertiesToolbar("Basic properties", automaton);
-        innerPanel.add(basicPropertiesToolbar);
-        
-        dockToolbars.add(codeToolbar);
-        dockToolbars.add(applyWordImageToolbar);
-        dockToolbars.add(applyWordPreimageToolbar);
-        dockToolbars.add(resetWordToolbar);
-        dockToolbars.add(shortestWordSubsetToolbar);
-        dockToolbars.add(basicPropertiesToolbar);
+        addToolbar(basicPropertiesToolbar, innerPanel);
         
         updateToolbars();
         
@@ -100,10 +93,10 @@ public class SplitPane extends JSplitPane
             {
                 if (ev.getOldValue() == null)
                 {
-                    if (ev.getSource().equals(applyWordImageToolbar))
-                        applyWordPreimageToolbar.rangeCheckBoxSetSelected(false);
+                    if (ev.getSource().equals(computeImageToolbar))
+                        computePreimageToolbar.rangeCheckBoxSetSelected(false);
                     else
-                        applyWordImageToolbar.rangeCheckBoxSetSelected(false);
+                        computeImageToolbar.rangeCheckBoxSetSelected(false);
                     
                     int[] states = (int[]) ev.getNewValue();
                     paintPanel.showRange(states);
@@ -113,8 +106,8 @@ public class SplitPane extends JSplitPane
             }
         };
         
-        applyWordImageToolbar.addPropertyChangeListener("showRange", showRangeListener);
-        applyWordPreimageToolbar.addPropertyChangeListener("showRange", showRangeListener);
+        computeImageToolbar.addPropertyChangeListener("showRange", showRangeListener);
+        computePreimageToolbar.addPropertyChangeListener("showRange", showRangeListener);
         
         PropertyChangeListener showActionListener = new PropertyChangeListener() {
             
@@ -123,10 +116,10 @@ public class SplitPane extends JSplitPane
             {
                 if (ev.getOldValue() == null)
                 {
-                    if (ev.getSource().equals(applyWordImageToolbar))
-                        applyWordPreimageToolbar.actionCheckBoxSetSelected(false);
+                    if (ev.getSource().equals(computeImageToolbar))
+                        computePreimageToolbar.actionCheckBoxSetSelected(false);
                     else
-                        applyWordImageToolbar.actionCheckBoxSetSelected(false);
+                        computeImageToolbar.actionCheckBoxSetSelected(false);
                     
                     HashMap<Integer, ArrayList<Integer>> actions = (HashMap<Integer, ArrayList<Integer>>) ev.getNewValue();
                     paintPanel.showAction(actions);
@@ -136,8 +129,8 @@ public class SplitPane extends JSplitPane
             }
         };
         
-        applyWordImageToolbar.addPropertyChangeListener("showAction", showActionListener);
-        applyWordPreimageToolbar.addPropertyChangeListener("showAction", showActionListener);
+        computeImageToolbar.addPropertyChangeListener("showAction", showActionListener);
+        computePreimageToolbar.addPropertyChangeListener("showAction", showActionListener);
         
         innerPanel.addContainerListener(new ContainerListener() {
 
@@ -193,6 +186,12 @@ public class SplitPane extends JSplitPane
                 }
             });
         }
+    }
+    
+    private void addToolbar(DockToolbar toolbar, JPanel panel)
+    {
+        panel.add(toolbar);
+        dockToolbars.add(toolbar);
     }
     
     private void updateToolbars()
