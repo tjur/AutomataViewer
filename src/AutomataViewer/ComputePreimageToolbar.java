@@ -43,9 +43,9 @@ public class ComputePreimageToolbar extends DockToolbar
     private int[] startStates; // subset of states before we applied first letter
     private boolean resetPrefix;
     
-    public ComputePreimageToolbar(String name, Automaton automaton)
+    public ComputePreimageToolbar(String name, boolean visibleOnStart, Automaton automaton)
     {
-        super(name, automaton);
+        super(name, visibleOnStart, automaton);
         
         prefix = -1;
         startStates = automaton.getSelectedStates();

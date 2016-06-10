@@ -25,16 +25,18 @@ public abstract class DockToolbar extends JToolBar
 {
     private JPanel panel; // content panel
     private final String name;
+    private final boolean visibleOnStart;
     private Automaton automaton;
     
     private boolean floating;
     private Dimension dockSize;
     private Dimension floatSize;
     
-    DockToolbar(String name, Automaton automaton)
+    DockToolbar(String name, boolean visibleOnStart, Automaton automaton)
     {
         super(name);
         this.name = name;
+        this.visibleOnStart = visibleOnStart;
         this.automaton = automaton;
         floating = false;
         setLayout(new FlowLayout());
@@ -160,6 +162,11 @@ public abstract class DockToolbar extends JToolBar
     public Font getDeafultFont()
     {
         return new Font("Arial", Font.ITALIC + Font.BOLD, 14);
+    }
+    
+    public boolean isVisibleOnStart()
+    {
+        return visibleOnStart;
     }
     
     // updates toolbar only if it is visible

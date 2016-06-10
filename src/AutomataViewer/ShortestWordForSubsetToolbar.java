@@ -47,9 +47,9 @@ public class ShortestWordForSubsetToolbar extends DockToolbar
     
     private InverseAutomaton inverseAutomaton;
     
-    public ShortestWordForSubsetToolbar(String name, Automaton automaton)
+    public ShortestWordForSubsetToolbar(String name, boolean visibleOnStart, Automaton automaton)
     {
-        super(name, automaton);
+        super(name, visibleOnStart, automaton);
         inverseAutomaton = new InverseAutomaton(automaton);
         
         JPanel panel = getPanel();

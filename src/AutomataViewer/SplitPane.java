@@ -47,22 +47,18 @@ public class SplitPane extends JSplitPane
         setBottomComponent(rightPanel);
         setResizeWeight(1.0);
             
-        codeToolbar = new AutomatonCodeToolbar("Automaton code", automaton);
+        codeToolbar = new AutomatonCodeToolbar("Automaton code", false, automaton);
+        ComputeImageToolbar computeImageToolbar = new ComputeImageToolbar("Compute image", true, automaton);
+        ComputePreimageToolbar computePreimageToolbar = new ComputePreimageToolbar("Compute preimage", false, automaton);
+        ShortestResetWordToolbar resetWordToolbar = new ShortestResetWordToolbar("Shortest reset word", true, automaton);   
+        ShortestWordForSubsetToolbar shortestWordSubsetToolbar = new ShortestWordForSubsetToolbar("Shortest word for subset", true, automaton);      
+        BasicPropertiesToolbar basicPropertiesToolbar = new BasicPropertiesToolbar("Basic properties", false, automaton);
+        
         addToolbar(codeToolbar, innerPanel);
-        
-        ComputeImageToolbar computeImageToolbar = new ComputeImageToolbar("Compute image", automaton);
         addToolbar(computeImageToolbar, innerPanel);
-        
-        ComputePreimageToolbar computePreimageToolbar = new ComputePreimageToolbar("Compute preimage", automaton);
         addToolbar(computePreimageToolbar, innerPanel);
-        
-        ShortestResetWordToolbar resetWordToolbar = new ShortestResetWordToolbar("Shortest reset word", automaton);
         addToolbar(resetWordToolbar, innerPanel);
-        
-        ShortestWordForSubsetToolbar shortestWordSubsetToolbar = new ShortestWordForSubsetToolbar("Shortest word for subset", automaton);
         addToolbar(shortestWordSubsetToolbar, innerPanel);
-        
-        BasicPropertiesToolbar basicPropertiesToolbar = new BasicPropertiesToolbar("Basic properties", automaton);
         addToolbar(basicPropertiesToolbar, innerPanel);
         
         updateToolbars();

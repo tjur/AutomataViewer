@@ -15,9 +15,9 @@ public class BasicPropertiesToolbar extends DockToolbar
     
     private InverseAutomaton inverseAutomaton;
     
-    public BasicPropertiesToolbar(String name, Automaton automaton)
+    public BasicPropertiesToolbar(String name, boolean visibleOnStart, Automaton automaton)
     {
-        super(name, automaton);
+        super(name, visibleOnStart, automaton);
         
         inverseAutomaton = new InverseAutomaton(automaton);
         

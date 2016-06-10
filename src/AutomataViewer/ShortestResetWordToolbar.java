@@ -33,9 +33,9 @@ public class ShortestResetWordToolbar extends DockToolbar
     private final JTextPane textPane;
     private final JLabel lengthLabel;
     
-    public ShortestResetWordToolbar(String name, Automaton automaton)
+    public ShortestResetWordToolbar(String name, boolean visibleOnStart, Automaton automaton)
     {
-        super(name, automaton);
+        super(name, visibleOnStart, automaton);
         
         JPanel panel = getPanel();
         

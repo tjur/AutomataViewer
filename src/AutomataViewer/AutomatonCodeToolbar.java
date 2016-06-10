@@ -21,9 +21,9 @@ public class AutomatonCodeToolbar extends DockToolbar
 {
     private JTextPane textPane;
     
-    public AutomatonCodeToolbar(String name, Automaton automaton)
+    public AutomatonCodeToolbar(String name, boolean visibleOnStart, Automaton automaton)
     {
-        super(name, automaton);
+        super(name, visibleOnStart, automaton);
         
         JPanel panel = getPanel();
         textPane = new JTextPane();

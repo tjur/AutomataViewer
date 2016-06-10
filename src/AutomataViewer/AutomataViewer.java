@@ -176,7 +176,8 @@ public class AutomataViewer
         for (DockToolbar dockToolbar : splitPane.getDockToolbars())
         {
             JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(dockToolbar.getName());
-            menuItem.setSelected(true);
+            menuItem.setSelected(dockToolbar.isVisibleOnStart());
+            dockToolbar.setVisible(dockToolbar.isVisibleOnStart());
             toolbarsMenu.add(menuItem);
             menuItem.addActionListener(new ActionListener() {
 
