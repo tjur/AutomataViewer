@@ -14,8 +14,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JMenuItem;
@@ -326,23 +324,16 @@ public class ComputePreimageToolbar extends DockToolbar
                 if (!actionCheckBox.isSelected())
                     firePropertyChange("showAction", false, true);
             }
-        }); 
-        
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
-        buttonPanel.add(undoPreimageButton);
-        buttonPanel.add(letterBackButton);
-        buttonPanel.add(letterForwardButton);
-        buttonPanel.add(preimageButton);
+        });
         
         JPanel outerPanel = new JPanel();
         outerPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.WEST;
+        outerPanel.add(undoPreimageButton,c);
+        outerPanel.add(letterBackButton,c);
+        outerPanel.add(letterForwardButton,c);
+        outerPanel.add(preimageButton,c);
         c.weightx = 1.0;
-        c.gridwidth = 1;
-        outerPanel.add(buttonPanel, c);
         outerPanel.add(rangeCheckBox, c);
         outerPanel.add(actionCheckBox, c);
         panel.add(outerPanel, BorderLayout.SOUTH);

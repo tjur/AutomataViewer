@@ -4,7 +4,6 @@ package AutomataViewer;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -39,11 +38,11 @@ public abstract class DockToolbar extends JToolBar
         this.visibleOnStart = visibleOnStart;
         this.automaton = automaton;
         floating = false;
-        setLayout(new FlowLayout());
+        setLayout(new BorderLayout());
         setOrientation(javax.swing.SwingConstants.HORIZONTAL);
         
         panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 3), name));
+        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 1), name));
         add(panel);
         
         addAncestorListener(new AncestorListener() {
@@ -91,20 +90,6 @@ public abstract class DockToolbar extends JToolBar
 
             @Override
             public void ancestorMoved(AncestorEvent event) {}
-        });
-        
-        addComponentListener(new ComponentAdapter()
-        {
-            @Override
-            public void componentResized(ComponentEvent ev) {
-                
-                Dimension dim = new Dimension(
-                    DockToolbar.this.getSize().width - 30,
-                    panel.getSize().height
-                );
-                panel.setPreferredSize(dim);
-                revalidate();
-            }
         });
         
         automaton.addPropertyChangeListener("automatonChanged", new PropertyChangeListener() {
