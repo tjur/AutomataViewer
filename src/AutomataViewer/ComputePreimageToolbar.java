@@ -56,10 +56,13 @@ public class ComputePreimageToolbar extends DockToolbar
         
         JPanel panel = getPanel();
         
+        JButton undoPreimageButton = new JButton("<<");
+        JButton letterBackButton = new JButton("<");
+        JButton letterForwardButton = new JButton(">");
+        JButton preimageButton = new JButton(">>");
+        
         StyleContext cont = StyleContext.getDefaultStyleContext();
-        AttributeSet attrStrike = cont.addAttribute(cont.getEmptySet(), StyleConstants.StrikeThrough, true);
         AttributeSet attrHighlighted = cont.addAttribute(cont.getEmptySet(), StyleConstants.Background, Color.LIGHT_GRAY);
-        AttributeSet attrDefault = cont.getStyle(StyleContext.DEFAULT_STYLE);
         DefaultStyledDocument doc = new DefaultStyledDocument() {
             
             @Override
@@ -70,52 +73,52 @@ public class ComputePreimageToolbar extends DockToolbar
                 }
                 catch (BadLocationException ex) {}
                 
-                String word = textPane.getText();
-                for (int i = 0; i < word.length(); i++)
-                {
-                    char letter = word.charAt(i);
-                    if (hashMap.containsKey(letter))
-                    {
-                        AttributeSet attr = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, AutomatonHelper.TRANSITIONS_COLORS[hashMap.get(letter)]);
-                        setCharacterAttributes(i, 1, attr, true);
-                    }
-                    else if (!Character.isWhitespace(letter))
-                        setCharacterAttributes(i, 1, attrStrike, true);
-                    else
-                        setCharacterAttributes(i, 1, attrDefault, true);
-                }
+                resetTextPane();
                 
                 prefix = -1;
                 startStates = getAutomaton().getSelectedStates();
                 showRange();
                 showAction();
+                
+                undoPreimageButton.setEnabled(false);
+                letterBackButton.setEnabled(false);
+                
+                if (textPane.getText().trim().length() > 0)
+                {
+                    letterForwardButton.setEnabled(true);
+                    preimageButton.setEnabled(true);
+                }
+                else
+                {
+                    letterForwardButton.setEnabled(false);
+                    preimageButton.setEnabled(false);
+                }
             }
             
             @Override
             public void remove (int offset, int len) throws BadLocationException 
             {
-                setCharacterAttributes(offset, len, attrDefault, true);
-                super.remove(offset, len);
-                
-                String word = textPane.getText();
-                for (int i = 0; i < word.length(); i++)
-                {
-                    char letter = word.charAt(i);
-                    if (hashMap.containsKey(letter))
-                    {
-                        AttributeSet attr = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, AutomatonHelper.TRANSITIONS_COLORS[hashMap.get(letter)]);
-                        setCharacterAttributes(i, 1, attr, true);
-                    }
-                    else if (!Character.isWhitespace(letter))
-                        setCharacterAttributes(i, 1, attrStrike, true);
-                    else
-                        setCharacterAttributes(i, 1, attrDefault, true);
-                }
+                super.remove(offset, len);   
+                resetTextPane();
                 
                 prefix = -1;
                 startStates = getAutomaton().getSelectedStates();
                 showRange();
                 showAction();
+                
+                undoPreimageButton.setEnabled(false);
+                letterBackButton.setEnabled(false);
+                
+                if (textPane.getText().trim().length() > 0)
+                {
+                    letterForwardButton.setEnabled(true);
+                    preimageButton.setEnabled(true);
+                }
+                else
+                {
+                    letterForwardButton.setEnabled(false);
+                    preimageButton.setEnabled(false);
+                }
             }
         };  
         
@@ -180,9 +183,9 @@ public class ComputePreimageToolbar extends DockToolbar
         
         panel.add(textPane, BorderLayout.CENTER);
         
-        JButton undoImageButton = new JButton("<<");
-        undoImageButton.setToolTipText("Undo image");
-        undoImageButton.addActionListener(new ActionListener() {
+        undoPreimageButton.setEnabled(false);
+        undoPreimageButton.setToolTipText("Undo preimage");
+        undoPreimageButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ev)
@@ -190,10 +193,15 @@ public class ComputePreimageToolbar extends DockToolbar
                 prefix = -1;
                 getAutomaton().selectStates(startStates); // states that we had before appling letters
                 resetTextPane();
+                
+                undoPreimageButton.setEnabled(false);                
+                letterBackButton.setEnabled(false);
+                letterForwardButton.setEnabled(true);
+                preimageButton.setEnabled(true);
             }  
         });
         
-        JButton letterBackButton = new JButton("<");
+        letterBackButton.setEnabled(false);
         letterBackButton.setToolTipText("Letter back");
         letterBackButton.addActionListener(new ActionListener() {
 
@@ -213,10 +221,19 @@ public class ComputePreimageToolbar extends DockToolbar
                 
                 resetTextPane();
                 doc.setCharacterAttributes(0, prefix + 1, attrHighlighted, false);
+                
+                letterForwardButton.setEnabled(true);
+                preimageButton.setEnabled(true);
+                
+                if (prefix == -1)
+                {
+                    undoPreimageButton.setEnabled(false);
+                    letterBackButton.setEnabled(false);
+                }
             }      
         });
         
-        JButton letterForwardButton = new JButton(">");
+        letterForwardButton.setEnabled(false);
         letterForwardButton.setToolTipText("Letter forward");
         letterForwardButton.addActionListener(new ActionListener() {
 
@@ -243,12 +260,21 @@ public class ComputePreimageToolbar extends DockToolbar
                         break;
                     }
                 }
+                
+                undoPreimageButton.setEnabled(true);
+                letterBackButton.setEnabled(true);
+                
+                if (prefix == word.length() - 1)
+                {
+                    letterForwardButton.setEnabled(false);
+                    preimageButton.setEnabled(false);
+                }
             }       
         });
         
-        JButton imageButton = new JButton(">>");
-        imageButton.setToolTipText("Image");
-        imageButton.addActionListener(new ActionListener() {
+        preimageButton.setEnabled(false);
+        preimageButton.setToolTipText("Preimage");
+        preimageButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent ev)
@@ -263,7 +289,19 @@ public class ComputePreimageToolbar extends DockToolbar
                 }
                 else
                     JOptionPane.showMessageDialog(textPane, "Invalid word");
-            }       
+                
+                if (prefix != -1)
+                {
+                    undoPreimageButton.setEnabled(true);
+                    letterBackButton.setEnabled(true);
+                }
+                
+                if (prefix == textPane.getText().length() - 1)
+                {
+                    letterForwardButton.setEnabled(false);
+                    preimageButton.setEnabled(false);
+                }
+            }
         });
         
         rangeCheckBox = new JCheckBox("Range");
@@ -292,11 +330,11 @@ public class ComputePreimageToolbar extends DockToolbar
         
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        buttonPanel.add(undoImageButton);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0));
+        buttonPanel.add(undoPreimageButton);
         buttonPanel.add(letterBackButton);
         buttonPanel.add(letterForwardButton);
-        buttonPanel.add(imageButton);
+        buttonPanel.add(preimageButton);
         
         JPanel outerPanel = new JPanel();
         outerPanel.setLayout(new GridBagLayout());
@@ -304,7 +342,6 @@ public class ComputePreimageToolbar extends DockToolbar
         c.anchor = GridBagConstraints.WEST;
         c.weightx = 1.0;
         c.gridwidth = 1;
-        imageButton.setEnabled(true);
         outerPanel.add(buttonPanel, c);
         outerPanel.add(rangeCheckBox, c);
         outerPanel.add(actionCheckBox, c);
