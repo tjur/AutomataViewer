@@ -3,6 +3,7 @@ package AutomataViewer;
 
 import AutomatonAlgorithms.ShortestResetWord;
 import AutomatonAlgorithms.WordNotFoundException;
+import AutomatonModels.Automaton;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;

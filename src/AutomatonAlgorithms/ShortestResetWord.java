@@ -1,6 +1,6 @@
 package AutomatonAlgorithms;
 
-import AutomataViewer.Automaton;
+import AutomatonModels.Automaton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

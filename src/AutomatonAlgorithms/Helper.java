@@ -1,7 +1,7 @@
 
 package AutomatonAlgorithms;
 
-import AutomataViewer.Automaton;
+import AutomatonModels.Automaton;
 
 
 public abstract class Helper

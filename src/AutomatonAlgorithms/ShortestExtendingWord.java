@@ -1,8 +1,8 @@
 
 package AutomatonAlgorithms;
 
-import AutomataViewer.Automaton;
-import AutomataViewer.InverseAutomaton;
+import AutomatonModels.Automaton;
+import AutomatonModels.InverseAutomaton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

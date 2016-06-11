@@ -2,6 +2,8 @@
 package AutomataViewer;
 
 import AutomatonAlgorithms.BasicProperties;
+import AutomatonModels.Automaton;
+import AutomatonModels.InverseAutomaton;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import javax.swing.BoxLayout;

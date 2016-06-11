@@ -1,5 +1,5 @@
 
-package AutomataViewer;
+package AutomatonModels;
 
 public class InverseAutomaton
 {

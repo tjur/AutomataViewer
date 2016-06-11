@@ -5,6 +5,8 @@ import AutomatonAlgorithms.ShortestCompressingWord;
 import AutomatonAlgorithms.ShortestExtendingWord;
 import AutomatonAlgorithms.ShortestResetWord;
 import AutomatonAlgorithms.WordNotFoundException;
+import AutomatonModels.Automaton;
+import AutomatonModels.InverseAutomaton;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;

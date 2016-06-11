@@ -1,6 +1,7 @@
 
 package AutomataViewer;
 
+import AutomatonModels.Automaton;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
