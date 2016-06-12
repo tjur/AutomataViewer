@@ -205,12 +205,15 @@ public class AutomataViewer
                 panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
                 
                 String[] strings = {
-                    "<html>AutomataViewer is a graphical interface for</html>",
+                    "<html>Automata Viewer version 1.0<br><br></html>",
+                    "<html>Automata Viewer is a graphical interface for</html>",
                     "<html>creating and operating on automata<br><br></html>",
                     "<html>Authors:</html>",
                     "<html>Tomasz Jurkiewicz<br></html>",
-                    "<html>Marek Szykuła<br><br><br></html>",
-                    "<html>2016</html>"
+                    "<html>Marek Szykuła<br><br></html>",
+                    "<html>University of Wrocław<br></html>",
+                    "<html>Institute of Computer Science<br><br></html>",
+                    "<html>Copyright © 2016</html>"
                 };
                 
                 panel.add(new Separator());
@@ -224,7 +227,7 @@ public class AutomataViewer
                 
                 aboutFrame.add(panel);
                 aboutFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                aboutFrame.setSize(350, 200);
+                aboutFrame.setSize(350, 265);
                 aboutFrame.setLocationRelativeTo(null);
                 aboutFrame.setResizable(false);
                 aboutFrame.setVisible(true);
