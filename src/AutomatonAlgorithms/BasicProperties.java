@@ -36,9 +36,11 @@ public abstract class BasicProperties
         
         boolean[] visited = new boolean[N*(N-1)];
         Arrays.fill(visited, false);
-        int[] stackN1 = new int[N*(N-1)/2];
-        int[] stackN2 = new int[N*(N-1)/2];
-        int top = 0;
+        
+        int[] queue = new int[N*(N-1)/2];
+        Arrays.fill(queue, -1);
+        int start = 0;
+        int end = 0;
         
         for (int n = 0; n < N; n++)
         {
@@ -57,9 +59,8 @@ public abstract class BasicProperties
                             if (!visited[i1*N + i2]) 
                             {
                                 visited[i1*N + i2] = true;
-                                stackN1[top] = i1;
-                                stackN2[top] = i2;
-                                top++;
+                                queue[end] = i1*N + i2;
+                                end++;
                             }
                         }
                     }
@@ -67,11 +68,12 @@ public abstract class BasicProperties
             }
         }
         
-        while (top > 0) 
+        while (start < end) 
         {
-            top--;
-            int q = stackN1[top];
-            int p = stackN2[top];
+            int q = queue[start] / N;
+            int p = queue[start] % N;
+            start++;
+            
             for (int k = 0; k < K; k++)
             {
                 if (k == ommitLetter)
@@ -96,10 +98,10 @@ public abstract class BasicProperties
 
                             if (visited[i*N + j]) 
                                 continue;
+                            
                             visited[i*N + j] = true;
-                            stackN1[top] = i;
-                            stackN2[top] = j;
-                            top++;
+                            queue[end] = i*N + j;
+                            end++;
                         }
                     }
                 }
