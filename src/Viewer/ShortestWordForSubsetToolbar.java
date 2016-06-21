@@ -1,5 +1,5 @@
 
-package AutomataViewer;
+package Viewer;
 
 import AutomatonAlgorithms.ShortestCompressingWord;
 import AutomatonAlgorithms.ShortestExtendingWord;

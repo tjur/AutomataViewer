@@ -1,5 +1,5 @@
 
-package AutomataViewer;
+package Viewer;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -43,7 +43,7 @@ import javax.swing.JToolBar;
 import javax.swing.ListCellRenderer;
 
 
-public class AutomataViewer
+public class SynchroViewer
 {
     
     private final JFrame frame;
@@ -54,9 +54,9 @@ public class AutomataViewer
     private JToolBar toolbar;
     private final String[] iconFiles = { 
         "icons/move_states.png", "icons/add_states.png", "icons/remove_states.png",
-        "icons/replace_states.png", "icons/add_transitions.png"
+        "icons/swap_states.png", "icons/add_transitions.png"
     };
-    private final String[] buttonLabels = { "Move states", "Add states", "Remove states", "Replace states", "Add/Remove transitions", "Select states" };
+    private final String[] buttonLabels = { "Move states", "Add states", "Remove states", "Swap states (drag one state to another)", "Add/Remove transitions", "Select states" };
     private final JButton[] toolBarButtons = new JButton[buttonLabels.length];
     private JButton selectedColorsButton;
     
@@ -64,7 +64,7 @@ public class AutomataViewer
     private JButton removeTransButton;
     private JComboBox<String> transitions;
 
-    public AutomataViewer(JFrame frame) 
+    public SynchroViewer(JFrame frame) 
     {
         this.frame = frame;
         splitPane = new SplitPane();
@@ -205,9 +205,9 @@ public class AutomataViewer
                 panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
                 
                 String[] strings = {
-                    "<html>Automata Viewer version 1.0<br><br></html>",
-                    "<html>Automata Viewer is a graphical interface for</html>",
-                    "<html>creating and operating on automata<br><br></html>",
+                    "<html>Synchro Viewer version 1.0<br><br></html>",
+                    "<html>Synchro Viewer is a graphical application for</html>",
+                    "<html>analyzing synchronizing automata.<br><br></html>",
                     "<html>Authors:</html>",
                     "<html>Tomasz Jurkiewicz<br></html>",
                     "<html>Marek Szykuła<br><br></html>",
@@ -278,7 +278,7 @@ public class AutomataViewer
                             transitions.setVisible(false);
                         }
                         
-                        if (paintPanel.getOperation() != PaintPanel.Operation.REPLACE_STATES.getValue())
+                        if (paintPanel.getOperation() != PaintPanel.Operation.SWAP_STATES.getValue())
                             paintPanel.resetReplaceStatesFirstState();
 
                         break;
@@ -391,11 +391,6 @@ public class AutomataViewer
         int rows = PaintPanel.STATES_COLORS.length / cols;
         if (PaintPanel.STATES_COLORS.length % cols != 0)
             rows++;
-        
-        /*selectedColorsButton.setIcon(createSelectedColorsIcon(paintPanel.getSelectedStateColor(), paintPanel.getUnselectedStateColor(), 40, 40));
-        toolbar.add(selectedColorsButton);
-        toolbar.addSeparator();        
-        toolbar.addSeparator(new Dimension(toolbar.getPreferredSize().height / 2, 0));*/
         
         JPanel colorChoosersPanel = new JPanel(new GridLayout(rows, cols));
         for (int i = 0; i < rows; i++)

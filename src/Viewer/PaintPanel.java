@@ -1,5 +1,5 @@
 
-package AutomataViewer;
+package Viewer;
 
 import AutomatonModels.Automaton;
 import java.awt.BasicStroke;
@@ -55,7 +55,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
     
     public static enum Operation
     {
-        MOVE_STATES(0), ADD_STATES(1), REMOVE_STATES(2), REPLACE_STATES(3), ADD_TRANS(4), SELECT_STATES(5);
+        MOVE_STATES(0), ADD_STATES(1), REMOVE_STATES(2), SWAP_STATES(3), ADD_TRANS(4), SELECT_STATES(5);
         
         private final int value;
         
@@ -422,7 +422,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
                 automaton.removeState(highlighted);
                 highlighted = -1;
             }
-            else if (highlighted >= 0 && operation == Operation.REPLACE_STATES)
+            else if (highlighted >= 0 && operation == Operation.SWAP_STATES)
                 replaceStatesFirstState = highlighted;
             else if (highlighted >= 0 && operation == Operation.ADD_TRANS)
                 addTransFirstState = highlighted;
@@ -468,7 +468,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             }   
             addTransFirstState = -1;
         }
-        else if (operation == Operation.REPLACE_STATES)
+        else if (operation == Operation.SWAP_STATES)
         {
             if (replaceStatesFirstState >= 0 && highlighted >= 0 && replaceStatesFirstState != highlighted)
             {
@@ -648,7 +648,7 @@ public class PaintPanel extends JPanel implements MouseListener, MouseMotionList
             if (highlighted != -1 && highlighted == n)
                 g.setColor(Color.LIGHT_GRAY);
             
-            if (operation == Operation.REPLACE_STATES && replaceStatesFirstState == n)
+            if (operation == Operation.SWAP_STATES && replaceStatesFirstState == n)
             {
                 g.setColor(Color.RED.darker());
                 g.setStroke(new BasicStroke(4));
