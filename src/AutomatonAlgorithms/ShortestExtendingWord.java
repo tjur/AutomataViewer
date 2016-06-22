@@ -19,7 +19,7 @@ public abstract class ShortestExtendingWord
         if (N == 0)
             throw new WordNotFoundException();
         
-        boolean[] visited = new boolean[(int) Math.pow(2, automaton.getN())];
+        boolean[] visited = new boolean[2 << automaton.getN()];
         int[] fromWhereSubsetVal = new int[visited.length];
         int[] fromWhereTransition = new int[visited.length];
         Arrays.fill(visited, false);
