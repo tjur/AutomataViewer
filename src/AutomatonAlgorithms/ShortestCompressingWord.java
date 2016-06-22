@@ -72,7 +72,7 @@ public abstract class ShortestCompressingWord
 
                 for (int i1 = 0; i1 < states1.length; i1++)
                 {
-                    for (int i2 = 0; i2 < states2.length; i2++) 
+                    for (int i2 = 0; i2 < states2.length; i2++)
                     {   
                         int a = states1[i1];
                         int b = states2[i2];

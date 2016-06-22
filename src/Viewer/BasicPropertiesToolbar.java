@@ -1,7 +1,8 @@
 
 package Viewer;
 
-import AutomatonAlgorithms.BasicProperties;
+import AutomatonAlgorithms.Connectivity;
+import AutomatonAlgorithms.Synchronizability;
 import AutomatonModels.Automaton;
 import AutomatonModels.InverseAutomaton;
 import java.awt.BorderLayout;
@@ -43,16 +44,16 @@ public class BasicPropertiesToolbar extends DockToolbar
     {
         inverseAutomaton = new InverseAutomaton(getAutomaton());
         
-        if (BasicProperties.isIrreduciblySynchronizing(getAutomaton(), inverseAutomaton))
+        if (Synchronizability.isIrreduciblySynchronizing(getAutomaton(), inverseAutomaton))
             syncLabel.setText("Irreducibly synchronizing");
-        else if (BasicProperties.isSynchronizing(getAutomaton(), inverseAutomaton))
+        else if (Synchronizability.isSynchronizing(getAutomaton(), inverseAutomaton))
             syncLabel.setText("Synchronizing");
         else
             syncLabel.setText("Not synchronizing");
             
-        if (BasicProperties.isStronglyConnected(getAutomaton(), inverseAutomaton))
+        if (Connectivity.isStronglyConnected(getAutomaton(), inverseAutomaton))
             connectedLabel.setText("Strongly connected");
-        else if (BasicProperties.isConnected(getAutomaton(), inverseAutomaton))
+        else if (Connectivity.isConnected(getAutomaton(), inverseAutomaton))
             connectedLabel.setText("Connected");
         else
             connectedLabel.setText("Not connected");
