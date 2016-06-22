@@ -33,24 +33,26 @@ public abstract class ShortestCompressingWord
                 int[] states = inverseAutomaton.getMatrix()[n][k];
                 for (int i1 = 0; i1 < states.length; i1++)
                 {
-                    for (int i2 = i1+1; i2 < states.length; i2++)
+                    for (int i2 = 0; i2 < states.length; i2++)
                     {
-                        if (states[i1] == 1 && states[i2] == 1)
+                        int a = states[i1];
+                        int b = states[i2];
+                        if (a >= b)
+                            continue;
+                        
+                        if (!visited[a*N + b]) 
                         {
-                            if (!visited[i1*N + i2]) 
+                            if (subset[a] == 1 && subset[b] == 1)
                             {
-                                if (subset[i1] == 1 && subset[i2] == 1)
-                                {
-                                    ArrayList<Integer> transitions = new ArrayList<>();
-                                    transitions.add(k);
-                                    return transitions;
-                                }
-                                
-                                visited[i1*N + i2] = true;
-                                fromWhereTransition[i1*N + i2] = k;
-                                queue[end] = i1*N + i2;
-                                end++;
+                                ArrayList<Integer> transitions = new ArrayList<>();
+                                transitions.add(k);
+                                return transitions;
                             }
+
+                            visited[a*N + b] = true;
+                            fromWhereTransition[a*N + b] = k;
+                            queue[end] = a*N + b;
+                            end++;
                         }
                     }
                 }
@@ -71,41 +73,38 @@ public abstract class ShortestCompressingWord
                 for (int i1 = 0; i1 < states1.length; i1++)
                 {
                     for (int i2 = 0; i2 < states2.length; i2++) 
-                    {
-                        if (states1[i1] == 1 && states2[i2] == 1)
-                        {   
-                            int i = i1;
-                            int j = i2;
-                            if (i1 > i2)
+                    {   
+                        int a = states1[i1];
+                        int b = states2[i2];
+                        if (a > b)
+                        {
+                            a = states2[i2];
+                            b = states1[i1];
+                        }
+
+                        if (visited[a*N + b])
+                            continue;
+
+                        visited[a*N + b] = true;
+                        fromWherePair[a*N + b] = q*N + p;
+                        fromWhereTransition[a*N + b] = k;
+                        queue[end] = a*N + b;
+                        end++;
+
+                        if (subset[a] == 1 && subset[b] == 1)
+                        {
+                            int pair = a*N + b;
+                            ArrayList<Integer> transitions = new ArrayList<>();
+                            while (true)
                             {
-                                i = i2;
-                                j = i1;
+                                transitions.add(fromWhereTransition[pair]);
+                                pair = fromWherePair[pair];
+
+                                if (pair == -1)
+                                    break;
                             }
 
-                            if (visited[i*N + j])
-                                continue;
-                            
-                            visited[i*N + j] = true;
-                            fromWherePair[i*N + j] = q*N + p;
-                            fromWhereTransition[i*N + j] = k;
-                            queue[end] = i*N + j;
-                            end++;
-                            
-                            if (subset[i1] == 1 && subset[i2] == 1)
-                            {
-                                int pair = i*N + j;
-                                ArrayList<Integer> transitions = new ArrayList<>();
-                                while (true)
-                                {
-                                    transitions.add(fromWhereTransition[pair]);
-                                    pair = fromWherePair[pair];
-                                    
-                                    if (pair == -1)
-                                        break;
-                                }
-
-                                return transitions;
-                            }
+                            return transitions;
                         }
                     }
                 }

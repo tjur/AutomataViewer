@@ -62,11 +62,8 @@ public abstract class ShortestExtendingWord
                         if (subset[i] == 1)
                         {
                             int[] subset2 = inverseAutomaton.getMatrix()[i][trans];
-                            for (int j = 0; j < N; j++)
-                            {
-                                if (subset2[j] == 1)
-                                    newSubset[j] = 1;
-                            }
+                            for (int j = 0; j < subset2.length; j++)
+                                newSubset[subset2[j]] = 1;
                         }
                     }
                     

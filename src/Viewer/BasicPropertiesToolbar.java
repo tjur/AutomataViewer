@@ -52,7 +52,7 @@ public class BasicPropertiesToolbar extends DockToolbar
             
         if (BasicProperties.isStronglyConnected(getAutomaton(), inverseAutomaton))
             connectedLabel.setText("Strongly connected");
-        else if (BasicProperties.isConnected(getAutomaton()))
+        else if (BasicProperties.isConnected(getAutomaton(), inverseAutomaton))
             connectedLabel.setText("Connected");
         else
             connectedLabel.setText("Not connected");

@@ -52,16 +52,18 @@ public abstract class BasicProperties
                 int[] states = inverseAutomaton.getMatrix()[n][k];
                 for (int i1 = 0; i1 < states.length; i1++)
                 {
-                    for (int i2 = i1+1; i2 < states.length; i2++)
+                    for (int i2 = 0; i2 < states.length; i2++)
                     {
-                        if (states[i1] == 1 && states[i2] == 1)
+                        int a = states[i1];
+                        int b = states[i2];
+                        if (a >= b)
+                            continue;
+                        
+                        if (!visited[a*N + b])
                         {
-                            if (!visited[i1*N + i2]) 
-                            {
-                                visited[i1*N + i2] = true;
-                                queue[end] = i1*N + i2;
-                                end++;
-                            }
+                            visited[a*N + b] = true;
+                            queue[end] = a*N + b;
+                            end++;
                         }
                     }
                 }
@@ -86,23 +88,20 @@ public abstract class BasicProperties
                 {
                     for (int i2 = 0; i2 < states2.length; i2++) 
                     {
-                        if (states1[i1] == 1 && states2[i2] == 1)
+                        int a = states1[i1];
+                        int b = states2[i2];
+                        if (a > b)
                         {
-                            int i = i1;
-                            int j = i2;
-                            if (i1 > i2)
-                            {
-                                i = i2;
-                                j = i1;
-                            }
-
-                            if (visited[i*N + j]) 
-                                continue;
-                            
-                            visited[i*N + j] = true;
-                            queue[end] = i*N + j;
-                            end++;
+                            a = states2[i2];
+                            b = states1[i1];
                         }
+
+                        if (visited[a*N + b])
+                            continue;
+
+                        visited[a*N + b] = true;
+                        queue[end] = a*N + b;
+                        end++;
                     }
                 }
             }
@@ -149,10 +148,10 @@ public abstract class BasicProperties
     {
         visited[vertex] = true;
         int[][] matrix = automaton.getMatrix();
-        for (int i = 0; i < automaton.getK(); i++)
+        for (int k = 0; k < automaton.getK(); k++)
         {
-            if (!visited[matrix[vertex][i]])
-                dfs(matrix[vertex][i], visited, automaton);
+            if (!visited[matrix[vertex][k]])
+                dfs(matrix[vertex][k], visited, automaton);
         }
     }
     
@@ -160,17 +159,17 @@ public abstract class BasicProperties
     {
         visited[vertex] = true;
         int[][][] reversedMatrix = inverseAutomaton.getMatrix();
-        for (int i = 0; i < automaton.getK(); i++)
+        for (int k = 0; k < automaton.getK(); k++)
         {
-            for (int j = 0; j < automaton.getN(); j++)
+            for (int m = 0; m < reversedMatrix[vertex][k].length; m++)
             {
-                if (reversedMatrix[vertex][i][j] == 1 && !visited[j])
-                    dfsReversed(j, visited, automaton, inverseAutomaton);
+                if (!visited[reversedMatrix[vertex][k][m]])
+                    dfsReversed(reversedMatrix[vertex][k][m], visited, automaton, inverseAutomaton);
             }
         }
     }
     
-    public static boolean isConnected(Automaton automaton)
+    public static boolean isConnected(Automaton automaton, InverseAutomaton inverseAutomaton)
     {
         if (automaton.getN() == 0)
             return false;
@@ -180,20 +179,8 @@ public abstract class BasicProperties
         
         boolean[] visited = new boolean[N];
         
-        int[][] matrix = new int[N][N];
         int vertex = 0; // choose arbitrary vertex
-        
-        // make undirected graph
-        for (int i = 0; i < N; i++)
-        {
-            for (int j = 0; j < K; j++)
-            {
-                matrix[i][automaton.getMatrix()[i][j]] = 1;
-                matrix[automaton.getMatrix()[i][j]][i] = 1;
-            }
-        }
-        
-        dfsUndirected(vertex, matrix, visited);
+        dfsUndirected(vertex, visited, automaton, inverseAutomaton);
         for (boolean val : visited)
         {
             if (!val)
@@ -203,13 +190,22 @@ public abstract class BasicProperties
         return true;
     }
     
-    private static void dfsUndirected(int vertex, int[][] matrix, boolean[] visited)
+    private static void dfsUndirected(int vertex, boolean[] visited, Automaton automaton, InverseAutomaton inverseAutomaton)
     {
         visited[vertex] = true;
-        for (int i = 0; i < matrix[vertex].length; i++)
+        for (int k = 0; k < automaton.getK(); k++)
         {
-            if (matrix[vertex][i] == 1 && !visited[i])
-                dfsUndirected(i, matrix, visited);
+            if (!visited[automaton.getMatrix()[vertex][k]])
+                dfsUndirected(automaton.getMatrix()[vertex][k], visited, automaton, inverseAutomaton);
+        }
+        int[][][] reversedMatrix = inverseAutomaton.getMatrix();
+        for (int k = 0; k < automaton.getK(); k++)
+        {
+            for (int m = 0; m < reversedMatrix[vertex][k].length; m++)
+            {
+                if (!visited[reversedMatrix[vertex][k][m]])
+                    dfsUndirected(reversedMatrix[vertex][k][m], visited, automaton, inverseAutomaton);
+            }
         }
     }
 }
