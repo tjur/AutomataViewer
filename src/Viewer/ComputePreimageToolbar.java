@@ -39,7 +39,7 @@ public class ComputePreimageToolbar extends DockToolbar
     private JCheckBox rangeCheckBox;
     private JCheckBox actionCheckBox;
     
-    private int prefix; // prefix of letters that we already applied
+    private int prefix; // prefix of letters that we already applied (from the end)
     private int[] startStates; // subset of states before we applied first letter
     private boolean resetPrefix;
     
@@ -56,10 +56,10 @@ public class ComputePreimageToolbar extends DockToolbar
         
         JPanel panel = getPanel();
         
-        JButton undoPreimageButton = new JButton("<<");
-        JButton letterBackButton = new JButton("<");
-        JButton letterForwardButton = new JButton(">");
-        JButton preimageButton = new JButton(">>");
+        JButton undoPreimageButton = new JButton(">>");
+        JButton letterBackButton = new JButton(">");
+        JButton letterForwardButton = new JButton("<");
+        JButton preimageButton = new JButton("<<");
         
         StyleContext cont = StyleContext.getDefaultStyleContext();
         AttributeSet attrHighlighted = cont.addAttribute(cont.getEmptySet(), StyleConstants.Background, Color.LIGHT_GRAY);
@@ -210,17 +210,17 @@ public class ComputePreimageToolbar extends DockToolbar
             {
                 String word = textPane.getText();
                 prefix = (prefix == -1) ? -1 : prefix - 1;
-                while (prefix >= 0 && Character.isWhitespace(word.charAt(prefix)))
+                while (prefix >= 0 && Character.isWhitespace(word.charAt(word.length() - prefix - 1)))
                     prefix--;
                 
-                String subword = word.substring(0, prefix + 1).replaceAll("\\s+","");
+                String subword = word.substring(word.length() - prefix - 1, word.length()).replaceAll("\\s+","");
                 resetPrefix = false;
                 getAutomaton().selectStates(startStates); // states that we have before appling letters
                 resetPrefix = false;
-                applyReversed(subword);
+                applyReversed(new StringBuilder(subword).reverse().toString());
                 
                 resetTextPane();
-                doc.setCharacterAttributes(0, prefix + 1, attrHighlighted, false);
+                doc.setCharacterAttributes(doc.getLength() - prefix - 1, prefix + 1, attrHighlighted, false);
                 
                 letterForwardButton.setEnabled(true);
                 preimageButton.setEnabled(true);
@@ -243,18 +243,18 @@ public class ComputePreimageToolbar extends DockToolbar
                 String word = textPane.getText();
                 for (int i = prefix + 1; i < word.length(); i++)
                 {
-                    if (hashMap.containsKey(word.charAt(i)))
+                    if (hashMap.containsKey(word.charAt(word.length() - i - 1)))
                     {
-                        String letter = word.substring(prefix + 1, i + 1).replaceAll("\\s+","");
+                        String letter = word.substring(word.length() - i - 1, word.length() - prefix - 1).replaceAll("\\s+","");
                         prefix = i;
                         resetPrefix = false;
                         applyReversed(letter);
                         
                         StyledDocument doc = textPane.getStyledDocument();
-                        doc.setCharacterAttributes(0, prefix + 1, attrHighlighted, false);
+                        doc.setCharacterAttributes(doc.getLength() - prefix - 1, prefix + 1, attrHighlighted, false);
                         break;
                     }
-                    else if (!Character.isWhitespace(word.charAt(i)))
+                    else if (!Character.isWhitespace(word.charAt(word.length() - i - 1)))
                     {
                         JOptionPane.showMessageDialog(textPane, "Invalid letter found");
                         break;
@@ -279,13 +279,13 @@ public class ComputePreimageToolbar extends DockToolbar
             @Override
             public void actionPerformed(ActionEvent ev)
             {
-                String word = textPane.getText().substring(prefix + 1).replaceAll("\\s+","");
+                String word = textPane.getText().substring(0, textPane.getText().length() - prefix - 1).replaceAll("\\s+","");
                 if (check(word))
                 {
-                    doc.setCharacterAttributes(prefix + 1, textPane.getText().length() - prefix - 1, attrHighlighted, false);
+                    doc.setCharacterAttributes(0, textPane.getText().length() - prefix, attrHighlighted, false);
                     prefix = textPane.getText().length() - 1;
                     resetPrefix = false;
-                    applyReversed(word);
+                    applyReversed(new StringBuilder(word).reverse().toString());
                 }
                 else
                     JOptionPane.showMessageDialog(textPane, "Invalid word");
@@ -331,10 +331,10 @@ public class ComputePreimageToolbar extends DockToolbar
         JPanel outerPanel = new JPanel();
         outerPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
-        outerPanel.add(undoPreimageButton,c);
-        outerPanel.add(letterBackButton,c);
-        outerPanel.add(letterForwardButton,c);
         outerPanel.add(preimageButton,c);
+        outerPanel.add(letterForwardButton,c);
+        outerPanel.add(letterBackButton,c);
+        outerPanel.add(undoPreimageButton,c);
         c.weightx = 1.0;
         outerPanel.add(rangeCheckBox, c);
         outerPanel.add(actionCheckBox, c);
@@ -405,7 +405,7 @@ public class ComputePreimageToolbar extends DockToolbar
     {
         if (rangeCheckBox.isSelected())
         {
-            String word = textPane.getText().substring(prefix + 1).replaceAll("\\s+","");
+            String word = new StringBuilder(textPane.getText().substring(0, textPane.getText().length() - prefix - 1).replaceAll("\\s+","")).reverse().toString();
             if (check(word))
                 firePropertyChange("showRange", null, getSubset(word, getAutomaton().getSelectedStates()));
             else
@@ -417,7 +417,7 @@ public class ComputePreimageToolbar extends DockToolbar
     {
         if (actionCheckBox.isSelected())
         {
-            String word = textPane.getText().substring(prefix + 1).replaceAll("\\s+","");
+            String word = new StringBuilder(textPane.getText().substring(0, textPane.getText().length() - prefix - 1).replaceAll("\\s+","")).reverse().toString();
             if (check(word))
                 firePropertyChange("showAction", null, getActions(word));
             else
@@ -477,7 +477,7 @@ public class ComputePreimageToolbar extends DockToolbar
         StyledDocument doc = textPane.getStyledDocument();
         StyleContext cont = StyleContext.getDefaultStyleContext();
         AttributeSet attrHighlighted = cont.addAttribute(cont.getEmptySet(), StyleConstants.Background, Color.LIGHT_GRAY);
-        doc.setCharacterAttributes(0, prefix + 1, attrHighlighted, false);
+        doc.setCharacterAttributes(doc.getLength() - prefix - 1, prefix + 1, attrHighlighted, false);
         
         showRange();
         showAction();

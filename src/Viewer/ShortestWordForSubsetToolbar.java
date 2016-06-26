@@ -20,6 +20,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -189,9 +190,15 @@ public class ShortestWordForSubsetToolbar extends DockToolbar
             else if (resetButton.isSelected())
                 transitions = ShortestResetWord.find(getAutomaton(), subset);
             else if (extendingButton.isSelected())
+            {
                 transitions = ShortestExtendingWord.find(getAutomaton(), inverseAutomaton, subset, getAutomaton().getSelectedStatesNumber() + 1);
+                Collections.reverse(transitions);
+            }
             else if (fullyExtendingButton.isSelected())
+            {
                 transitions = ShortestExtendingWord.find(getAutomaton(), inverseAutomaton, subset, getAutomaton().getN());
+                Collections.reverse(transitions);
+            }
             
             textPane.setText("");
             for (int trans : transitions)
